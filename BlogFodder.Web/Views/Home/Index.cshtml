@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNetCore.Components
+@using BlogFodder.Core.Plugins.Interfaces
+@{
+    ViewData["Title"] = "Home Page";
+    var plugins = ViewData["Plugins"] as IEnumerable<IContentPlugin> ?? new List<IContentPlugin>();
+    var dataFromDb = ViewData["DbData"] as Dictionary<string, string> ?? new Dictionary<string, string>();
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+@foreach (var plugin in plugins)
+{
+    if (dataFromDb.ContainsKey(plugin.Alias))
+    {
+        <component type="plugin.PluginContentComponent" render-mode="ServerPrerendered" param-Model="@dataFromDb[plugin.Alias]" />           
+    }
+
+    @*<component type="typeof(ColorfulCheckbox)" render-mode="ServerPrerendered" 
+               param-Size="14" param-Color="@("blue")" />*@
+}
+
+        @*foreach (var contentPlugin in adminPages)
+        {
+            if (contentPlugin != null && dataFromDb.ContainsKey(contentPlugin.Alias))
+            {
+                
+            }
+        }*@
+
+@*@await Component.InvokeAsync("MyCustom")*@
+
+@*<div>
+    @SampleComponentInstance
+</div>
+
+//https://learn.microsoft.com/en-us/aspnet/core/mvc/views/tag-helpers/built-in/component-tag-helper?view=aspnetcore-7.0
+//https://stackoverflow.com/questions/65477975/how-to-pass-a-variable-into-a-components-typeparam-in-blazor
+
+@code{
+    RenderFragment SampleComponentInstance => builder =>
+    {
+        var type = typeof(SampleComponent<>).MakeGenericType(new[] { MyType });
+        builder.OpenComponent(1, type);
+        builder.AddAttribute(2, "String", MyString);
+        builder.CloseComponent();
+    };
+
+    Type MyType { get; set; } = typeof(string);
+    string MyString { get; set; } = "hello";
+}*@
