@@ -2,6 +2,7 @@
 
 namespace BlogFodder.Plugins.Plugins.ContentEditors.RichTextEditor;
 
+//https://learn.microsoft.com/en-us/aspnet/core/razor-pages/ui-class?view=aspnetcore-5.0&tabs=visual-studio
 public class RichTextEditorPlugin : IContentPlugin
 {
     public string Alias => "RichTextEditorPlugin";

@@ -239,8 +239,8 @@ namespace BlogFodder.Core.Plugins
 
       return instances;
     }
-    
-    private static IEnumerable<Assembly?> GetAssemblies(Func<Assembly, bool>? predicate)
+
+    public static IEnumerable<Assembly?> GetAssemblies(Func<Assembly, bool>? predicate)
     {
       if (predicate == null)
         return AssemblyManager.Assemblies;

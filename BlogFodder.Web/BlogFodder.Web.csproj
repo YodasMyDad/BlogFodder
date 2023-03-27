@@ -11,6 +11,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\BlogFodder.Core\BlogFodder.Core.csproj" />
       <ProjectReference Include="..\BlogFodder.Plugins\BlogFodder.Plugins.csproj" />
     </ItemGroup>

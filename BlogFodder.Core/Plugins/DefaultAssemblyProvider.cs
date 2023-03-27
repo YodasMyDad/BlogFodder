@@ -50,7 +50,7 @@ public class DefaultAssemblyProvider
     List<Assembly?> assemblies = new();
 
     this.GetAssembliesFromDependencyContext(assemblies);
-    this.GetAssembliesFromPath(assemblies, AssemblyDirectory);
+    //this.GetAssembliesFromPath(assemblies, AssemblyDirectory);
     return assemblies;
   }
 
@@ -96,7 +96,7 @@ public class DefaultAssemblyProvider
     }
   }
 
-  private void GetAssembliesFromPath(List<Assembly> assemblies, string path)
+  private void GetAssembliesFromPath(List<Assembly?> assemblies, string path)
   {
     if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
     {
@@ -110,17 +110,17 @@ public class DefaultAssemblyProvider
         {
           assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(extensionPath);
 
-          if (this.IsCandidateAssembly(assembly) && !assemblies.Any(a => string.Equals(a.FullName, assembly.FullName, StringComparison.OrdinalIgnoreCase)))
+          if (this.IsCandidateAssembly(assembly) && !assemblies.Any(a => string.Equals(a?.FullName, assembly.FullName, StringComparison.OrdinalIgnoreCase)))
           {
             assemblies.Add(assembly);
-            this.logger.LogInformation("Assembly '{0}' is discovered and loaded", assembly.FullName);
+            this.logger.LogInformation("Assembly '{FullName}' is discovered and loaded", assembly.FullName);
           }
         }
 
         catch (Exception e)
         {
-          this.logger.LogWarning("Error loading assembly '{0}'", extensionPath);
-          this.logger.LogWarning(e.ToString());
+          this.logger.LogWarning("Error loading assembly '{ExtensionPath}'", extensionPath);
+          this.logger.LogWarning("{ErrorMessage}", e.Message);
         }
       }
 

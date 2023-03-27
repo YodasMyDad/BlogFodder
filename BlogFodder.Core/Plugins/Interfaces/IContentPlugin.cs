@@ -20,7 +20,7 @@ public interface IContentPlugin
     /// <summary>
     /// The editor view the user will interact with to add/save content to the DB
     /// </summary>
-    Type  PluginEditorComponent { set; }
+    Type  PluginEditorComponent { get; set; }
     
     /// <summary>
     /// The data/settings for the editor that are serialised and saved to the DB

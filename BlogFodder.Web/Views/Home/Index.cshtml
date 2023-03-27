@@ -4,25 +4,38 @@
     ViewData["Title"] = "Home Page";
     var plugins = ViewData["Plugins"] as IEnumerable<IContentPlugin> ?? new List<IContentPlugin>();
     var dataFromDb = ViewData["DbData"] as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var contentPlugins = plugins as IContentPlugin[] ?? plugins.ToArray();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h2>Plugin Form</h2>
+@using (Html.BeginForm("Index", "Home", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @foreach (var plugin in contentPlugins)
+    {
+        if (dataFromDb.ContainsKey(plugin.Alias))
+        {
+            <component type="plugin.PluginEditorComponent" render-mode="ServerPrerendered"/>
+        }
+    }
+    <button type="submit">Submit Form</button>
+}
 
-@foreach (var plugin in plugins)
+<h2>Plugins Display</h2>
+
+@foreach (var plugin in contentPlugins)
 {
     if (dataFromDb.ContainsKey(plugin.Alias))
     {
-        <component type="plugin.PluginContentComponent" render-mode="ServerPrerendered" param-Model="@dataFromDb[plugin.Alias]" />           
+        <component type="plugin.PluginContentComponent" render-mode="ServerPrerendered" param-Model="@dataFromDb[plugin.Alias]"/>
+        @*@(await Html.RenderComponentAsync<blazinmvc.Views.Shared.Component.Component>(RenderMode.ServerPrerendered,new {  Data= " Hello World " }))*@        
     }
 
     @*<component type="typeof(ColorfulCheckbox)" render-mode="ServerPrerendered" 
                param-Size="14" param-Color="@("blue")" />*@
 }
 
-        @*foreach (var contentPlugin in adminPages)
+@*foreach (var contentPlugin in adminPages)
         {
             if (contentPlugin != null && dataFromDb.ContainsKey(contentPlugin.Alias))
             {

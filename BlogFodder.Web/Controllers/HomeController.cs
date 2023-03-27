@@ -26,6 +26,14 @@ public class HomeController : Controller
         ViewData["DbData"] = new Dictionary<string, string> {{"RichTextEditorPlugin", JsonSerializer.Serialize(new {Testing = "I have real data boom"})}};
         return View();
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]  
+    public IActionResult Index(IFormCollection formCollection)
+    {
+        var testing = formCollection;
+        return View();
+    }
     
     public IActionResult Privacy()
     {
