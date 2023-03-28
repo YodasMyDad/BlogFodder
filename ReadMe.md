@@ -2,13 +2,9 @@
 
 `dotnet tool update --global dotnet-ef`
 
-`cd Merch.Core`  
-`dotnet ef --startup-project ../Merch.Web/ migrations add SetNull -o "Shared/Persistence/Migrations"`
-
-`dotnet ef database update --context SqlLiteDbContext`
-
-`cd ./project_with_migrations_folder`  
-`dotnet ef --startup-project ../my_startup_project_path/ migrations add myMigration01`
+`cd BlogFodder.Core`  
+`dotnet ef --startup-project ../BlogFodder.Web/ migrations add Initial -o "Data/Migrations"`  
+`dotnet ef database update --context BlogFodderDbContext`
 
 Misc Links
 
@@ -19,3 +15,8 @@ Razor Components
 
 https://learn.microsoft.com/en-us/aspnet/core/blazor/components/css-isolation?view=aspnetcore-7.0
 https://learn.microsoft.com/en-us/aspnet/core/blazor/components/class-libraries?view=aspnetcore-7.0&tabs=visual-studio
+//https://stackoverflow.com/questions/50762385/loading-razor-class-libraries-as-plugins
+//https://stackoverflow.com/questions/51003853/how-compiledrazorassemblypart-should-be-used-to-load-razor-views
+
+    //Load this project and copy it
+    //https://github.com/DominikAmon/RclIssueDemo/blob/master/RclDemo.WebApplication/Startup.cs

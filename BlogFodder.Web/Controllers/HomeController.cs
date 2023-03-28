@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
+using BlogFodder.Plugins.Plugins.ContentEditors.RichTextEditor;
 using Microsoft.AspNetCore.Mvc;
 using BlogFodder.Web.Models;
 
@@ -24,6 +25,7 @@ public class HomeController : Controller
         var adminPages = _extensionManager.GetInstances<IContentPlugin>();
         ViewData["Plugins"] = adminPages;
         ViewData["DbData"] = new Dictionary<string, string> {{"RichTextEditorPlugin", JsonSerializer.Serialize(new {Testing = "I have real data boom"})}};
+
         return View();
     }
 

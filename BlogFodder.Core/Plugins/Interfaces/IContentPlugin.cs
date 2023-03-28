@@ -1,4 +1,6 @@
-﻿namespace BlogFodder.Core.Plugins.Interfaces;
+﻿using BlogFodder.Core.Plugins.Models;
+
+namespace BlogFodder.Core.Plugins.Interfaces;
 
 public interface IContentPlugin
 {
@@ -16,36 +18,19 @@ public interface IContentPlugin
     /// Short description of what your plugin is and does
     /// </summary>
     string Description { get; }
+
+    /// <summary>
+    /// The plugin for the editor
+    /// </summary>
+    EditorPlugin Editor { get; set; }
+
+    /// <summary>
+    /// The plugin for the content
+    /// </summary>
+    ContentPlugin Content { get; set; }
     
     /// <summary>
-    /// The editor view the user will interact with to add/save content to the DB
+    /// The plugin for the settings
     /// </summary>
-    Type  PluginEditorComponent { get; set; }
-    
-    /// <summary>
-    /// The data/settings for the editor that are serialised and saved to the DB
-    /// This is settings per editor block, for things like API keys use the PluginGlobalSettings
-    /// </summary>
-    IPluginSettings PluginEditorModel { get; set; }
-    
-    /// <summary>
-    /// This is the content view that is rendered on the public facing site
-    /// </summary>
-    Type  PluginContentComponent { get; set; }
-    
-    /// <summary>
-    /// This is the model that is serialised and saved to the DB and passed into the PluginContentComponent
-    /// </summary>
-    IPluginSettings PluginContentModel { get; set; }
-    
-    /// <summary>
-    /// Optional: If your plugin requires globals settings that are used for all instances of your editor
-    /// then use this view to display the settings editor, appears in the admin/plugins navigation
-    /// </summary>
-    Type?  PluginGlobalSettingsEditorComponent { get; set; }
-    
-    /// <summary>
-    /// Optional: This is the model that is used to saved the global settings of your plugin  
-    /// </summary>
-    IPluginSettings? PluginGlobalSettingsModel { get; set; }
+    SettingsPlugin Settings { get; set; }
 }

@@ -1,11 +1,17 @@
 ﻿@using System.Text.Json
-
-<InputTextArea name="Testing" id="Testing" @bind-Value="EditorValue"></InputTextArea>
-
+<TinyMCE.Blazor.Editor Conf="@_conf" @bind-Value="@EditorValue" />
+<input type="hidden" name="Testing" id="Testing" @bind="EditorValue" />
+@*<textarea @bind=content @bind:event="oninput"></textarea>*@
 @code {
     [Parameter] public string? Model { get; set; }
     private RichTextEditorModel EditorModel { get; set; } = new();
     public string? EditorValue { get; set; }
+    private Dictionary<string, object> _conf = new()
+    {
+        { "height", 500},
+        { "toolbar", "undo redo | a11ycheck casechange blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist checklist outdent indent | removeformat | advcode table help"},
+        { "plugins", "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount"}
+    };
     protected override void OnInitialized()
     {
         if (Model != null)
