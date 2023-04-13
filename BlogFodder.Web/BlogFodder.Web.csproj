@@ -23,12 +23,25 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.4" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.5" />
         <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\BlogFodder.Core\BlogFodder.Core.csproj" />
         <ProjectReference Include="..\BlogFodder.Plugins\BlogFodder.Plugins.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Pages\Admin.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Shared\MainLayout.razor" />
+      <_ContentIncludedByDefault Remove="Pages\_Host.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Index.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Testing.razor" />
+      <_ContentIncludedByDefault Remove="Shared\LoginDisplay.razor" />
+      <_ContentIncludedByDefault Remove="Shared\MainLayout.razor" />
+      <_ContentIncludedByDefault Remove="Shared\NavMenu.razor" />
+      <_ContentIncludedByDefault Remove="Shared\SurveyPrompt.razor" />
     </ItemGroup>
 
 </Project>

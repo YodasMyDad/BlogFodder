@@ -8,4 +8,6 @@ public class EditorPlugin
     public IPluginSettings? Model { get; set; }
     public List<string> JsFiles { get; set; } = new();
     public List<string> CssFiles { get; set; } = new();
+    
+    
 }

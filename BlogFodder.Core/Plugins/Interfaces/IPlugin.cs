@@ -2,7 +2,7 @@
 
 namespace BlogFodder.Core.Plugins.Interfaces;
 
-public interface IContentPlugin
+public interface IPlugin
 {
     /// <summary>
     /// Alias is important, do not change the alias of your plugin when updating it
@@ -22,7 +22,7 @@ public interface IContentPlugin
     /// <summary>
     /// The plugin for the editor
     /// </summary>
-    EditorPlugin Editor { get; set; }
+    EditorPlugin? Editor { get; set; }
 
     /// <summary>
     /// The plugin for the content
@@ -32,5 +32,5 @@ public interface IContentPlugin
     /// <summary>
     /// The plugin for the settings
     /// </summary>
-    SettingsPlugin Settings { get; set; }
+    SettingsPlugin? Settings { get; set; }
 }

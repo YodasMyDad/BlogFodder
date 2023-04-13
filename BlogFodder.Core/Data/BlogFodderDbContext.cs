@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using BlogFodder.Core.Identity.Models;
+using BlogFodder.Core.Posts.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,13 +12,9 @@ public class BlogFodderDbContext : IdentityDbContext<User, Role, int, UserClaim,
     {
     }
 
-    /*public DbSet<GabBoard> Boards { get; set; }
-    public DbSet<GabSection> Sections { get; set; }
-    public DbSet<GabCategory> Categories { get; set; }
-    public DbSet<GabTopic> Topics { get; set; }
-    public DbSet<GabPost> Posts { get; set; }
-    public DbSet<GabFile> Files { get; set; }*/
-
+    public DbSet<Post> Posts => Set<Post>();
+    public DbSet<PostContentItem> PostContentItems => Set<PostContentItem>();
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

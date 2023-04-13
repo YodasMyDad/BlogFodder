@@ -22,7 +22,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var adminPages = _extensionManager.GetInstances<IContentPlugin>();
+        var adminPages = _extensionManager.GetInstances<IPlugin>();
         ViewData["Plugins"] = adminPages;
         ViewData["DbData"] = new Dictionary<string, string> {{"RichTextEditorPlugin", JsonSerializer.Serialize(new {Testing = "I have real data boom"})}};
 

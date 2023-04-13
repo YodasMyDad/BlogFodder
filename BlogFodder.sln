@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogFodder.Web", "BlogFodder.Web\BlogFodder.Web.csproj", "{862EC9FC-5B22-42CF-8C95-45B37A4BF3B7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogFodder.Plugins", "BlogFodder.Plugins\BlogFodder.Plugins.csproj", "{8F747562-AE2E-413C-B1D8-1402B40E060D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogFodder.Core", "BlogFodder.Core\BlogFodder.Core.csproj", "{EF413865-5CA8-4EEE-BE85-17C59B6EE71C}"
@@ -10,7 +8,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		nuget.config = nuget.config
 		ReadMe.md = ReadMe.md
+		Misc.txt = Misc.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogFodder.App", "BlogFodder.App\BlogFodder.App.csproj", "{0674EE72-9A47-4B3E-A095-C609136B881D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,10 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{862EC9FC-5B22-42CF-8C95-45B37A4BF3B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{862EC9FC-5B22-42CF-8C95-45B37A4BF3B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{862EC9FC-5B22-42CF-8C95-45B37A4BF3B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{862EC9FC-5B22-42CF-8C95-45B37A4BF3B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F747562-AE2E-413C-B1D8-1402B40E060D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F747562-AE2E-413C-B1D8-1402B40E060D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F747562-AE2E-413C-B1D8-1402B40E060D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -30,5 +27,9 @@ Global
 		{EF413865-5CA8-4EEE-BE85-17C59B6EE71C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF413865-5CA8-4EEE-BE85-17C59B6EE71C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF413865-5CA8-4EEE-BE85-17C59B6EE71C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0674EE72-9A47-4B3E-A095-C609136B881D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0674EE72-9A47-4B3E-A095-C609136B881D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0674EE72-9A47-4B3E-A095-C609136B881D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0674EE72-9A47-4B3E-A095-C609136B881D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

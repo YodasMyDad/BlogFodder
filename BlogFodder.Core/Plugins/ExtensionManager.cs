@@ -74,8 +74,8 @@ namespace BlogFodder.Core.Plugins
     {
       var type = typeof(T);
 
-      if (useCaching && AssemblyManager.Types.ContainsKey(type))
-        return AssemblyManager.Types[type];
+      if (useCaching && AssemblyManager.Types.TryGetValue(type, out var foundImplementation))
+        return foundImplementation;
 
       var implementations = new List<Type>();
 

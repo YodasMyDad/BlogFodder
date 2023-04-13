@@ -19,6 +19,6 @@
             EditorModel = JsonSerializer.Deserialize<RichTextEditorModel>(Model) ?? new RichTextEditorModel();
         }
 
-        EditorValue ??= "Hello this is text from the component";
+        EditorValue ??= $"Hello this is text from the component, showsomething is {EditorModel.ShowSomething}";
     }
 }

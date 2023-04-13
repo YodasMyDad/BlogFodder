@@ -1,17 +1,25 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    @*PluginName HeadTop*@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - BlogFodder.Web</title>
-    <base href="~/" />
+    @*PluginName HeadMeta*@
+    <base href="~/"/>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/BlogFodder.Web.styles.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="./_content/BlogFodder.Plugins/css/styles.css" asp-append-version="true"/>
+    @await RenderSectionAsync("Head", required: false)
+    @*PluginName HeadStyles*@
+    @*PluginName HeadBottom*@
 </head>
 <body>
+@*PluginName BodyTop*@
+@*PluginName HeaderBefore*@
 <header>
+    @*PluginName HeaderTop*@
+    @*PluginName Headers*@
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid">
             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BlogFodder.Web</a>
@@ -31,24 +39,42 @@
             </div>
         </div>
     </nav>
+    @*PluginName HeaderBottom*@
 </header>
+@*PluginName HeaderAfter*@
 <div class="container">
+    @*PluginName BeforeMainContent*@
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
+    @*PluginName AfterMainContent*@
 </div>
 
+@*PluginName FooterBefore*@
 <footer class="border-top footer text-muted">
+    @*PluginName FooterTop*@
     <div class="container">
         &copy; 2023 - BlogFodder.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
     </div>
+    @*PluginName FooterBottom*@
 </footer>
+@*PluginName FooterAfter*@
+<div id="blazor-error-ui">
+    <environment include="Staging,Production">
+        An error has occurred. This application may no longer respond until reloaded.
+    </environment>
+    <environment include="Development">
+        An unhandled exception has occurred. See browser dev tools for details.
+    </environment>
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
 <script src="_framework/blazor.server.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
-<script src="./_content/BlogFodder.Plugins/js/scripts.js"></script>
-<script src="_content/TinyMCE.Blazor/tinymce-blazor.js"></script>
 @await RenderSectionAsync("Scripts", required: false)
+@*PluginName BodyScripts*@
+@*PluginName BodyBottom*@
 </body>
 </html>
