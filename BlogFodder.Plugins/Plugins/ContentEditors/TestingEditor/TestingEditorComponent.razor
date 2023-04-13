@@ -1,0 +1,15 @@
+﻿@using System.Text.Json
+@using BlogFodder.Plugins.Plugins.ContentEditors.RichTextEditor
+@EditorValue
+@code {
+    [Parameter] public string? Model { get; set; }
+    private RichTextEditorModel EditorModel { get; set; } = new();
+    public string? EditorValue { get; set; }
+    protected override void OnInitialized()
+    {
+        if (Model != null)
+        {
+            EditorModel = JsonSerializer.Deserialize<RichTextEditorModel>(Model) ?? new RichTextEditorModel();
+        }
+    }
+}

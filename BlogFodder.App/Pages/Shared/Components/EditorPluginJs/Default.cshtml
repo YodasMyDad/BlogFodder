@@ -1,0 +1,6 @@
+@model List<string>
+
+@foreach (var jsFile in Model)
+{
+    <script src="@jsFile" asp-append-version="true"></script>
+}

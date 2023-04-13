@@ -1,0 +1,55 @@
+﻿@page "/"
+@using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Plugins.Interfaces
+@using System.Text.Json
+@inject ExtensionManager ExtensionManager;
+<PageTitle>Index</PageTitle>
+
+@foreach (var plugin in AdminPages)
+{
+    if (TestData.ContainsKey(plugin.Alias))
+    {
+        @*<component type="" render-mode="ServerPrerendered" param-Model="@TestData[plugin.Alias]"/>*@
+        <DynamicComponent Type="@plugin.Content.Component"
+                          Parameters="@(new Dictionary<string, object> {{"Model", TestData[plugin.Alias]}})" />
+    }
+}
+
+<h2>Plugin Form</h2>
+@foreach (var plugin in AdminPages)
+{
+    if (TestData.ContainsKey(plugin.Alias))
+    {
+        if (plugin.Editor != null)
+        {
+            <DynamicComponent Type="@plugin.Editor.Component"
+                              Parameters="@(new Dictionary<string, object> {{"Model", JsonSerializer.Serialize(new{ ShowSomething = true })}})"/>
+        }
+    }
+}
+
+@*
+@using (Html.BeginForm("Index", "Home", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @foreach (var plugin in contentPlugins)
+    {
+        if (dataFromDb.ContainsKey(plugin.Alias))
+        {
+            <component type="plugin.Editor.Component" render-mode="ServerPrerendered"/>
+        }
+    }
+    <button type="submit">Submit Form</button>
+}
+*@
+
+@code
+{
+    public IEnumerable<IPlugin?> AdminPages { get; set; } = default!;
+    public Dictionary<string, string> TestData { get; set; } = new();
+    protected override void OnInitialized()
+    {
+        AdminPages = ExtensionManager.GetInstances<IPlugin>(true);
+        TestData = new Dictionary<string, string> {{"RichTextEditorPlugin", JsonSerializer.Serialize(new {Testing = "I have real data boom"})}};
+    }
+}
