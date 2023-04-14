@@ -1,2 +1,5 @@
 -- Just ignore this file it's somewhere for me to put links of interest
 
+
+-- Translations? Do they work from the Plugins project?
+-- How do we share layouts for people to use?

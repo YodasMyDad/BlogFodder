@@ -1,6 +1,6 @@
 ﻿using BlogFodder.Core.Plugins.Interfaces;
 
-namespace BlogFodder.Plugins.Plugins.ContentEditors.RichTextEditor;
+namespace BlogFodder.Plugins.ContentEditors.RichTextEditor;
 
 public class RichTextContentModel : IPluginSettings
 {

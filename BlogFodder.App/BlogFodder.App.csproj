@@ -15,6 +15,7 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.4" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.5" />
+        <PackageReference Include="MudBlazor" Version="6.2.2" />
         <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
     </ItemGroup>
     
@@ -29,6 +30,10 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Backoffice\Navigation.razor" />
     </ItemGroup>
 
 </Project>

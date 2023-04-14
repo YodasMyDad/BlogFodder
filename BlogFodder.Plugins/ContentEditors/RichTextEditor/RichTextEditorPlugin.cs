@@ -1,6 +1,7 @@
 ﻿using BlogFodder.Core.Backoffice.Models;
 using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Plugins.Models;
+using BlogFodder.Plugins.ContentEditors.RichTextEditor;
 
 namespace BlogFodder.Plugins.Plugins.ContentEditors.RichTextEditor;
 

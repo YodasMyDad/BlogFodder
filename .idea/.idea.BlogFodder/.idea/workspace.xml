@@ -7,6 +7,7 @@
     <projectFile profileName="IIS Express">BlogFodder.App/BlogFodder.App.csproj</projectFile>
     <projectFile profileName="http">BlogFodder.App/BlogFodder.App.csproj</projectFile>
     <projectFile profileName="https">BlogFodder.App/BlogFodder.App.csproj</projectFile>
+    <projectFile>BlogFodder.Core/BlogFodder.Core.csproj</projectFile>
     <projectFile>BlogFodder.Plugins/BlogFodder.Plugins.csproj</projectFile>
     <projectFile profileName="IIS Express">BlogFodder.Web/BlogFodder.Web.csproj</projectFile>
     <projectFile profileName="http">BlogFodder.Web/BlogFodder.Web.csproj</projectFile>
@@ -23,28 +24,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="445a6a4b-95f7-4adb-861e-84aa224db874" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.BlogFodder/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.BlogFodder/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/config/applicationhost.config" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/config/applicationhost.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Data/BlogFodderDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Data/BlogFodderDbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Plugins/ExtensionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Plugins/ExtensionManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Plugins/Interfaces/IContentPlugin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Plugins/Interfaces/IPlugin.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Plugins/Models/EditorPlugin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Plugins/Models/EditorPlugin.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Plugins/Models/SettingsPlugin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Plugins/Models/SettingsPlugin.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Posts/Models/Post.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Posts/Models/CreatePost.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextEditorComponent.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextEditorComponent.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextEditorPlugin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextEditorPlugin.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextSettingsComponent.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextSettingsComponent.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BlogFodder/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BlogFodder/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/App.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/App.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/BlogFodder.App.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/BlogFodder.App.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Components/Backoffice/Navigation.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/Components/Backoffice/Navigation.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Components/Backoffice/Navigation.razor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/Components/Backoffice/Navigation.razor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Index.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Index.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/_Host.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/_Host.cshtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Shared/MainLayout.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/Layouts/MainLayout.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Shared/MainLayout.razor.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Shared/NavMenu.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Shared/NavMenu.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/_Imports.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/_Imports.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/BlogFodder.Plugins.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/BlogFodder.Plugins.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextContentComponent.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/ContentEditors/RichTextEditor/RichTextContentComponent.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextContentModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/ContentEditors/RichTextEditor/RichTextContentModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextEditorComponent.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/ContentEditors/RichTextEditor/RichTextEditorComponent.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextEditorModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/ContentEditors/RichTextEditor/RichTextEditorModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextEditorPlugin.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/ContentEditors/RichTextEditor/RichTextEditorPlugin.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextGlobalSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/ContentEditors/RichTextEditor/RichTextGlobalSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/RichTextEditor/RichTextSettingsComponent.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/ContentEditors/RichTextEditor/RichTextSettingsComponent.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/TestingEditor/TestingEditor.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/ContentEditors/TestingEditor/TestingEditorComponent.razor" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Plugins/_Imports.razor" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Testing.razor" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/wwwroot/css/editorstyles.css" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/wwwroot/css/editorstyles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/wwwroot/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/wwwroot/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Web/BlogFodder.Web.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Web/BlogFodder.Web.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Web/Controllers/HomeController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Web/Controllers/HomeController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Web/Controllers/SaveContoller.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Web/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Web/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Web/Views/Home/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Web/Views/Home/Index.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Web/Views/Shared/_Layout.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Web/Views/Shared/_Layout.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Web/_Imports.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Web/_Imports.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.sln" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ReadMe.md" beforeDir="false" afterPath="$PROJECT_DIR$/ReadMe.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Misc.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +63,7 @@
         <option value="HTML File" />
         <option value="JavaScript File" />
         <option value="CSS File" />
+        <option value="SCSS File" />
       </list>
     </option>
   </component>
@@ -70,6 +77,8 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/4a4e32cea57c17f7bee73f3df362944a221b8f84d193ae366a93bb192bbd/MvcServiceCollectionExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/659951c221ca1c435718c2e746a9e7f9343bbf8054969595da489dcd95175737/DynamicComponent.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/7641a1a0695522e81971758464776ba68659afdcd53575f6917f7593181d9345/Dictionary.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/9cb69f288de4bd921c32f45ec13452db54367d01d259b7fa633b1dc0e39cc1/HeadOutlet.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/b37bdcda3df384671c8eed0dd528e74eff6e04eeb7b1e81f219e5e066318/ComponentBase.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f412c9c6418a4b1a2ed20f976a4b4a03dcaff969936078ece0b0f9164792d9/MvcCoreMvcBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BlogFodder.Web/Program.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
@@ -88,33 +97,51 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "list.type.of.created.stylesheet": "SCSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;rider.external.source.directories&quot;: [
-      &quot;C:\\Users\\lee\\AppData\\Roaming\\JetBrains\\Rider2023.1\\resharper-host\\DecompilerCache&quot;,
-      &quot;C:\\Users\\lee\\AppData\\Roaming\\JetBrains\\Rider2023.1\\resharper-host\\SourcesCache&quot;,
-      &quot;C:\\Users\\lee\\AppData\\Local\\Symbols\\src&quot;
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "C:\\Users\\lee\\AppData\\Roaming\\JetBrains\\Rider2023.1\\resharper-host\\DecompilerCache",
+      "C:\\Users\\lee\\AppData\\Roaming\\JetBrains\\Rider2023.1\\resharper-host\\SourcesCache",
+      "C:\\Users\\lee\\AppData\\Local\\Symbols\\src"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.BlogFodder.App: IIS Express">
+    <configuration name="BlogFodder.Core" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/BlogFodder.Core/BlogFodder.Core.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_TFM" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
     <configuration name="BlogFodder.Plugins" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -182,6 +209,7 @@
       <item itemvalue=".NET Launch Settings Profile.BlogFodder.App: http" />
       <item itemvalue=".NET Launch Settings Profile.BlogFodder.App: https" />
       <item itemvalue=".NET Launch Settings Profile.BlogFodder.App: IIS Express" />
+      <item itemvalue=".NET Project.BlogFodder.Core" />
       <item itemvalue=".NET Project.BlogFodder.Plugins" />
     </list>
   </component>
@@ -220,7 +248,8 @@
       <workItem from="1681305934773" duration="75000" />
       <workItem from="1681306024412" duration="2109000" />
       <workItem from="1681312849395" duration="2155000" />
-      <workItem from="1681388913798" duration="8438000" />
+      <workItem from="1681388913798" duration="10009000" />
+      <workItem from="1681450588256" duration="9842000" />
     </task>
     <task id="LOCAL-00001" summary="Just playing at the moment">
       <created>1679737166564</created>
@@ -243,7 +272,21 @@
       <option name="project" value="LOCAL" />
       <updated>1680016843130</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Reworked to use Blazor as the main project&#10;Working on refactoring the components">
+      <created>1681397982939</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1681397982939</updated>
+    </task>
+    <task id="LOCAL-00005" summary="No idea why these didn't push">
+      <created>1681398011811</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1681398011811</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -256,7 +299,9 @@
     <MESSAGE value="Just playing at the moment" />
     <MESSAGE value="Working the plugin editor" />
     <MESSAGE value="Adding Identity and EF Core&#10;Trying to simplify the plugins and static assets&#10;Working on a TinyMCE example" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding Identity and EF Core&#10;Trying to simplify the plugins and static assets&#10;Working on a TinyMCE example" />
+    <MESSAGE value="Reworked to use Blazor as the main project&#10;Working on refactoring the components" />
+    <MESSAGE value="No idea why these didn't push" />
+    <option name="LAST_COMMIT_MESSAGE" value="No idea why these didn't push" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -273,6 +318,20 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BlogFodder.App/Pages/_Host.cshtml</url>
+          <line>21</line>
+          <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.App\Pages\_Host.cshtml" initialLine="20" isMultiMethodBreakpoint="true">
+            <option name="multiMethodBreakpoint" value="true" />
+            <startOffsets>
+              <option value="-1" />
+            </startOffsets>
+            <endOffsets>
+              <option value="-1" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -4,7 +4,7 @@ using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
 using Microsoft.AspNetCore.Components;
 
-namespace BlogFodder.App.Components.Backoffice;
+namespace BlogFodder.Plugins.Components.Backoffice;
 
 public partial class Navigation : ComponentBase
 {

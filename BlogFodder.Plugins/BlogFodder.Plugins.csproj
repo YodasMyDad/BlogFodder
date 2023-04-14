@@ -21,6 +21,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.4" />
+        <PackageReference Include="MudBlazor" Version="6.2.2" />
         <PackageReference Include="TinyMCE.Blazor" Version="1.0.4" />
     </ItemGroup>
 
@@ -30,6 +31,19 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="wwwroot\dsfsadfsdafasd.css" />
+      <_ContentIncludedByDefault Remove="Plugins\ContentEditors\RichTextEditor\RichTextContentComponent.razor" />
+      <_ContentIncludedByDefault Remove="Plugins\ContentEditors\RichTextEditor\RichTextEditorComponent.razor" />
+      <_ContentIncludedByDefault Remove="Plugins\ContentEditors\RichTextEditor\RichTextSettingsComponent.razor" />
+      <_ContentIncludedByDefault Remove="Plugins\ContentEditors\TestingEditor\TestingEditorComponent.razor" />
+      <_ContentIncludedByDefault Remove="Plugins\_Imports.razor" />
+      <_ContentIncludedByDefault Remove="ContentEditors\TestingEditor\TestingEditorComponent.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Components\Backoffice\Navigation.razor" />
+      <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextContentComponent.razor" />
+      <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextEditorComponent.razor" />
+      <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextSettingsComponent.razor" />
     </ItemGroup>
 
 </Project>

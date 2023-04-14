@@ -4,6 +4,14 @@
 @using System.Text.Json
 @inject ExtensionManager ExtensionManager;
 <PageTitle>Index</PageTitle>
+<HeadContent>
+    <meta name="description" content="Testing, does this work?">
+    @* This is where we could sort the CSS per page? *@
+</HeadContent>
+
+<SideBar>
+    <NavMenu />
+</SideBar>
 
 @foreach (var plugin in AdminPages)
 {

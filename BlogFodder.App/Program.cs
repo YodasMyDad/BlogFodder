@@ -8,6 +8,7 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +37,7 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddScoped<ExtensionManager>();
 
 builder.Services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(typeof(Constants).Assembly, typeof(Program).Assembly));
-
+builder.Services.AddMudServices();
 var app = builder.Build();
 
 var assemblies = app.Services.DiscoverAssemblies();
