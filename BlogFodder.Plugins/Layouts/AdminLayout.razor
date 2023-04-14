@@ -12,17 +12,10 @@
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h5" Class="mt-1">BlogFodder</MudText>
+            <MudText Typo="Typo.subtitle1" Class="mt-1">BlogFodder</MudText>
         </MudDrawerHeader>
-       <MudNavMenu>
-            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Pages</MudText>
-           <MudDivider Class="my-2"/>
-           <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Plugins</MudText>
-            <Navigation />
-            @*<MudNavGroup Title="Settings" Expanded="true">
-                <MudNavLink Href="/users">Users</MudNavLink>
-                <MudNavLink Href="/security">Security</MudNavLink>
-            </MudNavGroup>*@
+        <MudNavMenu>
+           <Navigation />
        </MudNavMenu>
     </MudDrawer>
     <MudMainContent>

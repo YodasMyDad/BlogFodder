@@ -45,10 +45,13 @@ public class RichTextEditorPlugin : IPlugin
         JsFiles = new List<string>(),
         Component = typeof(RichTextSettingsComponent),
         Model = new RichTextGlobalSettings(),
-        BackOfficeLink = new Link
+        BackOfficeLink = new List<Link>
         {
-            Route = "/tinymceeditorsettings",
-            Text = "TinyMCE Editor"
+            new()
+            {
+                Route = "/tinymceeditorsettings",
+                Text = "TinyMCE Editor"
+            }
         }
     };
 }

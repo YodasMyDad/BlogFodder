@@ -6,6 +6,7 @@ using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
+using BlogFodder.Core.Settings;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -38,7 +39,12 @@ builder.Services.AddScoped<ExtensionManager>();
 
 builder.Services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(typeof(Constants).Assembly, typeof(Program).Assembly));
 builder.Services.AddMudServices();
+
+builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection("BlogFodder"));
+
 var app = builder.Build();
+
+
 
 var assemblies = app.Services.DiscoverAssemblies();
 
