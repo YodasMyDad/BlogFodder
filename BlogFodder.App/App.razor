@@ -1,5 +1,7 @@
 ﻿@using BlogFodder.Core.Plugins
 @using BlogFodder.Plugins.Layouts
+@using MudBlazor.Extensions.Helper
+@inject IJSRuntime JsRuntime
 
 <Router 
     AppAssembly="@typeof(App).Assembly"
@@ -15,3 +17,13 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code
+{
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JsRuntime.InitializeMudBlazorExtensionsAsync();
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

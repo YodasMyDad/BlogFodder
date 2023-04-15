@@ -2,48 +2,33 @@
 @{
     var last = NavigationSections.Values.Last();
 }
-@foreach (var sectionKvp in NavigationSections)
-{
-    if (!sectionKvp.Value.Name.IsNullOrWhiteSpace())
+<MudNavMenu>
+    @foreach (var sectionKvp in NavigationSections)
     {
-        <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">@sectionKvp.Value.Name</MudText>
-    }
-    @foreach (var sectionLink in sectionKvp.Value.Links)
-    {
-        @if (sectionLink.SubLinks.Any())
+        if (!sectionKvp.Value.Name.IsNullOrWhiteSpace())
         {
-            <MudNavGroup Title="@sectionLink.Text" Expanded="false">
-                @foreach (var subLink in sectionLink.SubLinks)
-                {
-                    <MudNavLink Href="@subLink.Route" Match="NavLinkMatch.Prefix">@subLink.Text</MudNavLink>
-                }
-            </MudNavGroup>
+            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">@sectionKvp.Value.Name</MudText>
         }
-        else
+        @foreach (var sectionLink in sectionKvp.Value.Links.OrderBy(x => x.SortOrder))
         {
-            <MudNavLink Href="@sectionLink.Route">@sectionLink.Text</MudNavLink>
+            @if (sectionLink.SubLinks.Any())
+            {
+                <MudNavGroup Title="@sectionLink.Text" Expanded="false">
+                    @foreach (var subLink in sectionLink.SubLinks.OrderBy(x => x.SortOrder))
+                    {
+                        <MudNavLink Href="@subLink.Route" Match="NavLinkMatch.All">@subLink.Text</MudNavLink>
+                    }
+                </MudNavGroup>
+            }
+            else
+            {
+                <MudNavLink Href="@sectionLink.Route" Match="NavLinkMatch.All">@sectionLink.Text</MudNavLink>
+            }
         }
-    }
 
-    if (last.Name != sectionKvp.Value.Name)
-    {
-        <MudDivider Class="my-2"/>
-    }
-
-    @*<MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Pages</MudText>
-    <MudDivider Class="my-2"/>
-    <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Plugins</MudText>*@
-        @*@if (settingsLink.Count > 1)
+        if (last.Name != sectionKvp.Value.Name)
         {
-            <MudNavGroup Title="WHAT HERE??" Expanded="true">
-                @foreach (var subLink in settingsLink)
-                {
-                    <MudNavLink Href="@subLink.Route">@subLink.Text</MudNavLink>
-                }
-            </MudNavGroup>
+            <MudDivider Class="my-2"/>
         }
-        else
-        {
-            <MudNavLink Href="@settingsLink[0].Route">@settingsLink[0].Text</MudNavLink>
-        }*@
-}
+    }
+</MudNavMenu>

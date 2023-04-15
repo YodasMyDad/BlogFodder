@@ -2,7 +2,7 @@ using BlogFodder.Core;
 using BlogFodder.Core.Backoffice.Models;
 using BlogFodder.Core.Plugins.Interfaces;
 
-namespace BlogFodder.Plugins.Components.Backoffice;
+namespace BlogFodder.App.Pages.Admin;
 
 /// <summary>
 /// The navigation items for the post items

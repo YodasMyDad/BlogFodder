@@ -7,6 +7,7 @@ using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
+using MudBlazor;
 
 namespace BlogFodder.Plugins.Components.Backoffice;
 
@@ -48,7 +49,8 @@ public partial class Navigation : ComponentBase
             coreSection.Links.Add(new Link
             {
                 Route = "/admin", // TODO - Again, need a better way to store routes rather than magic strings
-                Text = "Dashboard"
+                Text = "Dashboard",
+                Icon = Icons.Material.Outlined.Dashboard
             });
         }
         

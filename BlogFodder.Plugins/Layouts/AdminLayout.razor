@@ -7,21 +7,20 @@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
         <MudSpacer/>
-        @*@AdminTopBar*@
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End"/>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
         <MudDrawerHeader>
             <MudText Typo="Typo.subtitle1" Class="mt-1">BlogFodder</MudText>
         </MudDrawerHeader>
-        <MudNavMenu>
-           <Navigation />
-       </MudNavMenu>
+        <Navigation/>
     </MudDrawer>
     <MudMainContent>
-        <CascadingValue Value="this">
-            @Body
-        </CascadingValue>
+        <MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
+            <CascadingValue Value="this">
+                @Body
+            </CascadingValue>
+        </MudContainer>
     </MudMainContent>
 </MudLayout>
 
@@ -31,16 +30,19 @@
     AdminNavigation? _adminNavigation;
     AdminTopBar? _adminTopBar;
     bool _drawerOpen = true;
+
     public void SetAdminNavigation(AdminNavigation? adminNavigation)
     {
         _adminNavigation = adminNavigation;
         Update();
     }
+
     public void SetAdminTopBar(AdminTopBar? adminTopBar)
     {
         _adminTopBar = adminTopBar;
         Update();
     }
+
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;

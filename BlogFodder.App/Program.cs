@@ -9,6 +9,9 @@ using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Settings;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
+using MudBlazor.Extensions;
+using MudBlazor.Extensions.Options;
 using MudBlazor.Services;
 using Serilog;
 
@@ -38,7 +41,23 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddScoped<ExtensionManager>();
 
 builder.Services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(typeof(Constants).Assembly, typeof(Program).Assembly));
-builder.Services.AddMudServices();
+builder.Services.AddMudServicesWithExtensions(c =>
+{
+    c.WithDefaultDialogOptions(ex =>
+    {
+        ex.MaximizeButton = true;
+        ex.CloseButton = true;
+        ex.FullHeight = true;
+        ex.CloseOnEscapeKey = true;
+        ex.MaxWidth = MaxWidth.Medium;
+        ex.FullWidth = true;
+        ex.DragMode = MudDialogDragMode.Simple;
+        ex.Animations = new[] {AnimationType.SlideIn};
+        ex.Position = DialogPosition.CenterRight;
+        ex.DisableSizeMarginY = true;
+        ex.DisablePositionMargin = true;
+    });
+});
 
 builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection("BlogFodder"));
 
