@@ -2,7 +2,7 @@
 
 public class PostContentItem
 {
-    public virtual Post Post { get; set; } = default!;
+    public Post Post { get; set; } = default!;
     public int PostId { get; set; }
     public int Id { get; set; }
     public int SortOrder { get; set; }

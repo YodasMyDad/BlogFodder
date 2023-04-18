@@ -1,0 +1,18 @@
+@using BlogFodder.Core.Plugins
+<MudDialog>
+    <DialogContent>
+        
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [Inject] public ExtensionManager ExtensionManager { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string? ContentText { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok("SomeAlias"));
+    void Cancel() => MudDialog.Cancel();
+}

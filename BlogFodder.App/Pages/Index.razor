@@ -36,21 +36,6 @@
     }
 }
 
-@*
-@using (Html.BeginForm("Index", "Home", FormMethod.Post))
-{
-    @Html.AntiForgeryToken()
-    @foreach (var plugin in contentPlugins)
-    {
-        if (dataFromDb.ContainsKey(plugin.Alias))
-        {
-            <component type="plugin.Editor.Component" render-mode="ServerPrerendered"/>
-        }
-    }
-    <button type="submit">Submit Form</button>
-}
-*@
-
 @code
 {
     public IEnumerable<IPlugin?> AdminPages { get; set; } = default!;

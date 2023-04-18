@@ -1,0 +1,116 @@
+@page "/admin/createpost"
+@layout AdminLayout
+@inject IDialogService Dialog
+
+
+<EditForm Context="createPostContext" Model="Post" OnValidSubmit="SubmitForm">
+    <FluentValidationValidator/>
+    `
+    <MudTextField Label="Title of this post" Class="my-2"
+                  Counter="1000" MaxLength="1000"
+                  DebounceInterval="500" OnDebounceIntervalElapsed="HandleIntervalElapsed"
+                  @bind-Value="Post.Name" For="@(() => Post.Name)" Variant="Variant.Outlined">
+    </MudTextField>
+
+    <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6">
+        <MudTabPanel Text="Excerpt">
+
+            <MudTextField Lines="5" Label="Preview Text" HelperText="Max. 3000 characters"
+                          @bind-Value="Post.Excerpt" For="@(() => Post.Excerpt)"/>
+
+            <MudField Label="Featured Image">
+                <MudFileUpload T="IBrowserFile" FilesChanged="SetFeaturedImage">
+                    <ButtonTemplate>
+                        <MudButton HtmlTag="label"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                                   for="@context">
+                            Choose Image
+                        </MudButton>
+                    </ButtonTemplate>
+                </MudFileUpload>
+            </MudField>
+        </MudTabPanel>
+        <MudTabPanel Text="Content">
+            <MudGrid Justify="Justify.SpaceBetween">
+                <MudItem xs="8">
+                    <MudText>
+                        Choose a content item to add
+                    </MudText>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudSelect T="string"
+                               ValueChanged="OnContentItemChanged" 
+                               Label="Editors" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var editor in AvailableEditorPlugins)
+                        {
+                            <MudSelectItem Value="@editor"/>   
+                        }
+                    </MudSelect>
+                    <MudButton OnClick="AddNewContentItem">Add</MudButton>
+                </MudItem>
+                
+            </MudGrid>
+            <MudGrid Class="mt-8">
+                @SelectedEditorAlias
+                @foreach (var contentItem in Post.ContentItems)
+                {
+                    <MudItem xs="12">
+                        <MudCard Elevation="25" Class="rounded-lg pb-4">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h5" Align="Align.Center">Name here?</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            @*<MudCardContent>
+                                <div class="d-flex justify-center">
+                                    <MudText Typo="Typo.h3">$5</MudText>
+                                    <MudText Typo="Typo.h5" Class="ml-1 mt-5" Color="Color.Secondary">/Monthly</MudText>
+                                </div>
+                                <MudList Class="mx-auto mt-4" Style="width:300px;">
+                                    <MudListItem Icon="@Icons.Material.Filled.LiveHelp">
+                                        Unlimited something
+                                    </MudListItem>
+                                    <MudListItem Icon="@Icons.Material.Filled.LiveHelp">
+                                        10 something
+                                    </MudListItem>
+                                    <MudListItem Icon="@Icons.Material.Filled.LiveHelp">
+                                        No something
+                                    </MudListItem>
+                                </MudList>
+                            </MudCardContent>*@
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudTabPanel>
+        <MudTabPanel Text="SEO">
+            <MudText>SEO</MudText>
+            <MudTextField Label="Page Title" HelperText="Max. 60 characters"
+                          @bind-Value="Post.PageTitle" For="@(() => Post.PageTitle)"/>
+            <MudTextField Lines="5" Label="Meta Description" HelperText="Max. 300 characters"
+                          @bind-Value="Post.MetaDescription" For="@(() => Post.MetaDescription)"/>
+            <MudField Label="Social Image">
+                <MudFileUpload T="IBrowserFile" FilesChanged="SetSocialImage">
+                    <ButtonTemplate>
+                        <MudButton HtmlTag="label"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                                   for="@context">
+                            Choose Image
+                        </MudButton>
+                    </ButtonTemplate>
+                </MudFileUpload>
+            </MudField>
+            <MudSwitch @bind-Checked="@Post.NoIndex" Label="No Index" Color="Color.Info"/>
+        </MudTabPanel>
+        <MudTabPanel Text="Settings">
+            <MudText>Settings</MudText>
+            <MudTextField @bind-Value="Post.Url" Label="Url" Variant="Variant.Text"></MudTextField>
+            <MudDatePicker Label="Date Created" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateCreated"/>
+            <MudDatePicker Label="Date Updated" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateUpdated"/>
+        </MudTabPanel>
+    </MudTabs>
+</EditForm>

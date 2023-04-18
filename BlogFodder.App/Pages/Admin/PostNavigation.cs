@@ -22,7 +22,7 @@ public class PostNavigation : IBackOfficeNavigationItem
             },
             new ()
             {
-                Route = "/admin/post",
+                Route = "/admin/createpost",
                 Text = "Create Post"
             }
         }
