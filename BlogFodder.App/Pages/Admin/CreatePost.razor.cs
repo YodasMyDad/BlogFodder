@@ -5,8 +5,7 @@ using BlogFodder.Core.Posts.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
-using MudBlazor.Extensions;
-using MudBlazor.Extensions.Options;
+using MudBlazor.Utilities;
 
 namespace BlogFodder.App.Pages.Admin;
 
@@ -15,23 +14,69 @@ public partial class CreatePost : ComponentBase
     public Post Post { get; set; } = new();
     public DateTime? DateCreated { get; set; } = DateTime.Now;
     public DateTime? DateUpdated { get; set; } = DateTime.Now;
-    public List<string> AvailableEditorPlugins { get; set; } = new();
+    public Dictionary<string, IPlugin> AvailableEditorPlugins { get; set; } = new();
+    
+    private MudDropContainer<PostContentItem> _container;
     
     [Inject] public ExtensionManager ExtensionManager { get; set; }
     
     /*private EditContext editContext;*/
     public string? AliasFromDialog { get; set; }
-    public string SelectedEditorAlias { get; set; }
+    public string? SelectedEditorAlias { get; set; }
+    
+    private void RefreshContainer()
+    {
+        //update the binding to the container
+        StateHasChanged();
+
+        //the container refreshes the internal state
+        _container.Refresh();
+    }
+
     
     private void OnContentItemChanged(string alias)
     {
         // Add in 
         SelectedEditorAlias = alias;
     }
+    
+    private void ItemUpdated(MudItemDropInfo<PostContentItem> dropItem)
+    {
+        if (dropItem.Item != null) dropItem.Item.Selector = dropItem.DropzoneIdentifier;
+        Post.ContentItems.UpdateOrder(dropItem, item => item.SortOrder, Post.ContentItems.Count);
+    }
 
+    
     private void AddNewContentItem()
     {
-        
+        if (SelectedEditorAlias != null && AvailableEditorPlugins.TryGetValue(SelectedEditorAlias, out var plugin))
+        {
+            Post.ContentItems.Add(new PostContentItem
+            {
+                PluginAlias = plugin.Alias,
+                Selector = "plugins"
+            });
+            RefreshContainer();
+        }
+    }
+
+    private async Task ShowEditor(PostContentItem contentItem)
+    {
+        var parameters = new DialogParameters
+        {
+            {"ContentItem", contentItem}
+        };
+
+        var dialog = await Dialog.ShowAsync<ContentItemEditor>("Select Blog Content Item", parameters, maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            AliasFromDialog = result.Data.ToString();
+            /*//In a real world scenario we would reload the data from the source here since we "removed" it in the dialog already.
+            Guid.TryParse(result.Data.ToString(), out Guid deletedServer);
+            Servers.RemoveAll(item => item.Id == deletedServer);*/
+        }
     }
     
     protected override void OnInitialized()
@@ -42,7 +87,7 @@ public partial class CreatePost : ComponentBase
         {
             if (plugin != null)
             {
-                AvailableEditorPlugins.Add(plugin.Alias);
+                AvailableEditorPlugins.Add(plugin.Alias, plugin);
             }
         }        
         //editContext = new EditContext(Post);
@@ -56,7 +101,7 @@ public partial class CreatePost : ComponentBase
             {"ContentText", "Are you sure you want to remove thisguy@emailz.com from this account?"}
         };
 
-        var dialog = await Dialog.ShowAsync<BlogContentItemsList>("Select Blog Content Item", parameters, maxWidth);
+        var dialog = await Dialog.ShowAsync<ContentItemEditor>("Select Blog Content Item", parameters, maxWidth);
         var result = await dialog.Result;
 
         if (!result.Canceled)

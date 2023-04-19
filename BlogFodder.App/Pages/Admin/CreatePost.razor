@@ -1,7 +1,8 @@
 @page "/admin/createpost"
+@using BlogFodder.Core.Posts.Models
 @layout AdminLayout
 @inject IDialogService Dialog
-
+<PageTitle>Create Post</PageTitle>
 
 <EditForm Context="createPostContext" Model="Post" OnValidSubmit="SubmitForm">
     <FluentValidationValidator/>
@@ -12,7 +13,7 @@
                   @bind-Value="Post.Name" For="@(() => Post.Name)" Variant="Variant.Outlined">
     </MudTextField>
 
-    <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6">
+    <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6 ">
         <MudTabPanel Text="Excerpt">
 
             <MudTextField Lines="5" Label="Preview Text" HelperText="Max. 3000 characters"
@@ -33,37 +34,53 @@
             </MudField>
         </MudTabPanel>
         <MudTabPanel Text="Content">
-            <MudGrid Justify="Justify.SpaceBetween">
+            <MudStack Row="true">
                 <MudItem xs="8">
                     <MudText>
                         Choose a content item to add
                     </MudText>
                 </MudItem>
                 <MudItem xs="4">
-                    <MudSelect T="string"
-                               ValueChanged="OnContentItemChanged" 
-                               Label="Editors" AnchorOrigin="Origin.BottomCenter">
-                        @foreach (var editor in AvailableEditorPlugins)
-                        {
-                            <MudSelectItem Value="@editor"/>   
-                        }
-                    </MudSelect>
-                    <MudButton OnClick="AddNewContentItem">Add</MudButton>
+                    <MudStack Row="true">
+                        <MudSelect T="string"
+                                   ValueChanged="OnContentItemChanged"
+                                   Label="Editors" AnchorOrigin="Origin.BottomCenter">
+                            @foreach (var editor in AvailableEditorPlugins)
+                            {
+                                <MudSelectItem Value="@editor.Key">@editor.Value.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton OnClick="AddNewContentItem">Add</MudButton>
+                    </MudStack>
                 </MudItem>
-                
-            </MudGrid>
-            <MudGrid Class="mt-8">
-                @SelectedEditorAlias
+            </MudStack>
+
+            @*@bind-SelectedItem="selectedItem" @bind-SelectedValue="selectedValue"*@
+
+
+            <MudDropContainer T="PostContentItem" @ref="_container" Items="Post.ContentItems" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-wrap flex-grow-1">
+                <ChildContent>
+                    <MudList Class="d-flex flex-column mud-height-full">
+                        <MudDropZone T="PostContentItem" Identifier="plugins" AllowReorder="true" Class="flex-grow-1"/>
+                    </MudList>
+                </ChildContent>
+                <ItemRenderer>
+                    <MudListItem @onclick="() => ShowEditor(context)" Text="@context.PluginAlias"/>
+                </ItemRenderer>
+            </MudDropContainer>
+
+
+            @*<MudGrid Class="mt-8">
                 @foreach (var contentItem in Post.ContentItems)
                 {
                     <MudItem xs="12">
-                        <MudCard Elevation="25" Class="rounded-lg pb-4">
+                        <MudCard @onclick="() => ShowEditor(contentItem)" Elevation="25" Class="rounded-lg pb-4">
                             <MudCardHeader>
                                 <CardHeaderContent>
-                                    <MudText Typo="Typo.h5" Align="Align.Center">Name here?</MudText>
+                                    <MudText Typo="Typo.h5" Align="Align.Center">@contentItem.PluginAlias</MudText>
                                 </CardHeaderContent>
                             </MudCardHeader>
-                            @*<MudCardContent>
+                            $1$<MudCardContent>
                                 <div class="d-flex justify-center">
                                     <MudText Typo="Typo.h3">$5</MudText>
                                     <MudText Typo="Typo.h5" Class="ml-1 mt-5" Color="Color.Secondary">/Monthly</MudText>
@@ -79,11 +96,11 @@
                                         No something
                                     </MudListItem>
                                 </MudList>
-                            </MudCardContent>*@
+                            </MudCardContent>#1#
                         </MudCard>
                     </MudItem>
                 }
-            </MudGrid>
+            </MudGrid>*@
         </MudTabPanel>
         <MudTabPanel Text="SEO">
             <MudText>SEO</MudText>

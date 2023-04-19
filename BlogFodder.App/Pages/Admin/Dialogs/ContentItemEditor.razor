@@ -1,7 +1,8 @@
 @using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Posts.Models
 <MudDialog>
     <DialogContent>
-        
+        This is a test @ContentItem.PluginAlias
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
@@ -11,8 +12,9 @@
 @code {
     [Inject] public ExtensionManager ExtensionManager { get; set; }
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    [Parameter] public string? ContentText { get; set; }
+    [Parameter] public PostContentItem ContentItem { get; set; } = new();
 
     void Submit() => MudDialog.Close(DialogResult.Ok("SomeAlias"));
     void Cancel() => MudDialog.Cancel();
+    
 }

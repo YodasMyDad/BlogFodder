@@ -3,3 +3,7 @@
 
 -- Translations? Do they work from the Plugins project?
 -- How do we share layouts for people to use?
+
+
+// Draggble 
+https://stackoverflow.com/questions/72225905/blazor-drag-drop-list-elements

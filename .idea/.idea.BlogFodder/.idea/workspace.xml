@@ -25,20 +25,11 @@
   <component name="ChangeListManager">
     <list default="true" id="445a6a4b-95f7-4adb-861e-84aa224db874" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BlogFodder/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BlogFodder/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/BlogFodder.App.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/BlogFodder.App.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/EditPostComponent.razor" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/Post.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/Post.razor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/PostNavigation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/PostNavigation.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Index.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Index.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/_Imports.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/_Imports.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.App/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/appsettings.Development.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Posts/Mapping/PostDbMapping.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Posts/Mapping/PostDbMapping.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Posts/Models/Post.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Posts/Models/Post.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/Dialogs/BlogContentItemsList.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.App/Pages/Admin/Dialogs/ContentItemEditor.razor" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BlogFodder.Core/Posts/Models/PostContentItem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Core/Posts/Models/PostContentItem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/BlogFodder.Plugins.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/BlogFodder.Plugins.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/Layouts/AdminLayout.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/Layouts/AdminLayout.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BlogFodder.Plugins/_Imports.razor" beforeDir="false" afterPath="$PROJECT_DIR$/BlogFodder.Plugins/_Imports.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Misc.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,6 +52,7 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/345522091b134d9f947c9176c246946bb5000/af/7a160b0d/DialogServiceExt.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6523246ecc834b6d94fabbd31efccf1c968b0/22/5cabfa55/LayoutComponentBase.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6609031f877c4d3d94436657f58ef94988f000/05/3b6c1e36/DialogParameters.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d1ea0e55adc447bda7c175e6f4a2c09b128a0/56/5d9cf409/EditContext.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/fa1df5c0762e47b39f059824416761227b880/92/0c0f71b8/Enumerable.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/327f875fd92c358a2c6b3c48cc81b288070ecb997371cd17419f80a482a617/LayoutComponentBase.cs" root0="SKIP_HIGHLIGHTING" />
@@ -242,7 +234,8 @@
       <workItem from="1681480581082" duration="6003000" />
       <workItem from="1681486901132" duration="587000" />
       <workItem from="1681538687473" duration="3671000" />
-      <workItem from="1681805920837" duration="14946000" />
+      <workItem from="1681805920837" duration="15153000" />
+      <workItem from="1681903077361" duration="8545000" />
     </task>
     <task id="LOCAL-00001" summary="Just playing at the moment">
       <created>1679737166564</created>
@@ -300,7 +293,14 @@
       <option name="project" value="LOCAL" />
       <updated>1681544194731</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Starting to build the create post page">
+      <created>1681832139294</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1681832139294</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -318,7 +318,8 @@
     <MESSAGE value="Adding Mud Blazor for admin" />
     <MESSAGE value="Working on the admin navigation" />
     <MESSAGE value="Working on create post page&#10;Added MudBlazor Extensions for custom dialog" />
-    <option name="LAST_COMMIT_MESSAGE" value="Working on create post page&#10;Added MudBlazor Extensions for custom dialog" />
+    <MESSAGE value="Starting to build the create post page" />
+    <option name="LAST_COMMIT_MESSAGE" value="Starting to build the create post page" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -337,31 +338,84 @@
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/BlogFodder.Plugins/Components/Backoffice/Navigation.razor</url>
-          <line>13</line>
-          <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.Plugins\Components\Backoffice\Navigation.razor" initialLine="11" isMultiMethodBreakpoint="true">
-            <option name="multiMethodBreakpoint" value="true" />
-            <startOffsets>
-              <option value="-1" />
-            </startOffsets>
-            <endOffsets>
-              <option value="-1" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="21" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs</url>
-          <line>58</line>
+          <line>103</line>
           <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.App\Pages\Admin\CreatePost.razor.cs" initialLine="30" containingFunctionPresentation="Method 'OpenDialog'">
             <startOffsets>
-              <option value="1774" />
+              <option value="3388" />
             </startOffsets>
             <endOffsets>
-              <option value="1882" />
+              <option value="3493" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="22" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs</url>
+          <line>44</line>
+          <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.App\Pages\Admin\CreatePost.razor.cs" initialLine="44" containingFunctionPresentation="Method 'ItemUpdated'">
+            <startOffsets>
+              <option value="1335" />
+              <option value="1362" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1361" />
+              <option value="1415" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs</url>
+          <line>53</line>
+          <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.App\Pages\Admin\CreatePost.razor.cs" initialLine="53" containingFunctionPresentation="Method 'AddNewContentItem'">
+            <startOffsets>
+              <option value="1707" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1859" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs</url>
+          <line>39</line>
+          <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.App\Pages\Admin\CreatePost.razor.cs" initialLine="39" containingFunctionPresentation="Method 'OnContentItemChanged'">
+            <startOffsets>
+              <option value="1209" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1237" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs</url>
+          <line>29</line>
+          <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.App\Pages\Admin\CreatePost.razor.cs" initialLine="29" containingFunctionPresentation="Method 'RefreshContainer'">
+            <startOffsets>
+              <option value="1009" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1027" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BlogFodder.App/Pages/Admin/CreatePost.razor.cs</url>
+          <line>32</line>
+          <properties documentPath="C:\Users\lee\OneDrive\Documents\Projects\BlogFodder\BlogFodder.App\Pages\Admin\CreatePost.razor.cs" initialLine="32" containingFunctionPresentation="Method 'RefreshContainer'">
+            <startOffsets>
+              <option value="1090" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1111" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
