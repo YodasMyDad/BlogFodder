@@ -1,24 +1,51 @@
 ﻿@using System.Text.Json
-<TinyMCE.Blazor.Editor Conf="@_conf" @bind-Value="@EditorValue" />
-@*<input type="hidden" name="Testing" id="Testing" @bind="EditorValue" />*@
-<MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+
+<MudDialog>
+    <DialogContent>
+        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6 ">
+
+            <MudTabPanel Text="Editor">
+                <TinyMCE.Blazor.Editor Conf="@_conf" @bind-Value="@EditorValue"/>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Settings">
+                <MudText>TODO</MudText>
+                @*<MudTextField @bind-Value="Post.Url" Label="Url" Variant="Variant.Text"></MudTextField>
+                    <MudDatePicker Label="Date Created" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateCreated"/>
+                    <MudDatePicker Label="Date Updated" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateUpdated"/>*@
+            </MudTabPanel>
+            
+        </MudTabs>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
 @code {
-    [Parameter] public string? Model { get; set; }
-    [Parameter] public EventCallback<string> SaveAndClose { get; set; }
+
+    [Parameter]
+    public string? Model { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SaveAndClose { get; set; }
+
     private RichTextEditorModel EditorModel { get; set; } = new();
     public string? EditorValue { get; set; }
+
     private Dictionary<string, object> _conf = new()
     {
-        { "height", 500},
-        { "toolbar", "undo redo | a11ycheck casechange blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist checklist outdent indent | removeformat | advcode table help"},
-        { "plugins", "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount"}
+        {"height", 500},
+        {"toolbar", "undo redo | a11ycheck casechange blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist checklist outdent indent | removeformat | advcode table help"},
+        {"plugins", "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount"}
     };
 
     private Task Submit()
     {
         return SaveAndClose.InvokeAsync(EditorValue);
     }
-    
+
     protected override void OnInitialized()
     {
         if (Model != null)
@@ -28,4 +55,5 @@
 
         EditorValue ??= $"Hello this is text from the component, showsomething is {EditorModel.ShowSomething}";
     }
+
 }

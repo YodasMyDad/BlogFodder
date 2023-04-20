@@ -2,24 +2,15 @@
 @using BlogFodder.Core.Plugins.Interfaces
 @using BlogFodder.Core.Posts.Models
 
-<MudDialog>
-    <DialogContent>
+@if (PluginEditor != null)
+{
+    <DynamicComponent Type="@PluginEditor.Editor?.Component"
+                      Parameters="@(new Dictionary<string, object> {
+                                      {"Model", ContentItem.PluginData}, 
+                                      {"SaveAndClose", EventCallback.Factory.Create<string>(this, SaveAndClose)}
+                                  })"/>
+}
 
-        @if (PluginEditor != null)
-        {
-            <DynamicComponent Type="@PluginEditor.Editor?.Component"
-                              Parameters="@(new Dictionary<string, object> {
-                                              {"Model", ContentItem.PluginData},
-                                              {"SaveAndClose", EventCallback.Factory.Create<string>(this, SaveAndClose)}
-                                          })" />   
-        }
-
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        @*<MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>*@
-    </DialogActions>
-</MudDialog>
 
 @code {
 
@@ -31,9 +22,9 @@
 
     [Parameter]
     public PostContentItem ContentItem { get; set; } = new();
-    
+
     public IPlugin? PluginEditor { get; set; }
-    
+
     public void SaveAndClose(string data)
     {
         MudDialog.Close(DialogResult.Ok(data));
@@ -47,7 +38,4 @@
             PluginEditor = pluginEditor;
         }
     }
-
-    //void Submit() => MudDialog.Close(DialogResult.Ok("SomeAlias"));
-    void Cancel() => MudDialog.Cancel();
 }
