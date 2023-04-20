@@ -14,8 +14,8 @@
     </MudTextField>
 
     <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6 ">
+        
         <MudTabPanel Text="Excerpt">
-
             <MudTextField Lines="5" Label="Preview Text" HelperText="Max. 3000 characters"
                           @bind-Value="Post.Excerpt" For="@(() => Post.Excerpt)"/>
 
@@ -33,6 +33,7 @@
                 </MudFileUpload>
             </MudField>
         </MudTabPanel>
+
         <MudTabPanel Text="Content">
             <MudStack Row="true">
                 <MudItem xs="8">
@@ -55,53 +56,28 @@
                 </MudItem>
             </MudStack>
 
-            @*@bind-SelectedItem="selectedItem" @bind-SelectedValue="selectedValue"*@
-
-
             <MudDropContainer T="PostContentItem" @ref="_container" Items="Post.ContentItems" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-wrap flex-grow-1">
                 <ChildContent>
-                    <MudList Class="d-flex flex-column mud-height-full">
+                    <MudGrid Class="mt-8" Spacing="2">
                         <MudDropZone T="PostContentItem" Identifier="plugins" AllowReorder="true" Class="flex-grow-1"/>
-                    </MudList>
+                    </MudGrid>
                 </ChildContent>
                 <ItemRenderer>
-                    <MudListItem @onclick="() => ShowEditor(context)" Text="@context.PluginAlias"/>
+                    <MudItem xs="12">
+                        <MudCard @onclick="() => ShowEditor(context)" Elevation="25" Class="rounded-lg pb-4">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h5" Align="Align.Center">@context.PluginAlias</MudText>
+                                    <MudText Typo="Typo.h5" Align="Align.Center">@context.PluginData</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                        </MudCard>
+                    </MudItem>
                 </ItemRenderer>
             </MudDropContainer>
 
-
-            @*<MudGrid Class="mt-8">
-                @foreach (var contentItem in Post.ContentItems)
-                {
-                    <MudItem xs="12">
-                        <MudCard @onclick="() => ShowEditor(contentItem)" Elevation="25" Class="rounded-lg pb-4">
-                            <MudCardHeader>
-                                <CardHeaderContent>
-                                    <MudText Typo="Typo.h5" Align="Align.Center">@contentItem.PluginAlias</MudText>
-                                </CardHeaderContent>
-                            </MudCardHeader>
-                            $1$<MudCardContent>
-                                <div class="d-flex justify-center">
-                                    <MudText Typo="Typo.h3">$5</MudText>
-                                    <MudText Typo="Typo.h5" Class="ml-1 mt-5" Color="Color.Secondary">/Monthly</MudText>
-                                </div>
-                                <MudList Class="mx-auto mt-4" Style="width:300px;">
-                                    <MudListItem Icon="@Icons.Material.Filled.LiveHelp">
-                                        Unlimited something
-                                    </MudListItem>
-                                    <MudListItem Icon="@Icons.Material.Filled.LiveHelp">
-                                        10 something
-                                    </MudListItem>
-                                    <MudListItem Icon="@Icons.Material.Filled.LiveHelp">
-                                        No something
-                                    </MudListItem>
-                                </MudList>
-                            </MudCardContent>#1#
-                        </MudCard>
-                    </MudItem>
-                }
-            </MudGrid>*@
         </MudTabPanel>
+        
         <MudTabPanel Text="SEO">
             <MudText>SEO</MudText>
             <MudTextField Label="Page Title" HelperText="Max. 60 characters"
@@ -123,11 +99,13 @@
             </MudField>
             <MudSwitch @bind-Checked="@Post.NoIndex" Label="No Index" Color="Color.Info"/>
         </MudTabPanel>
+        
         <MudTabPanel Text="Settings">
             <MudText>Settings</MudText>
             <MudTextField @bind-Value="Post.Url" Label="Url" Variant="Variant.Text"></MudTextField>
             <MudDatePicker Label="Date Created" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateCreated"/>
             <MudDatePicker Label="Date Updated" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateUpdated"/>
         </MudTabPanel>
+        
     </MudTabs>
 </EditForm>

@@ -67,15 +67,15 @@ public partial class CreatePost : ComponentBase
             {"ContentItem", contentItem}
         };
 
-        var dialog = await Dialog.ShowAsync<ContentItemEditor>("Select Blog Content Item", parameters, maxWidth);
+        var dialog = await Dialog.ShowAsync<ContentItemEditor>("", parameters, new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            AliasFromDialog = result.Data.ToString();
-            /*//In a real world scenario we would reload the data from the source here since we "removed" it in the dialog already.
-            Guid.TryParse(result.Data.ToString(), out Guid deletedServer);
-            Servers.RemoveAll(item => item.Id == deletedServer);*/
+            // Save the data to this contentItem, or do we have to loop
+            // to find the one with the Id? And set the data that way?
+            contentItem.PluginData = result.Data.ToString();
+            StateHasChanged();
         }
     }
     
@@ -93,27 +93,6 @@ public partial class CreatePost : ComponentBase
         //editContext = new EditContext(Post);
     }
 
-    DialogOptions maxWidth = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
-    private async Task OpenDialog()
-    {
-        var parameters = new DialogParameters
-        {
-            {"ContentText", "Are you sure you want to remove thisguy@emailz.com from this account?"}
-        };
-
-        var dialog = await Dialog.ShowAsync<ContentItemEditor>("Select Blog Content Item", parameters, maxWidth);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            AliasFromDialog = result.Data.ToString();
-            /*//In a real world scenario we would reload the data from the source here since we "removed" it in the dialog already.
-            Guid.TryParse(result.Data.ToString(), out Guid deletedServer);
-            Servers.RemoveAll(item => item.Id == deletedServer);*/
-        }
-
-    }
-    
     public IBrowserFile FeaturedImage { get; set; }
     private void SetFeaturedImage(IBrowserFile file)
     {

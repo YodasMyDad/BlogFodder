@@ -1,9 +1,10 @@
 ﻿@using System.Text.Json
 <TinyMCE.Blazor.Editor Conf="@_conf" @bind-Value="@EditorValue" />
-<input type="hidden" name="Testing" id="Testing" @bind="EditorValue" />
-@*<textarea @bind=content @bind:event="oninput"></textarea>*@
+@*<input type="hidden" name="Testing" id="Testing" @bind="EditorValue" />*@
+<MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
 @code {
     [Parameter] public string? Model { get; set; }
+    [Parameter] public EventCallback<string> SaveAndClose { get; set; }
     private RichTextEditorModel EditorModel { get; set; } = new();
     public string? EditorValue { get; set; }
     private Dictionary<string, object> _conf = new()
@@ -12,6 +13,12 @@
         { "toolbar", "undo redo | a11ycheck casechange blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist checklist outdent indent | removeformat | advcode table help"},
         { "plugins", "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount"}
     };
+
+    private Task Submit()
+    {
+        return SaveAndClose.InvokeAsync(EditorValue);
+    }
+    
     protected override void OnInitialized()
     {
         if (Model != null)

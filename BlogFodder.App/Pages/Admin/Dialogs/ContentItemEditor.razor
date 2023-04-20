@@ -1,20 +1,53 @@
 @using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Plugins.Interfaces
 @using BlogFodder.Core.Posts.Models
+
 <MudDialog>
     <DialogContent>
-        This is a test @ContentItem.PluginAlias
+
+        @if (PluginEditor != null)
+        {
+            <DynamicComponent Type="@PluginEditor.Editor?.Component"
+                              Parameters="@(new Dictionary<string, object> {
+                                              {"Model", ContentItem.PluginData},
+                                              {"SaveAndClose", EventCallback.Factory.Create<string>(this, SaveAndClose)}
+                                          })" />   
+        }
+
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+        @*<MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>*@
     </DialogActions>
 </MudDialog>
-@code {
-    [Inject] public ExtensionManager ExtensionManager { get; set; }
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    [Parameter] public PostContentItem ContentItem { get; set; } = new();
 
-    void Submit() => MudDialog.Close(DialogResult.Ok("SomeAlias"));
-    void Cancel() => MudDialog.Cancel();
+@code {
+
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; }
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public PostContentItem ContentItem { get; set; } = new();
     
+    public IPlugin? PluginEditor { get; set; }
+    
+    public void SaveAndClose(string data)
+    {
+        MudDialog.Close(DialogResult.Ok(data));
+    }
+
+    protected override void OnInitialized()
+    {
+        var pluginEditor = ExtensionManager.GetInstances<IPlugin>(true).FirstOrDefault(x => x?.Alias == ContentItem.PluginAlias);
+        if (pluginEditor != null)
+        {
+            PluginEditor = pluginEditor;
+        }
+    }
+
+    //void Submit() => MudDialog.Close(DialogResult.Ok("SomeAlias"));
+    void Cancel() => MudDialog.Cancel();
 }
