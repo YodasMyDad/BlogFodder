@@ -1,14 +1,15 @@
-﻿@using System.Text.Json
+@using System.Text.Json
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Posts.Models
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
+@inject IJSRuntime JsRuntime
 
 <MudDialog>
     <DialogContent>
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6 ">
 
             <MudTabPanel Text="Editor">
-                <TinyMCE.Blazor.Editor Conf="@GlobalSettings.DefaultEditorSettings" @bind-Value="@EditorData"/>
+                <textarea id="simplemde"></textarea>
             </MudTabPanel>
 
             <MudTabPanel Text="Settings">
@@ -25,39 +26,33 @@
     </DialogActions>
 </MudDialog>
 
-
 @code {
 
-    // Model that is passed in from the database
+    //https://www.puresourcecode.com/dotnet/blazor/markdown-editor-component-for-blazor/
+    
     [Parameter]
     public PostContentItem PostContentItem { get; set; } = new();
-
-    // The callback to send the data back to the post page
+    
     [Parameter]
     public EventCallback<PostContentItem> SaveAndClose { get; set; }
-    
-    // The deserialised data from the db
-    private RichTextEditorSettings EditorSettings { get; set; } = new();
-    private RichTextGlobalSettings GlobalSettings { get; set; } = new();
-    private string EditorData { get; set; } = string.Empty;
 
-    // Submits the data and closes the dialog
+    private string EditorData { get; set; } = string.Empty;
+    
     public Task Submit()
     {
-        PostContentItem.PluginData = EditorData;
-        PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions{ WriteIndented = false}); // Is this compact JSON?
+        /*PostContentItem.PluginData = EditorData;
+        PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions{ WriteIndented = false});*/
         return SaveAndClose.InvokeAsync(PostContentItem);
     }
-
-    // Onload, get the serialised data from the db and deserialise into the correct properties
+    
     protected override void OnInitialized()
     {
         if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
         {
             EditorData = PostContentItem.PluginData;
         }
-        
-        if (!PostContentItem.PluginSettings.IsNullOrWhiteSpace())
+        MakeEditor();
+    /*if (!PostContentItem.PluginSettings.IsNullOrWhiteSpace())
         {
             EditorSettings = JsonSerializer.Deserialize<RichTextEditorSettings>(PostContentItem.PluginSettings) ?? new RichTextEditorSettings();
         }
@@ -65,6 +60,37 @@
         if (!PostContentItem.GlobalSettings.IsNullOrWhiteSpace())
         {
             GlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(PostContentItem.GlobalSettings) ?? new RichTextGlobalSettings();
+        }*/
+    }
+
+    private IJSObjectReference MyJsModule { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Load the JS Helpers Module
+                MyJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/BlogFodder.Plugins/js/markdowneditor.js");
+            }
+            catch (Exception ex)
+            {
+                //Logger.LogError($"Failed to load JS module. Error: {ex}");
+            }
         }
     }
+
+    private async void MakeEditor()
+    {
+        try
+        {
+            //await MyJsModule.InvokeVoidAsync("MakeEditor", "foo");
+            await MyJsModule.InvokeVoidAsync("makeEditor");
+        }
+        catch (Exception ex)
+        {
+            //Logger.LogError($"Failed to execute JS function. Error: {ex}");
+        }
+    }
+    
 }

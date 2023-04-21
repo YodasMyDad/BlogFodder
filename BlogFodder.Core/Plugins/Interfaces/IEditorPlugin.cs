@@ -2,7 +2,7 @@
 
 namespace BlogFodder.Core.Plugins.Interfaces;
 
-public interface IPlugin
+public interface IEditorPlugin
 {
     /// <summary>
     /// Alias is important, do not change the alias of your plugin when updating it

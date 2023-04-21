@@ -2,12 +2,12 @@
 @using BlogFodder.Core.Plugins.Interfaces
 @using BlogFodder.Core.Posts.Models
 
-@if (PluginEditor != null)
+@if (Plugin != null)
 {
-    <DynamicComponent Type="@PluginEditor.Editor?.Component"
+    <DynamicComponent Type="@Plugin.Editor?.Component"
                       Parameters="@(new Dictionary<string, object> {
-                                      {"Model", ContentItem.PluginData}, 
-                                      {"SaveAndClose", EventCallback.Factory.Create<string>(this, SaveAndClose)}
+                                      {"PostContentItem", ContentItem},
+                                      {"SaveAndClose", EventCallback.Factory.Create<PostContentItem>(this, SaveAndClose)}
                                   })"/>
 }
 
@@ -23,19 +23,19 @@
     [Parameter]
     public PostContentItem ContentItem { get; set; } = new();
 
-    public IPlugin? PluginEditor { get; set; }
+    public IEditorPlugin? Plugin{ get; set; }
 
-    public void SaveAndClose(string data)
+    public void SaveAndClose(PostContentItem data)
     {
         MudDialog.Close(DialogResult.Ok(data));
     }
 
     protected override void OnInitialized()
     {
-        var pluginEditor = ExtensionManager.GetInstances<IPlugin>(true).FirstOrDefault(x => x?.Alias == ContentItem.PluginAlias);
+        var pluginEditor = ExtensionManager.GetInstances<IEditorPlugin>(true).FirstOrDefault(x => x?.Alias == ContentItem.PluginAlias);
         if (pluginEditor != null)
         {
-            PluginEditor = pluginEditor;
+            Plugin = pluginEditor;
         }
     }
 }

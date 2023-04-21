@@ -8,5 +8,9 @@ public class PostContentItem
     public int SortOrder { get; set; }
     public string? PluginAlias { get; set; }
     public string? PluginData { get; set; }
+    public string? PluginSettings { get; set; }
+    
+    // EF Ignore
     public string? Selector  { get; set; }
+    public string? GlobalSettings { get; set; }
 }

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using BlogFodder.App.Pages.Admin.Dialogs;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using MudBlazor.Utilities;
+using Newtonsoft.Json;
 
 namespace BlogFodder.App.Pages.Admin;
 
@@ -14,14 +16,9 @@ public partial class CreatePost : ComponentBase
     public Post Post { get; set; } = new();
     public DateTime? DateCreated { get; set; } = DateTime.Now;
     public DateTime? DateUpdated { get; set; } = DateTime.Now;
-    public Dictionary<string, IPlugin> AvailableEditorPlugins { get; set; } = new();
-    
+    public Dictionary<string, IEditorPlugin> AvailableEditorPlugins { get; set; } = new();
     private MudDropContainer<PostContentItem> _container;
-    
     [Inject] public ExtensionManager ExtensionManager { get; set; }
-    
-    /*private EditContext editContext;*/
-    public string? AliasFromDialog { get; set; }
     public string? SelectedEditorAlias { get; set; }
     
     private void RefreshContainer()
@@ -51,11 +48,19 @@ public partial class CreatePost : ComponentBase
     {
         if (SelectedEditorAlias != null && AvailableEditorPlugins.TryGetValue(SelectedEditorAlias, out var plugin))
         {
-            Post.ContentItems.Add(new PostContentItem
+
+            var postContentItem = new PostContentItem
             {
                 PluginAlias = plugin.Alias,
                 Selector = "plugins"
-            });
+            };
+
+            if (plugin.Settings != null)
+            {
+                postContentItem.GlobalSettings = JsonConvert.SerializeObject(plugin.Settings.Model);
+            }
+            
+            Post.ContentItems.Add(postContentItem);
             RefreshContainer();
         }
     }
@@ -74,15 +79,15 @@ public partial class CreatePost : ComponentBase
         {
             // Save the data to this contentItem, or do we have to loop
             // to find the one with the Id? And set the data that way?
-            contentItem.PluginData = result.Data.ToString();
-            StateHasChanged();
+            contentItem = result.Data as PostContentItem ?? contentItem;
+            RefreshContainer();
         }
     }
     
     protected override void OnInitialized()
     {
         // Get the Aliases of all Editor plugins
-        var allPlugins = ExtensionManager.GetInstances<IPlugin>(true).Where(x => x?.Editor != null);
+        var allPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x?.Editor != null);
         foreach (var plugin in allPlugins)
         {
             if (plugin != null)

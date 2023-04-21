@@ -19,7 +19,7 @@ public class EditorPluginCssViewComponent : ViewComponent
 
     public IViewComponentResult Invoke()
     {
-        var plugins = _extensionManager.GetInstances<IPlugin>(true);
+        var plugins = _extensionManager.GetInstances<IEditorPlugin>(true);
         var cssFiles = new List<string>();
         foreach (var plugin in plugins)
         {

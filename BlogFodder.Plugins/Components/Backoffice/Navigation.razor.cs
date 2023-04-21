@@ -54,7 +54,7 @@ public partial class Navigation : ComponentBase
             });
         }
         
-        var settingsPlugins = ExtensionManager.GetInstances<IPlugin>(true).Where(x => x?.Settings != null).ToList();
+        var settingsPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x?.Settings != null).ToList();
         if (settingsPlugins.Any())
         {
             var foundSettingsLinks = settingsPlugins.Select(x => x?.Settings?.BackOfficeLink).Where(x => x != null);

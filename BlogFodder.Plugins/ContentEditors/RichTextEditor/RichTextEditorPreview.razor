@@ -1,0 +1,16 @@
+@using BlogFodder.Core.Posts.Models
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponentPreview
+
+@((MarkupString)HtmlToShow)
+
+@code {
+    private string HtmlToShow { get; set; } = string.Empty;
+    
+    [Parameter]
+    public PostContentItem? PostContentItem { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        HtmlToShow = PostContentItem?.PluginData ?? "Rich Text Editor";
+    }
+}
