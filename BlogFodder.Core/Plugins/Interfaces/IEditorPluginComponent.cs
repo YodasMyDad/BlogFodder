@@ -7,5 +7,4 @@ public interface IEditorPluginComponent
 {
     PostContentItem PostContentItem { get; set; }
     EventCallback<PostContentItem> SaveAndClose { get; set; }
-    Task Submit();
 }

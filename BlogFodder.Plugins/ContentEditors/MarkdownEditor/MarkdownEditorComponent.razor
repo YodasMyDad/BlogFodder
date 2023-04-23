@@ -1,4 +1,3 @@
-@using System.Text.Json
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Posts.Models
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
@@ -9,16 +8,17 @@
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6 ">
 
             <MudTabPanel Text="Editor">
-                <textarea id="simplemde"></textarea>
+                <MudCard>
+                    <textarea id="@EditorId">@PostContentItem.PluginData</textarea>
+                </MudCard>
             </MudTabPanel>
 
-            <MudTabPanel Text="Settings">
-                <MudText>TODO</MudText>
-                @*<MudTextField @bind-Value="Post.Url" Label="Url" Variant="Variant.Text"></MudTextField>
+            @*<MudTabPanel Text="Settings">
+                <MudTextField @bind-Value="Post.Url" Label="Url" Variant="Variant.Text"></MudTextField>
                     <MudDatePicker Label="Date Created" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateCreated"/>
-                    <MudDatePicker Label="Date Updated" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateUpdated"/>*@
-            </MudTabPanel>
-            
+                    <MudDatePicker Label="Date Updated" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateUpdated"/>
+            </MudTabPanel>*@
+
         </MudTabs>
     </DialogContent>
     <DialogActions>
@@ -29,68 +29,48 @@
 @code {
 
     //https://www.puresourcecode.com/dotnet/blazor/markdown-editor-component-for-blazor/
-    
+
     [Parameter]
     public PostContentItem PostContentItem { get; set; } = new();
-    
+
     [Parameter]
     public EventCallback<PostContentItem> SaveAndClose { get; set; }
-
-    private string EditorData { get; set; } = string.Empty;
     
-    public Task Submit()
+    private string EditorId { get; set; } = string.Empty;
+
+    public async Task<Task> Submit()
     {
-        /*PostContentItem.PluginData = EditorData;
-        PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions{ WriteIndented = false});*/
+        PostContentItem.PluginData = await GetEditorValue();
+        //PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions{ WriteIndented = false});
         return SaveAndClose.InvokeAsync(PostContentItem);
     }
     
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        EditorId = $"easymde-{PostContentItem.Id}";
+        
         if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
         {
-            EditorData = PostContentItem.PluginData;
+            await SetEditorValue(PostContentItem.PluginData);
         }
-        MakeEditor();
-    /*if (!PostContentItem.PluginSettings.IsNullOrWhiteSpace())
-        {
-            EditorSettings = JsonSerializer.Deserialize<RichTextEditorSettings>(PostContentItem.PluginSettings) ?? new RichTextEditorSettings();
-        }
-        
-        if (!PostContentItem.GlobalSettings.IsNullOrWhiteSpace())
-        {
-            GlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(PostContentItem.GlobalSettings) ?? new RichTextGlobalSettings();
-        }*/
     }
 
-    private IJSObjectReference MyJsModule { get; set; }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            try
-            {
-                // Load the JS Helpers Module
-                MyJsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/BlogFodder.Plugins/js/markdowneditor.js");
-            }
-            catch (Exception ex)
-            {
-                //Logger.LogError($"Failed to load JS module. Error: {ex}");
-            }
-        }
-    }
-
-    private async void MakeEditor()
-    {
-        try
-        {
-            //await MyJsModule.InvokeVoidAsync("MakeEditor", "foo");
-            await MyJsModule.InvokeVoidAsync("makeEditor");
-        }
-        catch (Exception ex)
-        {
-            //Logger.LogError($"Failed to execute JS function. Error: {ex}");
+            await JsRuntime.InvokeVoidAsync("initializeEasyMDE", EditorId);
         }
     }
     
+    private async Task<string> GetEditorValue()
+    {
+        return await JsRuntime.InvokeAsync<string>("getEasyMDEValue", EditorId);
+    }
+
+    private async Task SetEditorValue(string data)
+    {
+        await JsRuntime.InvokeVoidAsync("setEasyMDEValue", EditorId, data);
+    }
+
 }

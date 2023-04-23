@@ -16,11 +16,12 @@ public class MarkdownEditorEditorPlugin : IEditorPlugin
         Icon = Icons.Material.Filled.Edit,
         CssFiles = new List<string>
         {
-            "_content/MudBlazor.Markdown/MudBlazor.Markdown.min.css"
+            "https://unpkg.com/easymde/dist/easymde.min.css"
         },
         JsFiles = new List<string>
         {
-            "_content/MudBlazor.Markdown/MudBlazor.Markdown.min.js"
+            "https://unpkg.com/easymde/dist/easymde.min.js",
+            "_content/BlogFodder.Plugins/js/markdowneditor.js"
         },
         PreviewComponent = typeof(MarkdownEditorPreview)
     };
