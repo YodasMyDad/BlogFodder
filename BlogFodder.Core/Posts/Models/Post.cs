@@ -1,8 +1,10 @@
-﻿namespace BlogFodder.Core.Posts.Models;
+﻿using BlogFodder.Core.Extensions;
+
+namespace BlogFodder.Core.Posts.Models;
 
 public class Post
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid().NewSequentialGuid();
     public string? Name { get; set; }
     public DateTime DateCreated { get; set; } = new();
     public DateTime DateUpdated { get; set; } = new();

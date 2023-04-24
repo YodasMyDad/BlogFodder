@@ -17,6 +17,9 @@ public class PostContentItemDbMapping : IEntityTypeConfiguration<PostContentItem
             .HasForeignKey(d => d.PostId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.Property(x => x.PluginAlias).HasMaxLength(500);
+        builder.Property(x => x.PluginAlias).HasMaxLength(600);
+
+        builder.Ignore(x => x.Selector);
+        builder.Ignore(x => x.GlobalSettings);
     }
 }

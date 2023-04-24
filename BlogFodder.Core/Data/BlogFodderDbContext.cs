@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogFodder.Core.Data;
 
-public class BlogFodderDbContext : IdentityDbContext<User, Role, int, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
+public class BlogFodderDbContext : IdentityDbContext<User, Role, Guid, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
 {
     public BlogFodderDbContext(DbContextOptions<BlogFodderDbContext> options) : base(options)
     {

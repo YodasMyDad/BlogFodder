@@ -1,5 +1,6 @@
 using System.Text.Json;
 using BlogFodder.App.Pages.Admin.Dialogs;
+using BlogFodder.Core.Data;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Posts.Models;
@@ -19,6 +20,8 @@ public partial class CreatePost : ComponentBase
     public Dictionary<string, IEditorPlugin> AvailableEditorPlugins { get; set; } = new();
     private MudDropContainer<PostContentItem> _container;
     [Inject] public ExtensionManager ExtensionManager { get; set; }
+    [Inject] public BlogFodderDbContext DbContext { get; set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
     public string? SelectedEditorAlias { get; set; }
     
     private void RefreshContainer()
@@ -114,12 +117,21 @@ public partial class CreatePost : ComponentBase
 
     private void HandleIntervalElapsed(string debouncedText)
     {
-        // at this stage, interval has elapsed
+        // TODO - Need to use a method to create the slug
         Post.Url = debouncedText;
     }
     
-    private async Task SubmitForm()
+    private async Task SubmitForm(EditContext formContext)
     {
+        // TODO - Need to look at validation!
+        /*var formIsValid = formContext.Validate();
+        if (formIsValid == false)
+            return;*/
+
+        // TODO - This needs to be moved to a service or better just use Mediatr
+        DbContext.Posts.Add(Post);
+        await DbContext.SaveChangesAsync();
+        Snackbar.Add("Post Created");
         /*CreateUpdateGabCategoryCommand.SectionId = GetGabCategoriesCommand.SectionId!.Value;
         var result = await Mediator.Send(CreateUpdateGabCategoryCommand);
         if (result.Success)

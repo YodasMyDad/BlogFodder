@@ -2,7 +2,7 @@
 
 namespace BlogFodder.Core.Identity.Models;
 
-public class RoleClaim : IdentityRoleClaim<int>
+public class RoleClaim : IdentityRoleClaim<Guid>
 {
     
 }

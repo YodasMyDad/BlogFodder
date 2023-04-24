@@ -3,6 +3,7 @@ using System;
 using BlogFodder.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    partial class BlogFodderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230424133128_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -274,6 +277,9 @@ namespace BlogFodder.Core.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("GlobalSettings")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PluginAlias")
                         .HasMaxLength(600)
                         .HasColumnType("TEXT");
@@ -285,6 +291,9 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("PostId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Selector")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("SortOrder")

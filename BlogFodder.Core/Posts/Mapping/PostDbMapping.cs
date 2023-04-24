@@ -23,6 +23,5 @@ public class PostDbMapping : IEntityTypeConfiguration<Post>
         builder.Property(x => x.SocialImage).HasMaxLength(1000);
         builder.Property(x => x.Url).HasMaxLength(500);
         builder.Property(x => x.ExtendedData).ToJsonConversion(4000);
-
     }
 }

@@ -29,13 +29,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="app.db">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
       <_ContentIncludedByDefault Remove="Components\Backoffice\Navigation.razor" />
     </ItemGroup>
 

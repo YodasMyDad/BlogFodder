@@ -1,10 +1,12 @@
-﻿namespace BlogFodder.Core.Posts.Models;
+﻿using BlogFodder.Core.Extensions;
+
+namespace BlogFodder.Core.Posts.Models;
 
 public class PostContentItem
 {
     public Post Post { get; set; } = default!;
-    public int PostId { get; set; }
-    public int Id { get; set; }
+    public Guid PostId { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid().NewSequentialGuid();
     public int SortOrder { get; set; }
     public string? PluginAlias { get; set; }
     public string? PluginData { get; set; }

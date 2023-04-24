@@ -2,7 +2,7 @@
 
 namespace BlogFodder.Core.Identity.Models;
 
-public class UserRole : IdentityUserRole<int>
+public class UserRole : IdentityUserRole<Guid>
 {
     
 }

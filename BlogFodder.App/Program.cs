@@ -1,18 +1,12 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using BlogFodder.App.Data;
 using BlogFodder.App.Extensions;
 using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Settings;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Extensions;
-using MudBlazor.Extensions.Options;
-using MudBlazor.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

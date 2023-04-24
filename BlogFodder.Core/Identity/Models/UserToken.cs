@@ -2,7 +2,7 @@
 
 namespace BlogFodder.Core.Identity.Models;
 
-public class UserToken : IdentityUserToken<int>
+public class UserToken : IdentityUserToken<Guid>
 {
     
 }

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    [Migration("20230328094802_Initial")]
-    partial class Initial
+    [Migration("20230424134333_RemoveProperties")]
+    partial class RemoveProperties
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,9 +22,9 @@ namespace BlogFodder.Core.Data.Migrations
 
             modelBuilder.Entity("BlogFodder.Core.Identity.Models.Role", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -59,8 +59,8 @@ namespace BlogFodder.Core.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -71,9 +71,9 @@ namespace BlogFodder.Core.Data.Migrations
 
             modelBuilder.Entity("BlogFodder.Core.Identity.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
@@ -146,8 +146,8 @@ namespace BlogFodder.Core.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -169,8 +169,8 @@ namespace BlogFodder.Core.Data.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -181,11 +181,11 @@ namespace BlogFodder.Core.Data.Migrations
 
             modelBuilder.Entity("BlogFodder.Core.Identity.Models.UserRole", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -196,8 +196,8 @@ namespace BlogFodder.Core.Data.Migrations
 
             modelBuilder.Entity("BlogFodder.Core.Identity.Models.UserToken", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
@@ -213,6 +213,91 @@ namespace BlogFodder.Core.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("BlogFodderUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("BlogFodder.Core.Posts.Models.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Excerpt")
+                        .HasMaxLength(3000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExtendedData")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("FeaturedImage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(350)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("NoIndex")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PageTitle")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SocialImage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BlogFodderPosts", (string)null);
+                });
+
+            modelBuilder.Entity("BlogFodder.Core.Posts.Models.PostContentItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PluginAlias")
+                        .HasMaxLength(600)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PluginData")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PluginSettings")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("BlogFodderPostContentItems", (string)null);
                 });
 
             modelBuilder.Entity("BlogFodder.Core.Identity.Models.RoleClaim", b =>
@@ -264,6 +349,22 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BlogFodder.Core.Posts.Models.PostContentItem", b =>
+                {
+                    b.HasOne("BlogFodder.Core.Posts.Models.Post", "Post")
+                        .WithMany("ContentItems")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("BlogFodder.Core.Posts.Models.Post", b =>
+                {
+                    b.Navigation("ContentItems");
                 });
 #pragma warning restore 612, 618
         }
