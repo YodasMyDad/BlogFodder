@@ -1,18 +1,46 @@
 ﻿@page "/"
-@using BlogFodder.Core.Plugins
-@using BlogFodder.Core.Plugins.Interfaces
-@using System.Text.Json
-@inject ExtensionManager ExtensionManager;
+@using BlogFodder.Core.Data
+@using BlogFodder.Core.Posts.Models
+@using Microsoft.EntityFrameworkCore
 
-<PageTitle>Index</PageTitle>
+<PageTitle>BlogFodder</PageTitle>
 <HeadContent>
-    <meta name="description" content="meta data to go here">
+    <meta name="description" content="Get this data from the DB or appSettings?">
 </HeadContent>
 
-<SideBar>
+<MudPaper Elevation="0">
+    <p>If you want to edit these posts, go to the <a href="/admin">Admin Section</a></p>
     
-</SideBar>
+    @if (Posts.Any())
+    {
+        <ul style="padding: 15px 0;">
+            @foreach (var post in Posts)
+            {
+                <li style="padding: 15px 0;">
+                    <a href="/post/@post.Url">
+                        @post.Name <br/>
+                        @post.Excerpt
+                    </a>
+                    <hr />
+                </li>   
+            }
+        </ul>   
+    }
+    else
+    {
+        <h2>Doh. You haven't created any posts yet</h2>
+    }
+</MudPaper>
 
-<p>This is currently blank as I'm working in the plugin system for the <a href="/admin">Admin Section</a></p>
 
-<p>TODO Just list posts here as example of getting data and rendering content</p>
+@code
+{
+    [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
+
+    public List<Post> Posts { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        Posts = DbContext.Posts.AsNoTracking().OrderBy(x => x.DateCreated).ToList();
+    }
+}

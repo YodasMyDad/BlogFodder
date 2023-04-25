@@ -1,18 +1,11 @@
 ﻿@using System.Text.Json
-<div class="sometestclass">
-    @ContentModel.Testing
-</div>
-<img src="_content/BlogFodder.Plugins/img/meme.jpg" alt="" />
+
+@((MarkupString)Model)
 
 @code {
     [Parameter] public string? Model { get; set; }
-    private RichTextContentModel ContentModel { get; set; } = new();
     protected override void OnInitialized()
     {
-        if (Model != null)
-        {
-            ContentModel = JsonSerializer.Deserialize<RichTextContentModel>(Model) ?? new RichTextContentModel();
-        }
     }
 
 }

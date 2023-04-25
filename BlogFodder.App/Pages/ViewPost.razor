@@ -1,0 +1,80 @@
+@page "/post/{Slug}"
+@using BlogFodder.Core.Extensions
+@using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Data
+@using BlogFodder.Core.Plugins.Interfaces
+@using BlogFodder.Core.Posts.Models
+@using Humanizer
+@using Microsoft.EntityFrameworkCore
+<PageTitle>@Post.PageTitle</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Post.MetaDescription">
+</HeadContent>
+<MudPaper Elevation="0">
+
+    @if (!CanBeFound)
+    {
+        <h1>Unable to find the post by the url</h1>
+        <p>Need to make this return a 404!</p>
+    }
+    else
+    {
+        <p>
+            <a href="/">Back to home</a>
+        </p>
+        <h1>@Post.Name</h1>
+        <p>
+            <small>@Post.DateCreated.Humanize()</small>
+        </p>
+        foreach (var postContentItem in Post.ContentItems)
+        {
+            <div class="postContentItem">
+                <DynamicComponent Type="@AvailableEditorPlugins[postContentItem.PluginAlias!].Content.Component"
+                                  Parameters="@(new Dictionary<string, object> {{"Model", postContentItem.PluginData ?? ""}})"/>
+            </div>
+        }
+    }
+
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public string? Slug { get; set; }
+
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+
+    [Inject]
+    public BlogFodderDbContext DbContext { get; set; } = default!;
+
+    private Post Post { get; set; } = new();
+
+    private bool CanBeFound { get; set; }
+    private Dictionary<string, IEditorPlugin> AvailableEditorPlugins { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        if (!Slug.IsNullOrWhiteSpace())
+        {
+    // TODO - Again, this all needs to be done in a service or mediatr call
+    // Get this post by slug
+            var post = DbContext.Posts.Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
+            if (post != null)
+            {
+                CanBeFound = true;
+                Post = post;
+    // Get all the plugins and put into a dictionary
+                var allPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x?.Content != null);
+                foreach (var plugin in allPlugins)
+                {
+                    if (plugin != null)
+                    {
+                        AvailableEditorPlugins.Add(plugin.Alias, plugin);
+                    }
+                }
+            }
+        }
+    }
+
+}

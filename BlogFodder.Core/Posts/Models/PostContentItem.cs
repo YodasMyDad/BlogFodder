@@ -15,4 +15,5 @@ public class PostContentItem
     // EF Ignore
     public string? Selector  { get; set; }
     public string? GlobalSettings { get; set; }
+    public bool IsNew { get; set; }
 }

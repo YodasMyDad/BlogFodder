@@ -15,10 +15,10 @@
 @code {
 
     [Inject]
-    public ExtensionManager ExtensionManager { get; set; }
+    public ExtensionManager ExtensionManager { get; set; } = default!;
 
     [CascadingParameter]
-    MudDialogInstance MudDialog { get; set; }
+    MudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
     public PostContentItem ContentItem { get; set; } = new();

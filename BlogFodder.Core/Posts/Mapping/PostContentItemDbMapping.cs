@@ -21,5 +21,6 @@ public class PostContentItemDbMapping : IEntityTypeConfiguration<PostContentItem
 
         builder.Ignore(x => x.Selector);
         builder.Ignore(x => x.GlobalSettings);
+        builder.Ignore(x => x.IsNew);
     }
 }

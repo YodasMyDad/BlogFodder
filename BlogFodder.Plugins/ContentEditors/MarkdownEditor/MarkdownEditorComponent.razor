@@ -49,10 +49,10 @@
     {
         EditorId = $"easymde-{PostContentItem.Id}";
         
-        if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
+        /*if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
         {
             await SetEditorValue(PostContentItem.PluginData);
-        }
+        }*/
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -68,9 +68,9 @@
         return await JsRuntime.InvokeAsync<string>("getEasyMDEValue", EditorId);
     }
 
-    private async Task SetEditorValue(string data)
+    /*private async Task SetEditorValue(string data)
     {
         await JsRuntime.InvokeVoidAsync("setEasyMDEValue", EditorId, data);
-    }
+    }*/
 
 }

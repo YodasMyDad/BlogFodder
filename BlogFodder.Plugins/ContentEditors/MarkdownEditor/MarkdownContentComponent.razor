@@ -1,7 +1,11 @@
-@inject IJSRuntime JS
+@using System.Text.Json
 
-<textarea id="simplemde"></textarea>
+<MudMarkdown Value="@Model" />
 
 @code {
-    
+    [Parameter] public string? Model { get; set; }
+    protected override void OnInitialized()
+    {
+    }
+
 }

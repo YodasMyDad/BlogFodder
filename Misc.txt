@@ -1,9 +1,3 @@
--- Just ignore this file it's somewhere for me to put links of interest
+-- Just ignore this file it's somewhere for me to put links and random things
 
-
--- Translations? Do they work from the Plugins project?
--- How do we share layouts for people to use?
-
-
-// Draggble 
-https://stackoverflow.com/questions/72225905/blazor-drag-drop-list-elements
+Translations? Do they work from the Plugins project?

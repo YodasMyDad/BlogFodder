@@ -4,15 +4,20 @@
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
-<HeadContent>
-    <meta name="main" content="Hello from main">
-</HeadContent>
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <CascadingValue Value="this">
+        @Body
+    </CascadingValue>
+</MudContainer>
 
+@*
 <div class="page">
     <div class="sidebar">
         @HeaderContent
     </div>
 
+    
+    
     <main>
         <article class="content px-4">
             <CascadingValue Value="this">
@@ -21,6 +26,7 @@
         </article>
     </main>
 </div>
+*@
 
 @code {
     RenderFragment HeaderContent => _sideBar?.ChildContent!;

@@ -1,7 +1,7 @@
 @page "/admin/createpost"
+@page "/admin/createpost/{Id:guid}"
 @using BlogFodder.Core.Posts.Models
 @layout AdminLayout
-@inject IDialogService Dialog
 <PageTitle>Create Post</PageTitle>
 
 <EditForm Context="createPostContext" Model="Post">
@@ -9,7 +9,7 @@
     `
     <MudTextField Label="Title of this post" Class="my-2"
                   Counter="1000" MaxLength="1000"
-                  DebounceInterval="500" OnDebounceIntervalElapsed="HandleIntervalElapsed"
+                  DebounceInterval="500" OnDebounceIntervalElapsed="HandleUrlSlug"
                   @bind-Value="Post.Name" For="@(() => Post.Name)" Variant="Variant.Outlined">
     </MudTextField>
 
@@ -45,7 +45,7 @@
             <MudGrid Row="true">
                 <MudItem>
                     <MudSelect Style="width: 250px" T="string" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               ValueChanged="OnContentItemChanged"
+                               ValueChanged="SelectedEditorChanged"
                                Label="Choose your content type" AnchorOrigin="Origin.BottomCenter">
                         @foreach (var editor in AvailableEditorPlugins)
                         {
@@ -58,7 +58,7 @@
                 </MudItem>
             </MudGrid>
 
-            <MudDropContainer T="PostContentItem" @ref="_container" Items="Post.ContentItems" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-wrap flex-grow-1">
+            <MudDropContainer T="PostContentItem" @ref="_dropContainer" Items="Post.ContentItems" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="DropItemUpdated" Class="d-flex flex-wrap flex-grow-1">
                 <ChildContent>
                     <MudGrid Class="mt-8">
                         <MudDropZone T="PostContentItem" Identifier="plugins" AllowReorder="true" Class="flex-grow-1"/>
@@ -70,7 +70,7 @@
                             <MudCardContent>
                                 @*<MudText Typo="Typo.h5" Align="Align.Center">@context.PluginAlias</MudText>
                                    <MudText Typo="Typo.h5" Align="Align.Center">@context.PluginData</MudText>*@
-                                <DynamicComponent Type="@AvailableEditorPlugins[context.PluginAlias].Editor.PreviewComponent"
+                                <DynamicComponent Type="@AvailableEditorPlugins[context.PluginAlias!].Editor?.PreviewComponent"
                                                   Parameters="@(new Dictionary<string, object> {{"PostContentItem", context}})"/>
                             </MudCardContent>
                         </MudCard>

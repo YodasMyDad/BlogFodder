@@ -1,0 +1,30 @@
+@page "/admin/viewposts"
+@using BlogFodder.Core.Posts.Models
+@using BlogFodder.Core.Data
+@using Microsoft.EntityFrameworkCore
+@layout AdminLayout
+<PageTitle>View Posts</PageTitle>
+<MudPaper Elevation="0">
+    <ul>
+        @foreach (var post in Posts)
+        {
+            <li>
+                <a href="/admin/createpost/@post.Id">@post.Name</a>
+            </li>   
+        }
+    </ul>
+</MudPaper>
+
+
+@code {
+    
+    [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
+
+    public List<Post> Posts { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        Posts = DbContext.Posts.AsNoTracking().OrderBy(x => x.DateCreated).ToList();
+    }
+
+}

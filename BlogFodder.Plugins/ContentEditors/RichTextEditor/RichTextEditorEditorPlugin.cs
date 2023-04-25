@@ -14,7 +14,7 @@ public class RichTextEditorEditorPlugin : IEditorPlugin
     // TODO - Icon?
     // TODO - What to pull through in block list? I.e. Short description etc...
     
-    public EditorPlugin Editor { get; set; } = new()
+    public EditorPlugin? Editor { get; set; } = new()
     {
         CssFiles = new List<string>
         {
@@ -35,11 +35,10 @@ public class RichTextEditorEditorPlugin : IEditorPlugin
             "_content/BlogFodder.Plugins/css/styles.css"
         },
         JsFiles = new List<string>(),
-        Component = typeof(RichTextContentComponent),
-        Model = new RichTextContentModel()
+        Component = typeof(RichTextContentComponent)
     };
 
-    public SettingsPlugin Settings { get; set; } = new()
+    public SettingsPlugin? Settings { get; set; } = new()
     {
         CssFiles = new List<string>(),
         JsFiles = new List<string>(),
