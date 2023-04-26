@@ -9,7 +9,7 @@
 </HeadContent>
 
 <MudPaper Elevation="0">
-    <p>If you want to edit these posts, go to the <a href="/admin">Admin Section</a></p>
+    <p>If you want to edit these posts, go to the <a href="/admin" @onclick="@NavigateToAdmin" @onclick:preventDefault>Admin Section</a></p>
     
     @if (Posts.Any())
     {
@@ -36,11 +36,17 @@
 @code
 {
     [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
 
     public List<Post> Posts { get; set; } = new();
 
     protected override void OnInitialized()
     {
         Posts = DbContext.Posts.AsNoTracking().OrderBy(x => x.DateCreated).ToList();
+    }
+    
+    void NavigateToAdmin()
+    {
+        NavigationManager.NavigateTo("/admin", true);
     }
 }

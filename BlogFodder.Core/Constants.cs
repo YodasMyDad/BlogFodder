@@ -13,6 +13,7 @@ public static class Constants
     {
         public const string NavigationSectionCore = "Core";
         public const string NavigationSectionPlugins = "Plugins";
+        public const string BackOfficeUrlDenoter = "/admin";
     }
     
     public static class Files
