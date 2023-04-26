@@ -7,6 +7,7 @@ namespace BlogFodder.Core.Plugins
   /// Represents the assembly cache with the mechanism of getting implementations or instances of a given type.
   /// This is the global access point to the ExtCore type discovering mechanism.
   /// </summary>
+  /// This Extension manager is adapted from code found in https://github.com/ExtCore/ExtCore
   public class ExtensionManager
   {
     private readonly IServiceProvider _serviceProvider;
@@ -89,6 +90,41 @@ namespace BlogFodder.Core.Plugins
 
       return implementations;
     }
+    
+    /// <summary>
+    /// Returns a type from a string name
+    /// </summary>
+    /// <param name="predicate">Optional filter</param>
+    /// <param name="strFullyQualifiedName">Fully qualified name of the component</param>
+    /// <param name="useCaching">Cache the type</param>
+    /// <returns></returns>
+    public Type? GetTypeFromName(Func<Assembly, bool>? predicate, string strFullyQualifiedName, bool useCaching = false)
+    {
+      if (useCaching && AssemblyManager.TypesByName.TryGetValue(strFullyQualifiedName, out var name))
+      {
+        return name;
+      }
+
+      var type = Type.GetType(strFullyQualifiedName);
+      if (type == null)
+      {
+        foreach (var asm in GetAssemblies(predicate))
+        {
+          type = asm?.GetType(strFullyQualifiedName);
+          if (type != null)
+          {
+            break;
+          }
+        }
+      }
+
+      if (useCaching && type != null)
+      {
+        AssemblyManager.TypesByName[strFullyQualifiedName] = type;
+      }
+
+      return type;
+    }
 
     /// <summary>
     /// Gets the new instance of the first implementation of the type specified by the type parameter,
@@ -134,7 +170,7 @@ namespace BlogFodder.Core.Plugins
     /// <returns>The instance of the first found implementation of the given type.</returns>
     public T? GetInstance<T>(Func<Assembly, bool>? predicate, bool useCaching = false)
     {
-      return GetInstances<T>(predicate, useCaching).FirstOrDefault();
+      return GetInstances<T>(predicate, useCaching).FirstOrDefault().Value;
     }
 
     /// <summary>
@@ -152,7 +188,7 @@ namespace BlogFodder.Core.Plugins
     /// <returns>The instance of the first found implementation of the given type.</returns>
     public T? GetInstance<T>(Func<Assembly, bool>? predicate, bool useCaching = false, params object[] args)
     {
-      return GetInstances<T>(predicate, useCaching, args).FirstOrDefault();
+      return GetInstances<T>(predicate, useCaching, args).FirstOrDefault().Value;
     }
 
     /// <summary>
@@ -165,7 +201,7 @@ namespace BlogFodder.Core.Plugins
     /// when the instance(s) of the same type(s) is requested.
     /// </param>
     /// <returns>The instances of the found implementations of the given type.</returns>
-    public IEnumerable<T?> GetInstances<T>(bool useCaching = false)
+    public Dictionary<string, T> GetInstances<T>(bool useCaching = false)
     {
       return GetInstances<T>(null, useCaching, new object[] { });
     }
@@ -181,7 +217,7 @@ namespace BlogFodder.Core.Plugins
     /// </param>
     /// <param name="args">The arguments to be passed to the constructors.</param>
     /// <returns>The instances of the found implementations of the given type.</returns>
-    public IEnumerable<T?> GetInstances<T>(bool useCaching = false, params object[] args)
+    public Dictionary<string, T> GetInstances<T>(bool useCaching = false, params object[] args)
     {
       return GetInstances<T>(null, useCaching, args);
     }
@@ -198,7 +234,7 @@ namespace BlogFodder.Core.Plugins
     /// when the instance(s) of the same type(s) is requested.
     /// </param>
     /// <returns>The instances of the found implementations of the given type.</returns>
-    public IEnumerable<T?> GetInstances<T>(Func<Assembly, bool>? predicate, bool useCaching = false)
+    public Dictionary<string, T> GetInstances<T>(Func<Assembly, bool>? predicate, bool useCaching = false)
     {
       return GetInstances<T>(predicate, useCaching, new object[] { });
     }
@@ -216,9 +252,9 @@ namespace BlogFodder.Core.Plugins
     /// </param>
     /// <param name="args">The arguments to be passed to the constructors.</param>
     /// <returns>The instances of the found implementations of the given type.</returns>
-    public IEnumerable<T?> GetInstances<T>(Func<Assembly, bool>? predicate, bool useCaching = false, params object[] args)
+    public Dictionary<string, T> GetInstances<T>(Func<Assembly, bool>? predicate, bool useCaching = false, params object[] args)
     {
-      var instances = new List<T?>();
+      var instances = new Dictionary<string, T>();
 
       foreach (var implementation in GetImplementations<T>(predicate, useCaching))
       {
@@ -233,7 +269,7 @@ namespace BlogFodder.Core.Plugins
           {
             instance = (T)ActivatorUtilities.CreateInstance(_serviceProvider, implementation);
           }
-          instances.Add(instance);
+          instances.Add(implementation.FullName ?? "WTF", instance);
         }
       }
 

@@ -9,6 +9,7 @@ public static class AssemblyManager
 #pragma warning disable CA2211
     public static ConcurrentDictionary<Type, IEnumerable<Type>> Types = null!;
 #pragma warning restore CA2211
+    public static ConcurrentDictionary<string, Type> TypesByName = null!;
 
     /// <summary>
     /// Gets the cached assemblies that have been set by the SetAssemblies method.

@@ -1,6 +1,9 @@
 ﻿@using System.Text.Json
 
-@((MarkupString)Model)
+@if (Model != null)
+{
+    @((MarkupString)Model)   
+}
 
 @code {
     [Parameter] public string? Model { get; set; }

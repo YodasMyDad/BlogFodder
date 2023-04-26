@@ -40,6 +40,7 @@
       <_ContentIncludedByDefault Remove="Plugins\ContentEditors\TestingEditor\TestingEditorComponent.razor" />
       <_ContentIncludedByDefault Remove="Plugins\_Imports.razor" />
       <_ContentIncludedByDefault Remove="ContentEditors\TestingEditor\TestingEditorComponent.razor" />
+      <_ContentIncludedByDefault Remove="Components\Inputs\FileUpload.razor" />
     </ItemGroup>
 
     <ItemGroup>
@@ -47,6 +48,22 @@
       <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextContentComponent.razor" />
       <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextEditorComponent.razor" />
       <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextSettingsComponent.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Components\Inputs\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Components\Inputs\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="Components\Inputs\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Components\Inputs\**" />
     </ItemGroup>
 
 </Project>

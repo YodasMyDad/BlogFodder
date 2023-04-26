@@ -3,46 +3,53 @@ using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
+using BlogFodder.Core.Providers;
 using BlogFodder.Core.Settings;
+using BlogFodder.Plugins.Authentication.Extensions;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Extensions;
 using Serilog;
+using SixLabors.ImageSharp.Web.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
-// Add services to the container.
 builder.Services.AddRazorPages();
-    /*.ConfigureApplicationPartManager(manager =>
-{
-    foreach (var assembly in ExtensionManager.GetAssemblies(x => x.FullName!.StartsWith("BlogFodder.Plugins", StringComparison.OrdinalIgnoreCase)))
-    {
-        if (assembly != null)
-        {
-            /*var assemblyPart = new AssemblyPart(assembly);
-            var fileProvider = new EmbeddedFileProvider(assembly);
-            manager.ApplicationParts.Add(assemblyPart);           
-            builder.Services.Configure<MvcRazorRuntimeCompilationOptions>(options => options.FileProviders.Add(fileProvider));#1#
-            manager.ApplicationParts.Add(new CompiledRazorAssemblyPart(assembly));                    
-        }
-    }
-});*/
+
+#if DEBUG
+builder.Services.AddServerSideBlazor(c => c.DetailedErrors = true);
+#else
 builder.Services.AddServerSideBlazor();
+#endif
+
 builder.Services.AddDatabase(builder.Configuration);
 
 builder.Services.AddScoped<ExtensionManager>();
+builder.Services.AddScoped<ProviderService>();
 
 builder.Services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(typeof(Constants).Assembly, typeof(Program).Assembly));
 builder.Services.AddMudServicesWithExtensions();
 builder.Services.AddMudMarkdownServices();
 
-builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection("BlogFodder"));
+builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection(Constants.SettingsConfigName));
+
+// TODO - Look into validation below? Need to do similar extension like the external authentication below
+/*// Setup form validation
+services.AddFormValidation(config =>
+    config
+        .AddDataAnnotationsValidation()
+        .AddFluentValidation(typeof(Gab.Core.Startup).Assembly, PluginManager.Assemblies.ToArray())
+);
+*/
+
+builder.Services.AddImageSharp();
+
+// TODO - Need to uncomment when doing login stuff
+//builder.Services.AddExternalAuthenticationProviders(builder.Configuration);
 
 var app = builder.Build();
-
-
 
 var assemblies = app.Services.DiscoverAssemblies();
 

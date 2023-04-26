@@ -23,9 +23,9 @@ public class EditorPluginCssViewComponent : ViewComponent
         var cssFiles = new List<string>();
         foreach (var plugin in plugins)
         {
-            if (plugin?.Editor?.CssFiles != null)
+            if (plugin.Value.Editor?.CssFiles != null)
             {
-                foreach (var cssFile in plugin.Editor.CssFiles)
+                foreach (var cssFile in plugin.Value.Editor.CssFiles)
                 {
                     cssFiles.Add(cssFile);
                 }

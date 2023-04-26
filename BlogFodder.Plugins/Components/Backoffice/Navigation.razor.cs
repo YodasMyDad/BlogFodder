@@ -54,10 +54,10 @@ public partial class Navigation : ComponentBase
             });
         }
         
-        var settingsPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x?.Settings != null).ToList();
+        var settingsPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x.Value.Settings != null).ToList();
         if (settingsPlugins.Any())
         {
-            var foundSettingsLinks = settingsPlugins.Select(x => x?.Settings?.BackOfficeLink).Where(x => x != null);
+            var foundSettingsLinks = settingsPlugins.Select(x => x.Value.Settings?.BackOfficeLink).Where(x => x != null);
             foreach (var settingsLink in foundSettingsLinks)
             {
                 if (settingsLink != null)
@@ -78,11 +78,12 @@ public partial class Navigation : ComponentBase
         {
             foreach (var navigationItem in backOfficeNavigationItems)
             {
-                if (navigationItem != null)
+                if (!navigationItem.Value.Link.Route.IsNullOrWhiteSpace() || 
+                    !navigationItem.Value.Link.Text.IsNullOrWhiteSpace())
                 {
-                    if (NavigationSections.TryGetValue(navigationItem.Link.Section, out var section))
+                    if (NavigationSections.TryGetValue(navigationItem.Value.Link.Section, out var section))
                     {
-                        section.Links.Add(navigationItem.Link);
+                        section.Links.Add(navigationItem.Value.Link);
                     }
                 }
             }

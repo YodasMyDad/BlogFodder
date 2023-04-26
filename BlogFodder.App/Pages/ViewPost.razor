@@ -57,21 +57,17 @@
     {
         if (!Slug.IsNullOrWhiteSpace())
         {
-    // TODO - Again, this all needs to be done in a service or mediatr call
-    // Get this post by slug
+            // TODO - Again, this all needs to be done in a service or mediatr call
+            // Get this post by slug
             var post = DbContext.Posts.Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
             if (post != null)
             {
                 CanBeFound = true;
                 Post = post;
-    // Get all the plugins and put into a dictionary
-                var allPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x?.Content != null);
-                foreach (var plugin in allPlugins)
+                var editorPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true);
+                foreach (var plugin in editorPlugins)
                 {
-                    if (plugin != null)
-                    {
-                        AvailableEditorPlugins.Add(plugin.Alias, plugin);
-                    }
+                    AvailableEditorPlugins.Add(plugin.Value.Alias, plugin.Value);
                 }
             }
         }

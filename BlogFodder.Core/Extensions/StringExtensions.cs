@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
+using BlogFodder.Core.Plugins;
+using Microsoft.AspNetCore.Components;
 
 namespace BlogFodder.Core.Extensions;
 
@@ -89,6 +91,51 @@ public static class StringExtensions
 
         return Enumerable.Empty<Guid>();
     }
+
+    /// <summary>
+    /// Renders a component from it's name
+    /// </summary>
+    /// <param name="componentName">Full namespace name</param>
+    /// <param name="extensionManager"></param>
+    /// <returns></returns>
+    public static RenderFragment ToComponent(this string componentName, ExtensionManager extensionManager, Dictionary<string, string> parameters) => builder =>
+    {
+        var t = extensionManager.GetTypeFromName(null, componentName, true);
+        if (t != null)
+        {
+            builder.OpenComponent(0, t);
+            for (var i = 0; i < parameters.Count; i++)
+            {
+                var item = parameters.ElementAt(i);
+#pragma warning disable ASP0006
+                builder.AddAttribute(i, item.Key, item.Value);
+#pragma warning restore ASP0006
+            }
+            builder.CloseComponent();
+        }
+    };
+    
+    /// <summary>
+    /// Does this string contain any of the strings from the list
+    /// </summary>
+    /// <param name="s"></param>
+    /// <param name="strings"></param>
+    /// <returns></returns>
+    public static bool Contains(this string s, List<string> strings)
+    {
+        if (strings?.Count > 0 && !s.IsNullOrWhiteSpace())
+        {
+            foreach (var str in strings)
+            {
+                if (s.Contains(str, System.StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     
     /// <summary>
     ///     Ensures a string does not end with a character.

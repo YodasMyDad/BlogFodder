@@ -23,9 +23,9 @@ public class EditorPluginJsViewComponent : ViewComponent
         var jsFiles = new List<string>();
         foreach (var plugin in plugins)
         {
-            if (plugin?.Editor?.JsFiles != null)
+            if (plugin.Value.Editor?.JsFiles != null)
             {
-                foreach (var jsFile in plugin.Editor.JsFiles)
+                foreach (var jsFile in plugin.Value.Editor.JsFiles)
                 {
                     jsFiles.Add(jsFile);
                 }

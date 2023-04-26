@@ -32,10 +32,10 @@
 
     protected override void OnInitialized()
     {
-        var pluginEditor = ExtensionManager.GetInstances<IEditorPlugin>(true).FirstOrDefault(x => x?.Alias == ContentItem.PluginAlias);
-        if (pluginEditor != null)
+        var pluginEditor = ExtensionManager.GetInstances<IEditorPlugin>(true).FirstOrDefault(x => x.Value.Alias == ContentItem.PluginAlias);
+        if (pluginEditor.Value != null)
         {
-            Plugin = pluginEditor;
+            Plugin = pluginEditor.Value;
         }
     }
 }

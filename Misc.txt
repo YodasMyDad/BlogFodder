@@ -1,3 +1,18 @@
 -- Just ignore this file it's somewhere for me to put links and random things
 
 Translations? Do they work from the Plugins project?
+
+builder.Services.AddRazorPages().ConfigureApplicationPartManager(manager =>
+{
+    foreach (var assembly in ExtensionManager.GetAssemblies(x => x.FullName!.StartsWith("BlogFodder.Plugins", StringComparison.OrdinalIgnoreCase)))
+    {
+        if (assembly != null)
+        {
+            /*var assemblyPart = new AssemblyPart(assembly);
+            var fileProvider = new EmbeddedFileProvider(assembly);
+            manager.ApplicationParts.Add(assemblyPart);           
+            builder.Services.Configure<MvcRazorRuntimeCompilationOptions>(options => options.FileProviders.Add(fileProvider));#1#
+            manager.ApplicationParts.Add(new CompiledRazorAssemblyPart(assembly));                    
+        }
+    }
+});

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Utilities;
 using Newtonsoft.Json;
+using NuGet.Packaging;
 
 namespace BlogFodder.App.Pages.Admin;
 
@@ -55,13 +56,10 @@ public partial class CreatePost : ComponentBase
         }
         
         // Get the Aliases of all Editor plugins
-        var allPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x?.Editor != null);
-        foreach (var plugin in allPlugins)
+        var editorPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x.Value.Editor != null);
+        foreach (var plugin in editorPlugins)
         {
-            if (plugin != null)
-            {
-                AvailableEditorPlugins.Add(plugin.Alias, plugin);
-            }
+            AvailableEditorPlugins.Add(plugin.Value.Alias, plugin.Value);
         }
     }
     
