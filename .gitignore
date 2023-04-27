@@ -4,3 +4,5 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 /BlogFodder.App/Logs/*
+/BlogFodder.App/node_modules/*
+/.idea/.idea.BlogFodder/.idea/*
