@@ -48,7 +48,6 @@ public class EditorPluginJsViewComponent : ViewComponent
         }
         else
         {
-            
             foreach (var plugin in plugins)
             {
                 if (plugin.Value.Content?.JsFiles != null)

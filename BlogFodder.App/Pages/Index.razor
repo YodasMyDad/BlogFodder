@@ -1,34 +1,25 @@
 ﻿@page "/"
 @using BlogFodder.Core.Data
+@using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Posts.Models
+@using BlogFodder.Core.Settings
+@using BlogFodder.Core.Shared.Models
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
 
 <PageTitle>BlogFodder</PageTitle>
 <HeadContent>
     <meta name="description" content="Get this data from the DB or appSettings?">
 </HeadContent>
 
+
 <p>If you want to edit these posts, go to the <a href="/admin" @onclick="@NavigateToAdmin" @onclick:preventDefault>Admin Section</a></p>
 
-@if (Posts.Any())
+
+@ExtensionManager.CreateComponent(PostListComponent, new Dictionary<string, object>
 {
-    <ul style="padding: 15px 0;">
-        @foreach (var post in Posts)
-        {
-            <li style="padding: 15px 0;">
-                <a href="/post/@post.Url">
-                    @post.Name <br/>
-                    @post.Excerpt
-                </a>
-                <hr/>
-            </li>
-        }
-    </ul>
-}
-else
-{
-    <h2>Doh. You haven't created any posts yet</h2>
-}
+    {"Posts", Posts}
+})
 
 
 @code
@@ -38,12 +29,27 @@ else
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
+    
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+    
+    [Inject]
+    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
 
-    public List<Post> Posts { get; set; } = new();
+    public PaginatedList<Post> Posts { get; set; } = new();
+
+    private string PostListComponent { get; set; } = ""; 
 
     protected override void OnInitialized()
     {
-        Posts = DbContext.Posts.AsNoTracking().OrderBy(x => x.DateCreated).ToList();
+        //TODO - This will be via a service/Mediatr
+        var count = DbContext.Posts.AsNoTracking().Count();
+        Posts = new PaginatedList<Post>(DbContext.Posts.AsNoTracking().OrderBy(x => x.DateCreated), count,1,18);
+    }
+
+    protected override void OnParametersSet()
+    {
+        PostListComponent = Settings.Value.FrontEnd.PostListComponent;
     }
 
     void NavigateToAdmin()

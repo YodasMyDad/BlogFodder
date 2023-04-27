@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+
 namespace BlogFodder.Core.Settings;
 
 public class BlogFodderSettings
@@ -6,10 +8,22 @@ public class BlogFodderSettings
     public string? UploadFolderName { get; set; }
     public long MaxUploadFileSizeInBytes { get; set; }
     public int MaxImageSizeInPixels { get; set; }
+    public string? Favicon { get; set; }
     public List<string> AllowedFileTypes { get; set; } = new();
     public BackOfficeSettings BackOffice { get; set; } = new();
     public EmailSettings Email { get; set; } = new();
     public PluginSettings Plugins { get; set; } = new();
+    public FrontEndSettings FrontEnd { get; set; } = new();
+}
+
+public class FrontEndSettings
+{
+    public string? HeaderComponent { get; set; }
+    public string? FooterComponent { get; set; }
+    public string? PostListComponent { get; set; }
+    public string? PostListItemComponent { get; set; }
+    public List<string> Styles { get; set; } = new();
+    public List<string> Scripts { get; set; } = new();
 }
 
 public class PluginSettings

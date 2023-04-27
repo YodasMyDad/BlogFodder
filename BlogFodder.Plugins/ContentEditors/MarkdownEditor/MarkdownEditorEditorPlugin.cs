@@ -26,7 +26,7 @@ public class MarkdownEditorEditorPlugin : IEditorPlugin
         PreviewComponent = typeof(MarkdownEditorPreview)
     };
 
-    public ContentPlugin Content { get; set; } = new()
+    public EditorContentPlugin Content { get; set; } = new()
     {
         Component = typeof(MarkdownContentComponent),
         CssFiles = new List<string>(),

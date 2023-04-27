@@ -1,17 +1,28 @@
 ﻿@page "/"
+@using BlogFodder.Core.Settings
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @namespace BlogFodder.App.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
+@inject IOptionsSnapshot<BlogFodderSettings> Settings;
+@{
+    var mainSettings = Settings.Value;
+}
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <base href="~/"/>
-    <link rel="icon" type="image/png" href="favicon.png"/>
+    <link rel="icon" type="image/png" href="@mainSettings.Favicon"/>
+    @foreach (var cssFile in mainSettings.FrontEnd.Styles)
+    {
+        <link rel="stylesheet" href="@cssFile" asp-append-version="true"/>
+    }
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
     @(await Component.InvokeAsync("EditorPluginCss"))
+    
 </head>
 <body>
 <component type="typeof(App)" render-mode="ServerPrerendered"/>
@@ -29,6 +40,10 @@
 
 
 <script src="_framework/blazor.server.js"></script>
+@foreach (var cssFile in mainSettings.FrontEnd.Scripts)
+{
+    <link rel="stylesheet" href="@cssFile" asp-append-version="true"/>
+}
 @await Component.InvokeAsync("EditorPluginJs")
 </body>
 </html>

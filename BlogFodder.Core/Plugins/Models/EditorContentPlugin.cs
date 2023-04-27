@@ -2,7 +2,7 @@
 
 namespace BlogFodder.Core.Plugins.Models;
 
-public class ContentPlugin
+public class EditorContentPlugin
 {
     public Type? Component { get; set; }
     public IPluginSettings? Model { get; set; }

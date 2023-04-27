@@ -33,13 +33,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\dsfsadfsdafasd.css" />
       <_ContentIncludedByDefault Remove="Plugins\ContentEditors\RichTextEditor\RichTextContentComponent.razor" />
       <_ContentIncludedByDefault Remove="Plugins\ContentEditors\RichTextEditor\RichTextEditorComponent.razor" />
       <_ContentIncludedByDefault Remove="Plugins\ContentEditors\RichTextEditor\RichTextSettingsComponent.razor" />
       <_ContentIncludedByDefault Remove="Plugins\ContentEditors\TestingEditor\TestingEditorComponent.razor" />
       <_ContentIncludedByDefault Remove="Plugins\_Imports.razor" />
-      <_ContentIncludedByDefault Remove="ContentEditors\TestingEditor\TestingEditorComponent.razor" />
       <_ContentIncludedByDefault Remove="Components\Inputs\FileUpload.razor" />
     </ItemGroup>
 

@@ -29,7 +29,7 @@ public class RichTextEditorEditorPlugin : IEditorPlugin
         Icon = Icons.Material.Filled.AlignHorizontalLeft
     };
 
-    public ContentPlugin Content { get; set; } = new()
+    public EditorContentPlugin Content { get; set; } = new()
     {
         CssFiles = new List<string>        {
             "_content/BlogFodder.Plugins/css/styles.css"

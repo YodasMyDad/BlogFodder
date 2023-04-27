@@ -48,7 +48,6 @@ public class EditorPluginCssViewComponent : ViewComponent
         }
         else
         {
-            cssFiles.Add("/css/styles.css");
             foreach (var plugin in plugins)
             {
                 if (plugin.Value.Content?.CssFiles != null)

@@ -24,5 +24,6 @@ public static class AssemblyManager
     {
         _assemblies = assems;
         Types = new ConcurrentDictionary<Type, IEnumerable<Type>>();
+        TypesByName = new ConcurrentDictionary<string, Type>();
     }
 }

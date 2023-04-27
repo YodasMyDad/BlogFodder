@@ -20,17 +20,17 @@ public interface IEditorPlugin
     string Description { get; }
 
     /// <summary>
-    /// The plugin for the editor
+    /// The plugin for the editor that the user will use to edit and save data
     /// </summary>
     EditorPlugin? Editor { get; set; }
 
     /// <summary>
-    /// The plugin for the content
+    /// The plugin to display content of the editor on the front end
     /// </summary>
-    ContentPlugin Content { get; set; }
+    EditorContentPlugin Content { get; set; }
     
     /// <summary>
-    /// The plugin for the settings
+    /// The plugin for the global settings, so use this if you have configurable settings needed for each instance of the editor
     /// </summary>
     SettingsPlugin? Settings { get; set; }
 }
