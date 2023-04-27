@@ -9,33 +9,47 @@
 <PageTitle>@Post.PageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Post.MetaDescription">
+    @*
+    //TODO - Need to add Schema and open graph tags etc... including noindex
+    *@
 </HeadContent>
-<MudPaper Elevation="0">
 
-    @if (!CanBeFound)
-    {
-        <h1>Unable to find the post by the url</h1>
-        <p>Need to make this return a 404!</p>
-    }
-    else
-    {
-        <p>
-            <a href="/">Back to home</a>
-        </p>
-        <h1>@Post.Name</h1>
-        <p>
-            <small>@Post.DateCreated.Humanize()</small>
-        </p>
-        foreach (var postContentItem in Post.ContentItems)
-        {
-            <div class="postContentItem">
-                <DynamicComponent Type="@AvailableEditorPlugins[postContentItem.PluginAlias!].Content.Component"
-                                  Parameters="@(new Dictionary<string, object> {{"Model", postContentItem.PluginData ?? ""}})"/>
+
+<div class="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-4">
+    <div class="lg:col-span-3 lg:col-start-1">
+        <div>
+            <div class="mx-auto max-w-prose text-lg">
+                <p class="block text-center text-lg font-semibold text-indigo-600">Last Updated: @Post.DateUpdated.Humanize()</p>
+                <h1 class="mt-2 block text-center text-3xl font-bold leading-8 tracking-tight text-gray-900 sm:text-4xl">
+                    @Post.Name
+                </h1>
             </div>
-        }
-    }
-
-</MudPaper>
+            <div class="prose prose-lg prose-indigo mx-auto mt-6 text-gray-500">
+                @if (!CanBeFound)
+                {
+                    <h1>Unable to find the post by the url</h1>
+                    <p>Need to make this return a 404!</p>
+                }
+                else
+                {
+                    <p>
+                        <a href="/">Back to home</a>
+                    </p>
+                    foreach (var postContentItem in Post.ContentItems)
+                    {
+                        <div class="postContentItem">
+                            <DynamicComponent Type="@AvailableEditorPlugins[postContentItem.PluginAlias!].Content.Component"
+                                              Parameters="@(new Dictionary<string, object> {{"Model", postContentItem.PluginData ?? ""}})"/>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="lg:col-span-1 lg:col-start-4">
+        This is column two, Need to add plugins here
+    </div>
+</div>
 
 @code {
 
@@ -57,8 +71,8 @@
     {
         if (!Slug.IsNullOrWhiteSpace())
         {
-            // TODO - Again, this all needs to be done in a service or mediatr call
-            // Get this post by slug
+    // TODO - Again, this all needs to be done in a service or mediatr call
+    // Get this post by slug
             var post = DbContext.Posts.Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
             if (post != null)
             {

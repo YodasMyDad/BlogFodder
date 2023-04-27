@@ -3,13 +3,13 @@
 @using BlogFodder.Core.Plugins
 @inherits LayoutComponentBase
 
-@ExtensionManager.CreateComponent(HeaderComponent)
+@ExtensionManager.CreateComponent(HeaderComponent!)
 
 <CascadingValue Value="this">
     @Body
 </CascadingValue>
 
-@ExtensionManager.CreateComponent(FooterComponent)
+@ExtensionManager.CreateComponent(FooterComponent!)
 
 @code {
 
@@ -19,13 +19,13 @@
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
 
-    private string HeaderComponent { get; set; } = "";
-    private string FooterComponent { get; set; } = "";
+    private string? HeaderComponent { get; set; } = "";
+    private string? FooterComponent { get; set; } = "";
 
     protected override void OnParametersSet()
     {
         HeaderComponent = Settings.Value.FrontEnd.HeaderComponent;
         FooterComponent = Settings.Value.FrontEnd.FooterComponent;
     }
-
+    
 }
