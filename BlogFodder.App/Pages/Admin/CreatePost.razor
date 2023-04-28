@@ -4,7 +4,7 @@
 @layout AdminLayout
 <PageTitle>Create Post</PageTitle>
 
-<EditForm Context="createPostContext" Model="Post">
+<EditForm Context="createPostContext"  Model="Post">
     <FluentValidationValidator/>
     <MudTextField Label="Title of this post" Class="my-2"
                   Counter="1000" MaxLength="1000"
@@ -22,17 +22,7 @@
                 </MudItem>
                 <MudItem xs="12">
                     <MudField Label="Featured Image">
-                        <MudFileUpload T="IBrowserFile" FilesChanged="SetFeaturedImage">
-                            <ButtonTemplate>
-                                <MudButton HtmlTag="label"
-                                           Variant="Variant.Filled"
-                                           Color="Color.Primary"
-                                           StartIcon="@Icons.Material.Filled.CloudUpload"
-                                           for="@context">
-                                    Choose Image
-                                </MudButton>
-                            </ButtonTemplate>
-                        </MudFileUpload>
+                        <BlogFodder.Plugins.Components.Form.FileUpload @bind-Value="FeaturedImage" ImagesOnly="true" MaxAllowedFiles="1" />
                     </MudField>
                 </MudItem>
             </MudGrid>
@@ -43,7 +33,7 @@
 
             <MudGrid Row="true">
                 <MudItem>
-                    <MudSelect Style="width: 250px" T="string" Variant="Variant.Outlined" Margin="Margin.Dense"
+                    <MudSelect Style="width: 400px" T="string" Variant="Variant.Outlined" Margin="Margin.Dense"
                                ValueChanged="SelectedEditorChanged"
                                Label="Choose your content type" AnchorOrigin="Origin.BottomCenter">
                         @foreach (var editor in AvailableEditorPlugins)
@@ -67,8 +57,6 @@
                     <MudItem xs="12" Class="mb-8">
                         <MudCard @onclick="() => ShowEditor(context)" Elevation="2" Class="rounded-lg pb-4">
                             <MudCardContent>
-                                @*<MudText Typo="Typo.h5" Align="Align.Center">@context.PluginAlias</MudText>
-                                   <MudText Typo="Typo.h5" Align="Align.Center">@context.PluginData</MudText>*@
                                 <DynamicComponent Type="@AvailableEditorPlugins[context.PluginAlias!].Editor?.PreviewComponent"
                                                   Parameters="@(new Dictionary<string, object> {{"PostContentItem", context}})"/>
                             </MudCardContent>
@@ -92,17 +80,7 @@
                 </MudItem>
                 <MudItem xs="12">
                     <MudField Label="Social Image">
-                        <MudFileUpload T="IBrowserFile" FilesChanged="SetSocialImage">
-                            <ButtonTemplate>
-                                <MudButton HtmlTag="label"
-                                           Variant="Variant.Filled"
-                                           Color="Color.Primary"
-                                           StartIcon="@Icons.Material.Filled.CloudUpload"
-                                           for="@context">
-                                    Choose Image
-                                </MudButton>
-                            </ButtonTemplate>
-                        </MudFileUpload>
+                        <BlogFodder.Plugins.Components.Form.FileUpload @bind-Value="SocialImage" ImagesOnly="true" MaxAllowedFiles="1" />
                     </MudField>
                 </MudItem>
                 <MudItem xs="12">

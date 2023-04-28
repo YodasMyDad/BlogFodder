@@ -1,4 +1,5 @@
 ﻿using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Media;
 
 namespace BlogFodder.Core.Posts.Models;
 
@@ -12,8 +13,9 @@ public class Post
     public string? Excerpt { get; set; } 
     
     public int AuthorId { get; set; }
-    
-    public string? FeaturedImage { get; set; }
+
+    public Guid? FeaturedImageId { get; set; }
+    public virtual BlogFodderFile? FeaturedImage { get; set; }
     
     // TODO - Tags, Categories?
     
@@ -21,7 +23,9 @@ public class Post
     public string? PageTitle { get; set; }
     public string? MetaDescription { get; set; }
     public bool NoIndex { get; set; }
-    public string? SocialImage { get; set; }
+    
+    public Guid? SocialImageId { get; set; }
+    public virtual BlogFodderFile? SocialImage { get; set; }
     public string? Url { get; set; }
     
     public Dictionary<string, string> ExtendedData { get; set; } = new();

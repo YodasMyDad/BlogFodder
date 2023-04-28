@@ -3,6 +3,7 @@ using System;
 using BlogFodder.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    partial class BlogFodderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230428130212_BlogFodderFile")]
+    partial class BlogFodderFile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -282,7 +285,8 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
-                    b.Property<Guid?>("FeaturedImageId")
+                    b.Property<string>("FeaturedImage")
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MetaDescription")
@@ -300,7 +304,8 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("SocialImageId")
+                    b.Property<string>("SocialImage")
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Url")
@@ -308,10 +313,6 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FeaturedImageId");
-
-                    b.HasIndex("SocialImageId");
 
                     b.ToTable("BlogFodderPosts", (string)null);
                 });
@@ -394,21 +395,6 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("BlogFodder.Core.Posts.Models.Post", b =>
-                {
-                    b.HasOne("BlogFodder.Core.Media.BlogFodderFile", "FeaturedImage")
-                        .WithMany()
-                        .HasForeignKey("FeaturedImageId");
-
-                    b.HasOne("BlogFodder.Core.Media.BlogFodderFile", "SocialImage")
-                        .WithMany()
-                        .HasForeignKey("SocialImageId");
-
-                    b.Navigation("FeaturedImage");
-
-                    b.Navigation("SocialImage");
                 });
 
             modelBuilder.Entity("BlogFodder.Core.Posts.Models.PostContentItem", b =>

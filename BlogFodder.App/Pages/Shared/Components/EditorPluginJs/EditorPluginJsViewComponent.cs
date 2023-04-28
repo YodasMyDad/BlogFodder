@@ -1,7 +1,9 @@
 using BlogFodder.Core;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
+using BlogFodder.Core.Settings;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace BlogFodder.App.Pages.Shared.Components.EditorPluginJs;
 
@@ -12,10 +14,11 @@ namespace BlogFodder.App.Pages.Shared.Components.EditorPluginJs;
 public class EditorPluginJsViewComponent : ViewComponent
 {
     private readonly ExtensionManager _extensionManager;
-
-    public EditorPluginJsViewComponent(ExtensionManager extensionManager)
+    private readonly BlogFodderSettings _optionsSnapshot;
+    public EditorPluginJsViewComponent(ExtensionManager extensionManager, IOptionsSnapshot<BlogFodderSettings> optionsSnapshot)
     {
         _extensionManager = extensionManager;
+        _optionsSnapshot = optionsSnapshot.Value;
     }
 
     public IViewComponentResult Invoke()
@@ -48,6 +51,7 @@ public class EditorPluginJsViewComponent : ViewComponent
         }
         else
         {
+            jsFiles.AddRange(_optionsSnapshot.FrontEnd.Scripts);
             foreach (var plugin in plugins)
             {
                 if (plugin.Value.Content?.JsFiles != null)

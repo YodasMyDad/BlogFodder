@@ -4,6 +4,7 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Posts.Models;
+using BlogFodder.Core.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ public partial class CreatePost : ComponentBase
     [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] public IDialogService Dialog { get; set; } = default!;
+    [Inject] public ProviderService ProviderService { get; set; } = default!;
 
     [Parameter] public Guid? Id { get; set; }
     
@@ -33,6 +35,9 @@ public partial class CreatePost : ComponentBase
     private bool IsUpdate { get; set; }
 
     private const string DefaultDropZoneSelector = "plugins";
+    
+    private IBrowserFile? FeaturedImage { get; set; }
+    private IBrowserFile? SocialImage { get; set; }
 
     protected override void OnInitialized()
     {
@@ -144,21 +149,7 @@ public partial class CreatePost : ComponentBase
             RefreshDopList();
         }
     }
-
-    public IBrowserFile? FeaturedImage { get; set; }
-    private void SetFeaturedImage(IBrowserFile file)
-    {
-        FeaturedImage = file;
-        //TODO upload the files to the server
-    }
     
-    public IBrowserFile? SocialImage { get; set; }
-    private void SetSocialImage(IBrowserFile file)
-    {
-        SocialImage = file;
-        //TODO upload the files to the server
-    }
-
     /// <summary>
     /// Creates the Url for the post
     /// </summary>
@@ -187,6 +178,60 @@ public partial class CreatePost : ComponentBase
         Post.DateCreated = DateCreated!.Value;
         Post.DateUpdated = DateUpdated!.Value;
         
+        // Profile Image - Need to save image and then create a gabfile
+        if (FeaturedImage != null)
+        {
+            // Save the file, create a gab file and attach it to the user
+            if (ProviderService.StorageProvider != null)
+            {
+                var fileSaveResult = await ProviderService.StorageProvider.SaveFile(FeaturedImage, Post.Id.ToString()).ConfigureAwait(false);
+                if (!fileSaveResult.Success)
+                {
+                    foreach (var errorMessage in fileSaveResult.ErrorMessages)
+                    {
+                        Snackbar.Add(errorMessage, Severity.Error);
+                    }
+                }
+
+                // Create the gabfile
+                var file = await ProviderService.StorageProvider.ToBlogFodderFile(fileSaveResult).ConfigureAwait(false);
+                
+                // Save the file first
+                DbContext.Files.Add(file);
+                //await DbContext.SaveChangesAsync().ConfigureAwait(false);
+
+                // Set the file to the user
+                Post.FeaturedImage = file;
+            }
+        }
+        
+        if (SocialImage != null)
+        {
+            // Save the file, create a gab file and attach it to the user
+            if (ProviderService.StorageProvider != null)
+            {
+                var fileSaveResult = await ProviderService.StorageProvider.SaveFile(SocialImage, Post.Id.ToString()).ConfigureAwait(false);
+                if (!fileSaveResult.Success)
+                {
+                    foreach (var errorMessage in fileSaveResult.ErrorMessages)
+                    {
+                        Snackbar.Add(errorMessage, Severity.Error);
+                    }
+                }
+
+                // Create the gabfile
+                var file = await ProviderService.StorageProvider.ToBlogFodderFile(fileSaveResult).ConfigureAwait(false);
+                
+                // Save the file first
+                DbContext.Files.Add(file);
+                //await DbContext.SaveChangesAsync().ConfigureAwait(false);
+
+                // Set the file to the user
+                Post.SocialImage = file;
+            }
+        }
+
+
         // TODO - This needs to be moved to a service or better just use Mediatr
         if (IsUpdate)
         {
@@ -206,5 +251,10 @@ public partial class CreatePost : ComponentBase
         await DbContext.SaveChangesAsync();
         var correctText = IsUpdate ? "Updated" : "Created";
         Snackbar.Add("Post " + correctText, Severity.Success);
+
+        if (!IsUpdate)
+        {
+            IsUpdate = true;
+        }
     }
 }

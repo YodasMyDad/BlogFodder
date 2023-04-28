@@ -16,11 +16,11 @@ public class PostDbMapping : IEntityTypeConfiguration<Post>
         builder.Property(x => x.DateCreated).IsRequired();
         builder.Property(x => x.DateUpdated).IsRequired();
         builder.Property(x => x.Excerpt).HasMaxLength(3000);
-        builder.Property(x => x.FeaturedImage).HasMaxLength(1000);
+        builder.HasOne(x => x.FeaturedImage);
+        builder.HasOne(x => x.SocialImage);
         
         builder.Property(x => x.PageTitle).HasMaxLength(100);
         builder.Property(x => x.MetaDescription).HasMaxLength(350);
-        builder.Property(x => x.SocialImage).HasMaxLength(1000);
         builder.Property(x => x.Url).HasMaxLength(500);
         builder.Property(x => x.ExtendedData).ToJsonConversion(4000);
     }

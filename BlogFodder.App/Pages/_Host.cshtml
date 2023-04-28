@@ -16,10 +16,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <base href="~/"/>
     <link rel="icon" type="image/png" href="@mainSettings.Favicon"/>
-    @foreach (var cssFile in mainSettings.FrontEnd.Styles)
-    {
-        <link rel="stylesheet" href="@cssFile" asp-append-version="true"/>
-    }
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
     @(await Component.InvokeAsync("EditorPluginCss"))
     
@@ -40,10 +36,6 @@
 
 
 <script src="_framework/blazor.server.js"></script>
-@foreach (var cssFile in mainSettings.FrontEnd.Scripts)
-{
-    <link rel="stylesheet" href="@cssFile" asp-append-version="true"/>
-}
 @await Component.InvokeAsync("EditorPluginJs")
 </body>
 </html>

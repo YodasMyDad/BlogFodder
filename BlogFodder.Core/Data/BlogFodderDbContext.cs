@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using BlogFodder.Core.Identity.Models;
+using BlogFodder.Core.Media;
 using BlogFodder.Core.Posts.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ public class BlogFodderDbContext : IdentityDbContext<User, Role, Guid, UserClaim
 
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<PostContentItem> PostContentItems => Set<PostContentItem>();
+    public DbSet<BlogFodderFile> Files => Set<BlogFodderFile>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

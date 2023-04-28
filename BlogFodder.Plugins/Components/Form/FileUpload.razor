@@ -1,0 +1,74 @@
+<div class="space-y-2 mt-2 border-2 border-gray-300 border-dashed rounded-md px-6 pt-5 pb-6 flex flex-col sm:flex-row sm:justify-between">
+    <div class="space-y-1 text-center">
+        <div class="relative space-y-1 cursor-pointer">
+            @if (MaxAllowedFiles > 1)
+            {
+                <InputFile OnChange="OnChange" id="@InputId" class="cursor-pointer absolute w-full h-full inset-0 opacity-0 z-10" multiple/>
+            }
+            else
+            {
+                <InputFile OnChange="OnChange" id="@InputId" class="cursor-pointer absolute w-full h-full inset-0 opacity-0 z-10"/>
+            }
+            <ImagePlusSvg Classes="mx-auto h-12 w-12 text-gray-400"/>
+            <div class="text-sm text-center text-gray-600">
+                <label for="@InputId" class="font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                    @(MaxAllowedFiles > 1 ? "Upload files" : "Upload a file")
+                </label>
+            </div>
+            <p class="text-xs text-gray-500">
+                @if (ImagesOnly)
+                {
+                    <text>Image files only</text>
+                }
+                else
+                {
+                    @string.Join(", ", Settings.Value.AllowedFileTypes)
+                }
+            </p>
+        </div>
+    </div>
+    @if (ShowSpinner)
+    {
+        <div class="flex items-center justify-center">
+            <AnimatedSpinner Classes="h-8 w-8 text-indigo-400"/>
+        </div>
+    }
+
+    @if (!ShowSpinner)
+    {
+        <div class="flex flex-col space-y-2">
+            @if (MaxAllowedFiles > 1 && Values != null)
+            {
+                @foreach (var file in Values)
+                {
+                    <div class="flex justify-between rounded-md items-center py-0.5 pl-2.5 pr-1 text-sm font-medium uppercase bg-indigo-100 text-indigo-700">
+                        <div class="overflow-hidden">
+                            @file.Name
+                        </div>
+                        <div title="Remove Item"
+                             @onclick="@(() => RemoveValue(file))"
+                             class="cursor-pointer flex-shrink-0 ml-1 mb-0.5 h-5 w-5 rounded-full flex items-center justify-center text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500 focus:outline-none focus:bg-indigo-500 focus:text-white">
+                            <span class="sr-only">Remove Item</span>
+                            <CrossSvg Classes="h-3 w-3"/>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (MaxAllowedFiles <= 1 && Value != null)
+            {
+                <div class="flex justify-between rounded-md items-center py-0.5 pl-2.5 pr-1 text-sm font-medium uppercase bg-indigo-100 text-indigo-700">
+                    <div class="overflow-hidden">
+                        @Value.Name
+                    </div>
+                    <div title="Remove Item"
+                         @onclick="@(() => RemoveValue(Value))"
+                         class="cursor-pointer flex-shrink-0 ml-1 mb-0.5 h-5 w-5 rounded-full flex items-center justify-center text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500 focus:outline-none focus:bg-indigo-500 focus:text-white">
+                        <span class="sr-only">Remove Item</span>
+                        <CrossSvg Classes="h-3 w-3"/>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

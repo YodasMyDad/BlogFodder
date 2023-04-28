@@ -10,9 +10,9 @@ public interface IStorageProvider
     /// Saves the file
     /// </summary>
     /// <param name="browserFile"></param>
-    /// <param name="contentidentifier"></param>
+    /// <param name="contentIdentifier"></param>
     /// <param name="overwrite"></param>
-    public Task<FileSaveResult> SaveFile(IBrowserFile browserFile, string contentidentifier, bool overwrite = true);
+    public Task<FileSaveResult> SaveFile(IBrowserFile browserFile, string contentIdentifier, bool overwrite = true);
 
 
     /// <summary>

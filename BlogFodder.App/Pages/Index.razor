@@ -49,7 +49,7 @@
 
     protected override void OnParametersSet()
     {
-        PostListComponent = Settings.Value.FrontEnd.PostListComponent;
+        PostListComponent = Settings.Value.FrontEnd.PostListComponent!;
     }
 
     void NavigateToAdmin()
