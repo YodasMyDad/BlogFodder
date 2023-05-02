@@ -4,6 +4,7 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Posts.Models;
+using BlogFodder.Core.Posts.Validation;
 using BlogFodder.Core.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -11,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Utilities;
 using Newtonsoft.Json;
-using NuGet.Packaging;
 
 namespace BlogFodder.App.Pages.Admin;
 
@@ -24,7 +24,6 @@ public partial class CreatePost : ComponentBase
     [Inject] public ProviderService ProviderService { get; set; } = default!;
 
     [Parameter] public Guid? Id { get; set; }
-    
     private Post Post { get; set; } = new();
     private DateTime? DateCreated { get; set; } = DateTime.Now;
     private DateTime? DateUpdated { get; set; } = DateTime.Now;
@@ -33,11 +32,11 @@ public partial class CreatePost : ComponentBase
     private string? SelectedEditorAlias { get; set; }
     private SlugHelper SlugHelper { get; set; } = new();
     private bool IsUpdate { get; set; }
-
+    public MudForm Form { get; set; } = default!;
     private const string DefaultDropZoneSelector = "plugins";
-    
     private IBrowserFile? FeaturedImage { get; set; }
     private IBrowserFile? SocialImage { get; set; }
+    public PostValidator PostValidator { get; set; } = new();
 
     protected override void OnInitialized()
     {
@@ -49,17 +48,17 @@ public partial class CreatePost : ComponentBase
             if (dbPost != null)
             {
                 Post = dbPost;
-                
+
                 // This is shite, need to look at a better way
                 foreach (var postContentItem in Post.ContentItems)
                 {
                     postContentItem.Selector = DefaultDropZoneSelector;
                 }
-                
+
                 IsUpdate = true;
             }
         }
-        
+
         // Get the Aliases of all Editor plugins
         var editorPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x.Value.Editor != null);
         foreach (var plugin in editorPlugins)
@@ -67,7 +66,7 @@ public partial class CreatePost : ComponentBase
             AvailableEditorPlugins.Add(plugin.Value.Alias, plugin.Value);
         }
     }
-    
+
     /// <summary>
     /// Refreshes the dop list to show new data
     /// </summary>
@@ -89,7 +88,7 @@ public partial class CreatePost : ComponentBase
         // Add in 
         SelectedEditorAlias = alias;
     }
-    
+
     /// <summary>
     /// Fires when the order is updated on the drop item list
     /// </summary>
@@ -112,7 +111,7 @@ public partial class CreatePost : ComponentBase
             {
                 PluginAlias = plugin.Alias,
                 Selector = DefaultDropZoneSelector,
-                SortOrder = Post.ContentItems.Count+1,
+                SortOrder = Post.ContentItems.Count + 1,
                 PostId = Post.Id,
                 IsNew = true
             };
@@ -121,7 +120,7 @@ public partial class CreatePost : ComponentBase
             {
                 postContentItem.GlobalSettings = JsonConvert.SerializeObject(plugin.Settings.Model);
             }
-            
+
             Post.ContentItems.Add(postContentItem);
             RefreshDopList();
         }
@@ -138,7 +137,8 @@ public partial class CreatePost : ComponentBase
             {"ContentItem", contentItem}
         };
 
-        var dialog = await Dialog.ShowAsync<ContentItemEditor>("", parameters, new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+        var dialog = await Dialog.ShowAsync<ContentItemEditor>("", parameters,
+            new DialogOptions {MaxWidth = MaxWidth.Medium, FullWidth = true});
         var result = await dialog.Result;
 
         if (!result.Canceled)
@@ -149,112 +149,118 @@ public partial class CreatePost : ComponentBase
             RefreshDopList();
         }
     }
-    
-    /// <summary>
-    /// Creates the Url for the post
-    /// </summary>
-    /// <param name="debouncedText"></param>
-    private void HandleUrlSlug(string debouncedText)
-    {
-        // Only creates the slug for a new post
-        // They can manually change it themselves for an edit
-        if (!IsUpdate)
-        {
-            Post.Url = SlugHelper.GenerateSlug(debouncedText);   
-        }
-    }
-    
+
     /// <summary>
     /// Submits the form and saves the post
     /// </summary>
-    /// <param name="formContext"></param>
-    private async Task SubmitForm(EditContext formContext)
+    private async Task SubmitForm()
     {
-        // TODO - Need to look at validation!
-        /*var formIsValid = formContext.Validate();
-        if (formIsValid == false)
-            return;*/
-        // Have to set these as the pickers won't allowed a non null Date!?
-        Post.DateCreated = DateCreated!.Value;
-        Post.DateUpdated = DateUpdated!.Value;
-        
-        // Profile Image - Need to save image and then create a gabfile
-        if (FeaturedImage != null)
+        await Form.Validate();
+        if (Form.IsValid)
         {
-            // Save the file, create a gab file and attach it to the user
-            if (ProviderService.StorageProvider != null)
+            // Set any empty values like the Url
+            if (Post.Url.IsNullOrWhiteSpace())
             {
-                var fileSaveResult = await ProviderService.StorageProvider.SaveFile(FeaturedImage, Post.Id.ToString()).ConfigureAwait(false);
-                if (!fileSaveResult.Success)
+                Post.Url = SlugHelper.GenerateSlug(Post.Name);
+            }
+
+            if (Post.MetaDescription.IsNullOrWhiteSpace())
+            {
+                Post.MetaDescription = Post.Excerpt;
+            }
+
+            if (Post.PageTitle.IsNullOrWhiteSpace())
+            {
+                Post.PageTitle = Post.Name;
+            }
+
+            // Have to set these as the pickers won't allowed a non null Date!?
+            Post.DateCreated = DateCreated!.Value;
+            Post.DateUpdated = DateUpdated!.Value;
+
+            // Profile Image - Need to save image and then create a gabfile
+            if (FeaturedImage != null)
+            {
+                // Save the file, create a gab file and attach it to the user
+                if (ProviderService.StorageProvider != null)
                 {
-                    foreach (var errorMessage in fileSaveResult.ErrorMessages)
+                    var fileSaveResult = await ProviderService.StorageProvider
+                        .SaveFile(FeaturedImage, Post.Id.ToString()).ConfigureAwait(false);
+                    if (!fileSaveResult.Success)
                     {
-                        Snackbar.Add(errorMessage, Severity.Error);
+                        foreach (var errorMessage in fileSaveResult.ErrorMessages)
+                        {
+                            Snackbar.Add(errorMessage, Severity.Error);
+                        }
                     }
+
+                    // Create the gabfile
+                    var file = await ProviderService.StorageProvider.ToBlogFodderFile(fileSaveResult)
+                        .ConfigureAwait(false);
+
+                    // Save the file first
+                    DbContext.Files.Add(file);
+                    //await DbContext.SaveChangesAsync().ConfigureAwait(false);
+
+                    // Set the file to the user
+                    Post.FeaturedImage = file;
+                }
+            }
+
+            if (SocialImage != null)
+            {
+                // Save the file, create a gab file and attach it to the user
+                if (ProviderService.StorageProvider != null)
+                {
+                    var fileSaveResult = await ProviderService.StorageProvider.SaveFile(SocialImage, Post.Id.ToString())
+                        .ConfigureAwait(false);
+                    if (!fileSaveResult.Success)
+                    {
+                        foreach (var errorMessage in fileSaveResult.ErrorMessages)
+                        {
+                            Snackbar.Add(errorMessage, Severity.Error);
+                        }
+                    }
+
+                    // Create the gabfile
+                    var file = await ProviderService.StorageProvider.ToBlogFodderFile(fileSaveResult)
+                        .ConfigureAwait(false);
+
+                    // Save the file first
+                    DbContext.Files.Add(file);
+                    //await DbContext.SaveChangesAsync().ConfigureAwait(false);
+
+                    // Set the file to the user
+                    Post.SocialImage = file;
+                }
+            }
+
+
+            // TODO - This needs to be moved to a service or better just use Mediatr
+            if (IsUpdate)
+            {
+                // Add the new content items first
+                foreach (var postContentItem in Post.ContentItems.Where(x => x.IsNew))
+                {
+                    postContentItem.IsNew = false;
+                    DbContext.PostContentItems.Add(postContentItem);
                 }
 
-                // Create the gabfile
-                var file = await ProviderService.StorageProvider.ToBlogFodderFile(fileSaveResult).ConfigureAwait(false);
-                
-                // Save the file first
-                DbContext.Files.Add(file);
-                //await DbContext.SaveChangesAsync().ConfigureAwait(false);
-
-                // Set the file to the user
-                Post.FeaturedImage = file;
+                DbContext.Posts.Update(Post);
             }
-        }
-        
-        if (SocialImage != null)
-        {
-            // Save the file, create a gab file and attach it to the user
-            if (ProviderService.StorageProvider != null)
+            else
             {
-                var fileSaveResult = await ProviderService.StorageProvider.SaveFile(SocialImage, Post.Id.ToString()).ConfigureAwait(false);
-                if (!fileSaveResult.Success)
-                {
-                    foreach (var errorMessage in fileSaveResult.ErrorMessages)
-                    {
-                        Snackbar.Add(errorMessage, Severity.Error);
-                    }
-                }
-
-                // Create the gabfile
-                var file = await ProviderService.StorageProvider.ToBlogFodderFile(fileSaveResult).ConfigureAwait(false);
-                
-                // Save the file first
-                DbContext.Files.Add(file);
-                //await DbContext.SaveChangesAsync().ConfigureAwait(false);
-
-                // Set the file to the user
-                Post.SocialImage = file;
+                DbContext.Posts.Add(Post);
             }
-        }
 
+            await DbContext.SaveChangesAsync();
+            var correctText = IsUpdate ? "Updated" : "Created";
+            Snackbar.Add("Post " + correctText, Severity.Success);
 
-        // TODO - This needs to be moved to a service or better just use Mediatr
-        if (IsUpdate)
-        {
-            // Add the new content items first
-            foreach (var postContentItem in Post.ContentItems.Where(x => x.IsNew))
+            if (!IsUpdate)
             {
-                postContentItem.IsNew = false;
-                DbContext.PostContentItems.Add(postContentItem);
+                IsUpdate = true;
             }
-            
-            DbContext.Posts.Update(Post);
-        }
-        else
-        {
-            DbContext.Posts.Add(Post);
-        }        
-        await DbContext.SaveChangesAsync();
-        var correctText = IsUpdate ? "Updated" : "Created";
-        Snackbar.Add("Post " + correctText, Severity.Success);
-
-        if (!IsUpdate)
-        {
-            IsUpdate = true;
         }
     }
 }

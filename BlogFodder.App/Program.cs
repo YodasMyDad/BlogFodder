@@ -1,4 +1,3 @@
-using BlogFodder.App.Extensions;
 using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
@@ -29,29 +28,18 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddScoped<ExtensionManager>();
 builder.Services.AddScoped<ProviderService>();
 
-builder.Services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(typeof(Constants).Assembly, typeof(Program).Assembly));
 builder.Services.AddMudServicesWithExtensions();
+
+// TODO - Remove this and use a C# method to convert the Markdown
 builder.Services.AddMudMarkdownServices();
 
 builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection(Constants.SettingsConfigName));
 
-// TODO - Look into validation below? Need to do similar extension like the external authentication below
-/*// Setup form validation
-services.AddFormValidation(config =>
-    config
-        .AddDataAnnotationsValidation()
-        .AddFluentValidation(typeof(Gab.Core.Startup).Assembly, PluginManager.Assemblies.ToArray())
-);
-*/
-
 builder.Services.AddImageSharp();
 
-// TODO - Need to uncomment when doing login stuff
-//builder.Services.AddExternalAuthenticationProviders(builder.Configuration);
+builder.Services.EnableBlogFodderPlugins(builder.Configuration);
 
 var app = builder.Build();
-
-var assemblies = app.Services.DiscoverAssemblies();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -63,9 +51,9 @@ using (var scope = app.Services.CreateScope())
             dbContext.Database.Migrate();
         }
     }
-    catch
+    catch (Exception ex)
     {
-        // TODO - Need to do proper logging here!
+        Log.Error(ex, "Error during startup trying to do Db migrations");
     }
 }
 
