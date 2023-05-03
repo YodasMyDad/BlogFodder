@@ -5,7 +5,7 @@
 
 <MudDialog>
     <DialogContent>
-        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6 ">
+        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
             <MudTabPanel Text="Editor">
                 <MudCard>
@@ -13,11 +13,9 @@
                 </MudCard>
             </MudTabPanel>
 
-            @*<MudTabPanel Text="Settings">
-                <MudTextField @bind-Value="Post.Url" Label="Url" Variant="Variant.Text"></MudTextField>
-                    <MudDatePicker Label="Date Created" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateCreated"/>
-                    <MudDatePicker Label="Date Updated" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateUpdated"/>
-            </MudTabPanel>*@
+            <MudTabPanel Text="Settings">
+
+            </MudTabPanel>
 
         </MudTabs>
     </DialogContent>

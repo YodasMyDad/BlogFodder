@@ -37,7 +37,7 @@ public partial class CreatePost : ComponentBase
     private IBrowserFile? FeaturedImage { get; set; }
     private IBrowserFile? SocialImage { get; set; }
     public PostValidator PostValidator { get; set; } = new();
-
+    private string[] _errors = Array.Empty<string>();
     protected override void OnInitialized()
     {
         // See if this is an edit or not
@@ -158,6 +158,13 @@ public partial class CreatePost : ComponentBase
         await Form.Validate();
         if (Form.IsValid)
         {
+            // TODO - Look to do this with the fluentvalidator
+            if (!Post.ContentItems.Any())
+            {
+                _errors = new[] {"You need to add some content to the post"};
+                return;
+            }
+            
             // Set any empty values like the Url
             if (Post.Url.IsNullOrWhiteSpace())
             {

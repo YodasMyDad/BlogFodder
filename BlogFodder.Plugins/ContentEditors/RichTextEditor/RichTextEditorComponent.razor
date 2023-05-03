@@ -5,7 +5,7 @@
 
 <MudDialog>
     <DialogContent>
-        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6 ">
+        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
             <MudTabPanel Text="Editor">
                 <TinyMCE.Blazor.Editor Conf="@GlobalSettings.DefaultEditorSettings" @bind-Value="@EditorData"/>

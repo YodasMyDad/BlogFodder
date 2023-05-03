@@ -3,8 +3,16 @@
 @using BlogFodder.Core.Posts.Models
 @layout AdminLayout
 <PageTitle>Create Post</PageTitle>
-
-<MudForm Model="@Post" @ref="@Form" Validation="@(PostValidator.ValidateValue)" ValidationDelay="0">
+@if (_errors.Length > 0)
+{
+    <MudPaper Class="pa-4 mb-2">
+        @foreach (var error in _errors)
+        {
+            <MudText Color="@Color.Error">@error</MudText>
+        }
+    </MudPaper>   
+}
+<MudForm Model="@Post" @ref="@Form" @bind-Errors="@_errors" Validation="@(PostValidator.ValidateValue)" ValidationDelay="0">
     <MudTextField Label="Title of this post" Class="my-2"
                   Counter="1000" MaxLength="1000"
                   @bind-Value="Post.Name" For="@(() => Post.Name)" Variant="Variant.Outlined">
