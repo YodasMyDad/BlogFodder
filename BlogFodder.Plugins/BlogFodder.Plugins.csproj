@@ -50,6 +50,7 @@
 
     <ItemGroup>
       <Compile Remove="Components\Inputs\**" />
+      <Compile Remove="Components\Form\FileUpload.razor.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -58,10 +59,15 @@
 
     <ItemGroup>
       <Content Remove="Components\Inputs\**" />
+      <Content Remove="Components\Form\FileUpload.razor" />
     </ItemGroup>
 
     <ItemGroup>
       <None Remove="Components\Inputs\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Components\Form\" />
     </ItemGroup>
 
 </Project>

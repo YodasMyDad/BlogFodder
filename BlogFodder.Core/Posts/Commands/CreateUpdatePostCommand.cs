@@ -10,4 +10,5 @@ public class CreateUpdatePostCommand : IRequest<HandlerResult<Post>>
     public IBrowserFile? FeaturedImage { get; set; } 
     public IBrowserFile? SocialImage { get; set; }
     public Post Post { get; set; } = new();
+    public bool IsUpdate { get; set; }
 }

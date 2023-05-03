@@ -1,4 +1,3 @@
-using BlogFodder.Core.Posts.Models;
 using FluentValidation;
 
 namespace BlogFodder.Core.Shared.Validation;
