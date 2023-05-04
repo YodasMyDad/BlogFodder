@@ -28,22 +28,33 @@
                 </MudItem>
                 <MudItem xs="12">
                     <MudField Label="Featured Image">
+                        @if (PostCommand.Post.FeaturedImage != null)
+                        {
+                            <MudImage ObjectFit="ObjectFit.Cover" Width="100" Src="@($"{PostCommand.Post.FeaturedImage.Url}?width=100")" Class="rounded"/>
+                        }
                         @if (PostCommand.FeaturedImage != null)
                         {
-                            @PostCommand.FeaturedImage.Name
-                            <code>@PostCommand.FeaturedImage.Size bytes</code>
+                            <MudChip Color="Color.Default" OnClose="RemoveSelectedFeaturedImage">
+                                @PostCommand?.FeaturedImage?.Name
+                            </MudChip>
                         }
-                        <MudFileUpload T="IBrowserFile" For="@(() => PostCommand.FeaturedImage)" @bind-Files="PostCommand.FeaturedImage">
-                            <ButtonTemplate>
-                                <MudButton HtmlTag="label"
-                                           Variant="Variant.Filled"
-                                           Color="Color.Primary"
-                                           StartIcon="@Icons.Material.Filled.Image"
-                                           for="@context">
-                                    Upload Image
-                                </MudButton>
-                            </ButtonTemplate>
-                        </MudFileUpload>
+                        <MudStack Row="true">
+                            <MudFileUpload T="IBrowserFile" For="@(() => PostCommand.FeaturedImage)" @bind-Files="PostCommand.FeaturedImage" OnFilesChanged="CheckImageSize">
+                                <ButtonTemplate>
+                                    <MudButton HtmlTag="label"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               StartIcon="@Icons.Material.Filled.Image"
+                                               for="@context">
+                                        Upload Image
+                                    </MudButton>
+                                </ButtonTemplate>
+                            </MudFileUpload>
+                            @if (PostCommand.Post.FeaturedImage != null)
+                            {
+                                <MudButton Variant="Variant.Text" OnClick="RemoveFeaturedImage">Remove Image</MudButton>
+                            }
+                        </MudStack>
                     </MudField>
                 </MudItem>
             </MudGrid>
@@ -100,22 +111,33 @@
                 </MudItem>
                 <MudItem xs="12">
                     <MudField Label="Social Image">
+                        @if (PostCommand.Post.SocialImage != null)
+                        {
+                            <MudImage ObjectFit="ObjectFit.Cover" Width="100" Src="@($"{PostCommand.Post.SocialImage.Url}?width=100")" Class="rounded"/>
+                        }
                         @if (PostCommand.SocialImage != null)
                         {
-                            @PostCommand.SocialImage.Name
-                            <code>@PostCommand.SocialImage.Size bytes</code>
+                            <MudChip Color="Color.Default" OnClose="RemoveSelectedSocialImage">
+                                @PostCommand.SocialImage.Name
+                            </MudChip>
                         }
-                        <MudFileUpload T="IBrowserFile" For="@(() => PostCommand.SocialImage)" @bind-Files="PostCommand.SocialImage">
-                            <ButtonTemplate>
-                                <MudButton HtmlTag="label"
-                                           Variant="Variant.Filled"
-                                           Color="Color.Primary"
-                                           StartIcon="@Icons.Material.Filled.Image"
-                                           for="@context">
-                                    Upload Image
-                                </MudButton>
-                            </ButtonTemplate>
-                        </MudFileUpload>
+                        <MudStack Row="true">
+                            <MudFileUpload T="IBrowserFile" For="@(() => PostCommand.SocialImage)" @bind-Files="PostCommand.SocialImage" OnFilesChanged="CheckImageSize">
+                                <ButtonTemplate>
+                                    <MudButton HtmlTag="label"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               StartIcon="@Icons.Material.Filled.Image"
+                                               for="@context">
+                                        Upload Image
+                                    </MudButton>
+                                </ButtonTemplate>
+                            </MudFileUpload>
+                            @if (PostCommand.Post.SocialImage != null)
+                            {
+                                <MudButton Variant="Variant.Text" OnClick="RemoveSocialImage">Remove Image</MudButton>
+                            }
+                        </MudStack>
                     </MudField>
                 </MudItem>
                 <MudItem xs="12">

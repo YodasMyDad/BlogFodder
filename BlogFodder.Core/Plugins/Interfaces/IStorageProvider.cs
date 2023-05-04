@@ -1,4 +1,5 @@
 using BlogFodder.Core.Media;
+using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Shared.Models;
 using Microsoft.AspNetCore.Components.Forms;
 

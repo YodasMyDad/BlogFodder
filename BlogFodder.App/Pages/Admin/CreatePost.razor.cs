@@ -6,8 +6,10 @@ using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Posts.Commands;
 using BlogFodder.Core.Posts.Models;
 using BlogFodder.Core.Posts.Validation;
+using BlogFodder.Core.Providers;
 using MediatR;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Utilities;
@@ -22,7 +24,8 @@ public partial class CreatePost : ComponentBase
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] public IDialogService Dialog { get; set; } = default!;
     [Inject] public IMediator Mediator { get; set; } = default!;
-    
+    [Inject] public ProviderService ProviderService { get; set; } = default!;
+
     [Parameter] public Guid? Id { get; set; }
     
     private CreateUpdatePostCommand PostCommand { get; set; } = new();
@@ -42,6 +45,8 @@ public partial class CreatePost : ComponentBase
             // Yes, should probably be in a service or Mediatr call
             var dbPost = DbContext.Posts
                 .Include(x => x.ContentItems)
+                .Include(x => x.FeaturedImage)
+                .Include(x => x.SocialImage)
                 .FirstOrDefault(x => x.Id == Id.Value);
             
             if (dbPost != null)
@@ -86,6 +91,42 @@ public partial class CreatePost : ComponentBase
     {
         // Add in 
         SelectedEditorAlias = alias;
+    }
+
+    private void RemoveSelectedSocialImage()
+    {
+        PostCommand.SocialImage = null;
+        StateHasChanged();
+    }
+    private void RemoveSocialImage()
+    {
+        PostCommand.Post.SocialImageId = null;
+        PostCommand.Post.SocialImage = null;
+        StateHasChanged();
+    }
+    
+    private void RemoveSelectedFeaturedImage()
+    {
+        PostCommand.FeaturedImage = null;
+        StateHasChanged();
+    }
+    private void RemoveFeaturedImage()
+    {
+        PostCommand.Post.FeaturedImageId = null;
+        PostCommand.Post.FeaturedImage = null;
+        StateHasChanged();
+    }
+    
+    private void CheckImageSize(InputFileChangeEventArgs args)
+    {
+        var result = ProviderService.StorageProvider?.CanUseFile(args.File).Result;
+        if (result is {Success: false})
+        {
+            foreach (var errorMessage in result.ErrorMessages)
+            {
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
     }
 
     /// <summary>
@@ -171,6 +212,9 @@ public partial class CreatePost : ComponentBase
                 {
                     PostCommand.IsUpdate = true;
                 }
+
+                RemoveSelectedSocialImage();
+                RemoveSelectedFeaturedImage();
             }
             else
             {

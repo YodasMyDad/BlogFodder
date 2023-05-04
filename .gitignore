@@ -6,3 +6,4 @@ riderModule.iml
 /BlogFodder.App/Logs/*
 /BlogFodder.App/node_modules/*
 /.idea/.idea.BlogFodder/.idea/*
+/BlogFodder.App/wwwroot/uploads/*

@@ -1,4 +1,5 @@
 using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Media.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

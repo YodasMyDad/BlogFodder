@@ -20,6 +20,7 @@
         <PackageReference Include="MudBlazor.Extensions" Version="1.7.40" />
         <PackageReference Include="MudBlazor.Markdown" Version="0.1.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+        <PackageReference Include="SixLabors.ImageSharp.Web" Version="3.0.1" />
     </ItemGroup>
     
 

@@ -68,7 +68,7 @@ if (!app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseImageSharp();
 app.UseRouting();
 
 app.UseAuthorization();

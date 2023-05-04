@@ -1,5 +1,6 @@
 ﻿using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Media;
+using BlogFodder.Core.Media.Models;
 
 namespace BlogFodder.Core.Posts.Models;
 

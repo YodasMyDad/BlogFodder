@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using BlogFodder.Core.Identity.Models;
 using BlogFodder.Core.Media;
+using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Posts.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
