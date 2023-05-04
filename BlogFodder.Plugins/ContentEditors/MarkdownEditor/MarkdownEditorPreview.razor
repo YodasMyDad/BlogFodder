@@ -1,7 +1,8 @@
 @using BlogFodder.Core.Posts.Models
+@using Markdig
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponentPreview
 
-@((MarkupString)HtmlToShow)
+@((MarkupString)Markdown.ToHtml(HtmlToShow))
 
 @code {
     private string HtmlToShow { get; set; } = string.Empty;

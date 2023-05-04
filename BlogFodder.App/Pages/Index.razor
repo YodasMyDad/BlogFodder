@@ -4,6 +4,7 @@
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
 @using BlogFodder.Core.Shared.Models
+@using Humanizer
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
 
@@ -44,7 +45,10 @@
     {
         //TODO - This will be via a service/Mediatr
         var count = DbContext.Posts.AsNoTracking().Count();
-        Posts = new PaginatedList<Post>(DbContext.Posts.AsNoTracking().OrderBy(x => x.DateCreated), count,1,18);
+        Posts = new PaginatedList<Post>(DbContext.Posts
+            .Include(x => x.FeaturedImage)
+            .Include(x => x.SocialImage)
+            .AsNoTracking().OrderBy(x => x.DateCreated), count,1,18);
     }
 
     protected override void OnParametersSet()

@@ -12,6 +12,7 @@ public class PostNavigation : IBackOfficeNavigationItem
     public Link Link { get; set; } = new()
     {
         Text = "Posts",
+        Open = true,
         Section = Constants.BackOffice.NavigationSectionCore,
         SubLinks = new List<Link>
         {

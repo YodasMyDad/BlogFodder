@@ -65,7 +65,8 @@ public class EditorPluginCssViewComponent : ViewComponent
             }
         }
         
-
-        return View(cssFiles);
+        // Distinct to stop and duplicates
+        // Should really be better checking than this
+        return View(cssFiles.Distinct().ToList());
     }
 }

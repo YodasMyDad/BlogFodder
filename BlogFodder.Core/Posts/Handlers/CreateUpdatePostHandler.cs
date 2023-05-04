@@ -7,6 +7,7 @@ using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogFodder.Core.Posts.Handlers;
 
@@ -28,7 +29,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         var handlerResult = new HandlerResult<Post>();
 
         // Set any empty values like the Url
-        if (request.Post.Url.IsNullOrWhiteSpace())
+        if (request.Post.Url.IsNullOrWhiteSpace() || request.Post.Url.IsNullOrWhiteSpace())
         {
             request.Post.Url = _slugHelper.GenerateSlug(request.Post.Name);
         }
@@ -55,27 +56,53 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
 
         if (_providerService.StorageProvider != null)
         {
-            // Profile Image - Need to save image and then create a gabfile
+            // See if this post already exsists as we will need to remove the images
+            var post = _dbContext.Posts
+                .Include(x => x.FeaturedImage)
+                .Include(x => x.SocialImage)
+                .FirstOrDefault(x => x.Id != request.Post.Id);
+            
+            // Profile Image - Need to save image and then create a file
             if (request.FeaturedImage != null)
             {
-                // TODO - Need to see if we are deleting an old image
-
-                // Save the file, create a gab file and attach it to the user
+                // Save the file, create a file and attach it to the user
                 var fileResult = await SaveImage(request.FeaturedImage, request.Post.Id, handlerResult);
 
                 // Set the file to the user
                 request.Post.FeaturedImage = fileResult;
+                
+                // Delete the old one if there is one
+                if (post?.FeaturedImage != null)
+                {
+                    _dbContext.Files.Remove(post.FeaturedImage);
+                }
+            }
+            else if(post?.FeaturedImage != null 
+                    && request.Post.FeaturedImageId == null)
+            {
+                // Delete the image
+                _dbContext.Files.Remove(post.FeaturedImage);
             }
 
             if (request.SocialImage != null)
             {
-                // TODO - Need to see if we are deleting an old image
-
-                // Save the file, create a gab file and attach it to the user
+                // Save the file, create a file and attach it to the user
                 var fileResult = await SaveImage(request.SocialImage, request.Post.Id, handlerResult);
 
                 // Set the file to the user
                 request.Post.SocialImage = fileResult;
+                
+                // Delete the old one if there is one
+                if (post?.SocialImage != null)
+                {
+                    _dbContext.Files.Remove(post.SocialImage);
+                }
+            }
+            else if(post?.SocialImage != null 
+                    && request.Post.SocialImageId == null)
+            {
+                // Delete the image
+                _dbContext.Files.Remove(post.SocialImage);
             }
         }
 

@@ -93,11 +93,18 @@ public partial class CreatePost : ComponentBase
         SelectedEditorAlias = alias;
     }
 
+    /// <summary>
+    /// Removes the selected social images
+    /// </summary>
     private void RemoveSelectedSocialImage()
     {
         PostCommand.SocialImage = null;
         StateHasChanged();
     }
+    
+    /// <summary>
+    /// Removes the saved social image
+    /// </summary>
     private void RemoveSocialImage()
     {
         PostCommand.Post.SocialImageId = null;
@@ -105,11 +112,18 @@ public partial class CreatePost : ComponentBase
         StateHasChanged();
     }
     
+    /// <summary>
+    /// Removes the featured image
+    /// </summary>
     private void RemoveSelectedFeaturedImage()
     {
         PostCommand.FeaturedImage = null;
         StateHasChanged();
     }
+    
+    /// <summary>
+    /// Removes the featured image
+    /// </summary>
     private void RemoveFeaturedImage()
     {
         PostCommand.Post.FeaturedImageId = null;
@@ -117,6 +131,10 @@ public partial class CreatePost : ComponentBase
         StateHasChanged();
     }
     
+    /// <summary>
+    /// Checks the image size and notifies the user if the image selected is too large
+    /// </summary>
+    /// <param name="args"></param>
     private void CheckImageSize(InputFileChangeEventArgs args)
     {
         var result = ProviderService.StorageProvider?.CanUseFile(args.File).Result;
@@ -167,6 +185,16 @@ public partial class CreatePost : ComponentBase
     }
 
     /// <summary>
+    /// Removes a post content item from the post
+    /// </summary>
+    /// <param name="postContentItem"></param>
+    private void RemoveContentItem(PostContentItem postContentItem)
+    {
+        PostCommand.Post.ContentItems.Remove(postContentItem);
+        RefreshDopList();
+    }
+
+    /// <summary>
     /// Shows the popup content editor and renders the Plugin Editor
     /// </summary>
     /// <param name="contentItem"></param>
@@ -204,6 +232,8 @@ public partial class CreatePost : ComponentBase
             if (result.Success)
             {
                 PostCommand.Post = result.Entity;
+                PostCommand.SocialImage = null;
+                PostCommand.FeaturedImage = null;
                 
                 var correctText = PostCommand.IsUpdate ? "Updated" : "Created";
                 Snackbar.Add("Post " + correctText, Severity.Success);
@@ -212,9 +242,6 @@ public partial class CreatePost : ComponentBase
                 {
                     PostCommand.IsUpdate = true;
                 }
-
-                RemoveSelectedSocialImage();
-                RemoveSelectedFeaturedImage();
             }
             else
             {

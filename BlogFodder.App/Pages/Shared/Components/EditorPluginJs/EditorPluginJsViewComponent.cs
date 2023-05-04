@@ -64,6 +64,8 @@ public class EditorPluginJsViewComponent : ViewComponent
             }
         }
 
-        return View(jsFiles);
+        // Distinct to stop and duplicates
+        // Should really be better checking than this
+        return View(jsFiles.Distinct().ToList());
     }
 }

@@ -7,6 +7,7 @@ public class Link
     public int SortOrder { get; set; }
     
     public string? Icon { get; set; }
+    public bool Open { get; set; } 
     
     public string Section { get; set; } = Constants.BackOffice.NavigationSectionPlugins;
 

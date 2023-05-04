@@ -25,17 +25,14 @@ builder.Services.AddServerSideBlazor();
 
 builder.Services.AddDatabase(builder.Configuration);
 
+builder.Services.AddImageSharp();
+
 builder.Services.AddScoped<ExtensionManager>();
 builder.Services.AddScoped<ProviderService>();
 
 builder.Services.AddMudServicesWithExtensions();
 
-// TODO - Remove this and use a C# method to convert the Markdown
-builder.Services.AddMudMarkdownServices();
-
 builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection(Constants.SettingsConfigName));
-
-builder.Services.AddImageSharp();
 
 builder.Services.EnableBlogFodderPlugins(builder.Configuration);
 
@@ -64,15 +61,15 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+app.UseImageSharp();
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseImageSharp();
 app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
