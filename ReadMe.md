@@ -4,7 +4,11 @@ We are seriously lacking an open source WordPress alternative in .Net land. A bl
 
 .Net has made huge improvements recently, and adding the concepts of Razor Class Libraries and Razor Components. I believe we can create a plugin system that makes use of both these 'newish' concepts, and allow .Net developers, to create plugins, with .Net C# (As well as JS as when needed).
 
-This is a Blazor Server app that is a POC and just me messing around and getting some initial code working.
+### What This Is Not
+
+A fully working blogging engine. This is a Blazor Server app that is a **POC** and just me messing around and getting some initial code working.
+
+Also, full disclosure, I'm a not a super smart .Net geek. So I'm just cobbling this together as I go, so open to opinions on how to improve it from an architecture or performance point of view.
 
 ### Progress
 
@@ -18,17 +22,47 @@ ADD SIMPLE ANIMATED GIF HERE SHOWING CURRENT FUNCTIONALITY
 
 ### Current Plugins
 
-Sorry, only a couple at the moment. But, the final concept will be users can create Nuget packages that just reference the BlogFodder.Plugins project/nuget package. That's it. Oh, also, all plugins Namespaces must start with BlogFodder.Plugins.XX (Again, all this is subject to change)
+The final concept will be users can create Nuget packages that just reference the `BlogFodder.Plugins` project/nuget package (When the nuget package is created). That's it. Oh, also, all plugins Namespaces must start with BlogFodder.Plugins.XX (Again, all this is subject to change)
 
 #### IEditorPlugin
 
 This controls the post editors, which are how the user can edit content and how it is previewed in the admin section, settings and how it is rendered in the front end (Also global settings).
 
-The two implementations of this are **MarkdownEditorEditorPlugin** and **RichTextEditorEditorPlugin**, so check those out if you want to know more.
+The two implementations of this are **`MarkdownEditorEditorPlugin`** and **`RichTextEditorEditorPlugin`**, so check those out if you want to know more about how to use them.
 
 #### IBackOfficeNavigationItem
 
 This just controls a link being added to a section in the admin navigation, can be a class, or a Blazor Page can inherit from the Interface.
+
+If you are making a section in the admin with a number of pages, it's easier to just add a class, like I have done with the `PostNavigation.cs` for the Posts section in the admin. If it's just a single page, then it's probably easier to just Implement on the Razor component directly.
+
+#### IStorageProvider
+
+You can create your own Storage provider for saving files. The app comes with the default `DiskStorageProvider` which stores all files to disk. But you can implement your own version to use say Azure Blob storage. Then you just need to update the `appSettings` to use your version i.e.
+
+`"IStorageProvider": "BlogFodder.Plugins.CustomProviders.AzureStorageProvider"`
+
+#### IPostPlugin
+
+*Coming soon*. Idea is to be able to add plugins onto a post. An example would be, comments, this could easily be a plugin for posts, just like newsletter sign up.
+
+#### ISitePlugin
+
+*Coming soon*. Similar to the above, idea is to have plugins which will be enabled in certain parts of the site, i.e. Header, Footer, SideBar.
+
+#### IRenderPlugin
+
+*Coming soon*. This plugin will be executed in middleware and will allow you to manipulate the final HTML of the page before it gets to the user.
+
+#### Theme Customisation
+
+I've gone with a different route with the theme engine, all the components that make up the front end are in the `appSettings`. So if you want to override/restyle the front end, you just need to create your own versions of the components and point to them in the `appSettings`.
+
+For example, lets saying you wanted to customise the Header either by adding a new feature or changing the styling. Just create your own Header component, by copying the existing one. Then in the `appSettings` point the site to your version of the `Header` component
+
+`"HeaderComponent": "BlogFodder.Plugins.MyCustomProject.FrontEnd.Header"`
+
+This way you can completely customise and update the site without touching the core code.
 
 ### Entity Framework
 
