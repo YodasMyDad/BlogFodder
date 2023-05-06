@@ -18,8 +18,6 @@ It's very simple right now, it has no authentication, and is just a simple front
 
 The admin (/admin) section is where I have been focusing, and you can create a simple post which currently has two POC plugins available, A Rich Text Editor & Markdown Editor. Where you can create the post content content sections, sort them etc...
 
-ADD SIMPLE ANIMATED GIF HERE SHOWING CURRENT FUNCTIONALITY
-
 ### Current Plugins
 
 The final concept will be users can create Nuget packages that just reference the `BlogFodder.Plugins` project/nuget package (When the nuget package is created). That's it. Oh, also, all plugins Namespaces must start with BlogFodder.Plugins.XX (Again, all this is subject to change)
@@ -28,7 +26,7 @@ The final concept will be users can create Nuget packages that just reference th
 
 This controls the post editors, which are how the user can edit content and how it is previewed in the admin section, settings and how it is rendered in the front end (Also global settings).
 
-The two implementations of this are **`MarkdownEditorEditorPlugin`** and **`RichTextEditorEditorPlugin`**, so check those out if you want to know more about how to use them.
+The two implementations of this are **`MarkdownEditorEditorPlugin`** and **`RichTextEditorEditorPlugin`**, so check those out if you want to know more about how to use them. I will update these docs more when this project is more of an alpha than POC.
 
 #### IBackOfficeNavigationItem
 
@@ -36,11 +34,29 @@ This just controls a link being added to a section in the admin navigation, can 
 
 If you are making a section in the admin with a number of pages, it's easier to just add a class, like I have done with the `PostNavigation.cs` for the Posts section in the admin. If it's just a single page, then it's probably easier to just Implement on the Razor component directly.
 
+You can choose which section to add the link to and also add new sections of links by updating the appSettings and then adding your new section in your 
+
+```json
+"BackOffice": {
+  "CustomNavigationSections": [
+    "Custom"
+  ]
+}
+```
+
+
+
 #### IStorageProvider
 
 You can create your own Storage provider for saving files. The app comes with the default `DiskStorageProvider` which stores all files to disk. But you can implement your own version to use say Azure Blob storage. Then you just need to update the `appSettings` to use your version i.e.
 
 `"IStorageProvider": "BlogFodder.Plugins.CustomProviders.AzureStorageProvider"`
+
+#### IExternalAuthenticationProvider
+
+While the login/authentication hasn't been hooked up yet, the site is using .Net Identity as the authentication provider, but will only allow login via external providers. This was all the password management can be handled by the providers.
+
+You can add External Authentication providers by Implementing the `IExternalAuthenticationProvider`. The site will launch with 3 existing providers already created which are Facebook, Google & Microsoft. You can see the code for these providers in `BlogFodder.Core`
 
 #### IPostPlugin
 
