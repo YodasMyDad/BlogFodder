@@ -25,10 +25,10 @@ public class GetPluginSettingsHandler : IRequestHandler<GetPluginSettingsCommand
         if (pluginSettings != null)
         {
             result.Entity = pluginSettings;
+            result.Success = true;
         }
         else
         {
-            result.Success = false;
             result.AddMessage("Unable to find any settings with that alias", HandlerResultMessageType.Error);
         }
         

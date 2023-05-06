@@ -7,8 +7,8 @@ namespace BlogFodder.Plugins.ContentEditors.RichTextEditor;
 
 public class RichTextEditorEditorPlugin : IEditorPlugin
 {
-    public string Alias => "RichTextEditorPlugin";
-    public string Name => "Rich Text Editor";
+    public string Alias => RichTextEditorConstants.PluginAlias;
+    public string Name => RichTextEditorConstants.PluginName;
     public string Description => "Plugin that uses the TinyMCE editor";
 
     // TODO - Icon?
@@ -43,16 +43,7 @@ public class RichTextEditorEditorPlugin : IEditorPlugin
         CssFiles = new List<string>(),
         JsFiles = new List<string>(),
         Component = typeof(RichTextSettingsComponent),
-        Model = new RichTextGlobalSettings
-        {
-            DefaultEditorSettings = new Dictionary<string, object>
-            {
-                // Need to get these from somewhere really? Instead of being hardcoded
-                {"height", 600},
-                {"toolbar", "undo redo | a11ycheck casechange blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist checklist outdent indent | removeformat | advcode table help"},
-                {"plugins", "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount"}
-            }
-        },
+        Model = new RichTextGlobalSettings(),
         BackOfficeLink = new List<Link>
         {
             new()

@@ -2,6 +2,7 @@ using BlogFodder.App.Pages.Admin.Dialogs;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
+using BlogFodder.Core.Plugins.Commands;
 using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Posts.Commands;
 using BlogFodder.Core.Posts.Models;
@@ -161,7 +162,7 @@ public partial class CreatePost : ComponentBase
     /// <summary>
     /// Adds a new content item based on an editor plugin alias
     /// </summary>
-    private void AddNewContentItem()
+    private async Task AddNewContentItem()
     {
         if (SelectedEditorAlias != null && AvailableEditorPlugins.TryGetValue(SelectedEditorAlias, out var plugin))
         {
@@ -176,7 +177,13 @@ public partial class CreatePost : ComponentBase
 
             if (plugin.Settings != null)
             {
-                postContentItem.GlobalSettings = JsonConvert.SerializeObject(plugin.Settings.Model);
+                // TODO - Get the global settings from the DB
+                var globalSettings = new GetPluginSettingsCommand
+                {
+                    Alias = plugin.Alias
+                };
+                var result = await Mediator.Send(globalSettings).ConfigureAwait(false);
+                postContentItem.GlobalSettings = result.Success ? JsonConvert.SerializeObject(result.Entity) : JsonConvert.SerializeObject(plugin.Settings.Model);
             }
 
             PostCommand.Post.ContentItems.Add(postContentItem);
