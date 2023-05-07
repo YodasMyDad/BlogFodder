@@ -24,6 +24,20 @@
                     <MudTextField Label="API Key" Variant="Variant.Outlined" Margin="Margin.Dense"
                                   HelperText="Get the API key from TinyMCE website" @bind-Value="RichTextGlobalSettings.ApiKey" For="@(() => RichTextGlobalSettings.ApiKey)"/>
                 </MudItem>
+
+                <MudItem xs="12">
+                    <MudNumericField @bind-Value="RichTextGlobalSettings.Height" Label="Height" Variant="Variant.Outlined" Margin="Margin.Dense" Min="100" For="@(() => RichTextGlobalSettings.Height)" />
+                </MudItem>
+                
+                <MudItem xs="12">
+                    <MudTextField Lines="3" Label="Toolbar" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  HelperText="Check the TinyMCE website for more info" @bind-Value="RichTextGlobalSettings.ToolBar" For="@(() => RichTextGlobalSettings.ToolBar)"/>
+                </MudItem>
+                
+                <MudItem xs="12">
+                    <MudTextField Lines="3" Label="Plugins" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  HelperText="Check the TinyMCE website for more info" @bind-Value="RichTextGlobalSettings.Plugins" For="@(() => RichTextGlobalSettings.Plugins)"/>
+                </MudItem>
             </MudGrid>
 
         </MudTabPanel>

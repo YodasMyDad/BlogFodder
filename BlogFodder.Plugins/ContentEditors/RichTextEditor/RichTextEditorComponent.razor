@@ -1,6 +1,7 @@
 ﻿@using System.Text.Json
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Posts.Models
+@using JsonSerializer = System.Text.Json.JsonSerializer
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
 
 <MudDialog>
@@ -8,7 +9,7 @@
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
             <MudTabPanel Text="Editor">
-                <TinyMCE.Blazor.Editor Conf="@GlobalSettings.DefaultEditorSettings" @bind-Value="@EditorData"/>
+                <TinyMCE.Blazor.Editor Conf="@DefaultEditorSettings" @bind-Value="@EditorData"/>
             </MudTabPanel>
 
             <MudTabPanel Text="Settings">
@@ -41,6 +42,8 @@
     private RichTextGlobalSettings GlobalSettings { get; set; } = new();
     private string EditorData { get; set; } = string.Empty;
 
+    public Dictionary<string, object> DefaultEditorSettings { get; set; } = new();
+
     // Submits the data and closes the dialog
     public Task Submit()
     {
@@ -64,7 +67,16 @@
         
         if (!PostContentItem.GlobalSettings.IsNullOrWhiteSpace())
         {
-            GlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(PostContentItem.GlobalSettings) ?? new RichTextGlobalSettings();
+            // Weird but here. The JSON string is escaped, so we need to unescape it before we try and deserialize into the object
+            var firstDeserialize = JsonSerializer.Deserialize<string>(PostContentItem.GlobalSettings) ?? "";
+            GlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(firstDeserialize) ?? new RichTextGlobalSettings();
         }
+        
+        DefaultEditorSettings = new Dictionary<string, object>
+        {
+            {"height", GlobalSettings.Height},
+            {"toolbar", GlobalSettings.ToolBar ?? ""},
+            {"plugins", GlobalSettings.Plugins ?? ""}
+        };
     }
 }

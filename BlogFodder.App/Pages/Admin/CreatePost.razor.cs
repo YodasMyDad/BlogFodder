@@ -1,3 +1,4 @@
+using System.Text.Json;
 using BlogFodder.App.Pages.Admin.Dialogs;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
@@ -14,7 +15,6 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Utilities;
-using Newtonsoft.Json;
 
 namespace BlogFodder.App.Pages.Admin;
 
@@ -183,7 +183,9 @@ public partial class CreatePost : ComponentBase
                     Alias = plugin.Alias
                 };
                 var result = await Mediator.Send(globalSettings).ConfigureAwait(false);
-                postContentItem.GlobalSettings = result.Success ? JsonConvert.SerializeObject(result.Entity) : JsonConvert.SerializeObject(plugin.Settings.Model);
+                postContentItem.GlobalSettings = result.Success ? 
+                    JsonSerializer.Serialize(result.Entity.Data, new JsonSerializerOptions {WriteIndented = false}) : 
+                    JsonSerializer.Serialize(plugin.Settings.Model, new JsonSerializerOptions {WriteIndented = false});
             }
 
             PostCommand.Post.ContentItems.Add(postContentItem);
