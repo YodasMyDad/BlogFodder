@@ -1,7 +1,10 @@
 @page "/admin/viewposts"
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Data
+@using BlogFodder.Core.Extensions
+@using BlogFodder.Core.Posts.Commands
 @using Humanizer
+@using MediatR
 @using Microsoft.EntityFrameworkCore
 @layout AdminLayout
 <PageTitle>View Posts</PageTitle>
@@ -11,10 +14,14 @@
     <HeaderContent>
         <MudTh>Title</MudTh>
         <MudTh>Date Updated</MudTh>
+        <MudTh>Delete</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Title">@context.Name</MudTd>
         <MudTd DataLabel="Date Updated">@context.DateUpdated.Humanize()</MudTd>
+        <MudTd DataLabel="Delete">
+            <MudButton Color="Color.Primary" OnClick="@(() => DeletePost(context))">Delete</MudButton>
+        </MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager />
@@ -26,12 +33,40 @@
     
     [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
-
+    [Inject] public IMediator Mediator { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] private IDialogService DialogService { get; set; } = default!;
+    
     public List<Post> Posts { get; set; } = new();
 
     protected override void OnInitialized()
     {
         Posts = DbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
+    }
+
+    private async Task DeletePost(Post post)
+    {
+        var dialogResult = await DialogService.ShowMessageBox(
+            "Warning", 
+            "Once you click delete the post is gone", 
+            yesText:"Delete", cancelText:"Cancel");
+        if (dialogResult == true)
+        {
+            var result = await Mediator.Send(new DeletePostCommand{PostId = post.Id}).ConfigureAwait(false);
+            if (result is {Success: false})
+            {
+                foreach (var errorMessage in result.Messages.ErrorMessagesToList())
+                {
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Post Deleted", Severity.Success);
+                Posts = DbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
+                StateHasChanged();
+            }   
+        }
     }
     
     private void RowClickEvent(TableRowClickEventArgs<Post> tableRowClickEventArgs)

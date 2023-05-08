@@ -9,20 +9,17 @@
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
             <MudTabPanel Text="Editor">
-                <TinyMCE.Blazor.Editor Conf="@DefaultEditorSettings" @bind-Value="@EditorData"/>
+                <TinyMCE.Blazor.Editor Conf="@DefaultEditorSettings" ApiKey="@GlobalSettings.ApiKey" @bind-Value="@EditorData" />
             </MudTabPanel>
 
-            <MudTabPanel Text="Settings">
-                <MudText>TODO</MudText>
-                @*<MudTextField @bind-Value="Post.Url" Label="Url" Variant="Variant.Text"></MudTextField>
-                    <MudDatePicker Label="Date Created" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateCreated"/>
-                    <MudDatePicker Label="Date Updated" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="DateUpdated"/>*@
-            </MudTabPanel>
+            @*<MudTabPanel Text="Settings">>
+
+            </MudTabPanel>*@
             
         </MudTabs>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+        <MudButton Color="Color.Primary" Size="Size.Large" OnClick="Submit">Ok</MudButton>
     </DialogActions>
 </MudDialog>
 

@@ -22,7 +22,17 @@ public static class DbContextExtensions
         {
             context.Update(entity);
         }
+        
+        crudResult = await context.SaveChangesAndLog(crudResult, cancellationToken);
 
+        crudResult.Entity = entity;
+
+        return crudResult;
+    }
+
+    public static async Task<HandlerResult<T>> SaveChangesAndLog<T>(this BlogFodderDbContext context,
+        HandlerResult<T> crudResult, CancellationToken cancellationToken)
+    {
         try
         {
             var isSaved = await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -38,10 +48,7 @@ public static class DbContextExtensions
             crudResult.Success = false;
             crudResult.AddMessage(ex.Message, HandlerResultMessageType.Error);
             Log.Error(ex, $"{nameof(T)} not saved using SaveChangesAsync");
-            return crudResult;
         }
-
-        crudResult.Entity = entity;
 
         return crudResult;
     }

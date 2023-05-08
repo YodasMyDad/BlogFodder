@@ -39,13 +39,21 @@
       <_ContentIncludedByDefault Remove="Plugins\ContentEditors\TestingEditor\TestingEditorComponent.razor" />
       <_ContentIncludedByDefault Remove="Plugins\_Imports.razor" />
       <_ContentIncludedByDefault Remove="Components\Inputs\FileUpload.razor" />
+      <_ContentIncludedByDefault Remove="Components\Backoffice\Navigation.razor" />
+      <_ContentIncludedByDefault Remove="Components\FrontEnd\Footer.razor" />
+      <_ContentIncludedByDefault Remove="Components\FrontEnd\Header.razor" />
+      <_ContentIncludedByDefault Remove="Components\FrontEnd\PostList.razor" />
+      <_ContentIncludedByDefault Remove="Components\FrontEnd\PostListItem.razor" />
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Components\Backoffice\Navigation.razor" />
       <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextContentComponent.razor" />
       <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextEditorComponent.razor" />
       <AdditionalFiles Include="ContentEditors\RichTextEditor\RichTextSettingsComponent.razor" />
+      <AdditionalFiles Include="FrontEnd\Footer.razor" />
+      <AdditionalFiles Include="FrontEnd\Header.razor" />
+      <AdditionalFiles Include="FrontEnd\PostList.razor" />
+      <AdditionalFiles Include="FrontEnd\PostListItem.razor" />
     </ItemGroup>
 
     <ItemGroup>
@@ -64,10 +72,6 @@
 
     <ItemGroup>
       <None Remove="Components\Inputs\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Components\Form\" />
     </ItemGroup>
 
 </Project>

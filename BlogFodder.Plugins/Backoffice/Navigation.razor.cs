@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using BlogFodder.Core;
 using BlogFodder.Core.Backoffice.Models;
 using BlogFodder.Core.Extensions;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using MudBlazor;
 
-namespace BlogFodder.Plugins.Components.Backoffice;
+namespace BlogFodder.Plugins.Backoffice;
 
 public partial class Navigation : ComponentBase
 {
