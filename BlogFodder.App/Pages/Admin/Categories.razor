@@ -1,0 +1,21 @@
+@page "/admin/categories"
+@layout AdminLayout
+@using BlogFodder.Core.Backoffice.Models
+@using BlogFodder.Core
+@implements BlogFodder.Core.Plugins.Interfaces.IBackOfficeNavigationItem
+
+<PageTitle>Admin - Categories</PageTitle>
+
+<p>TODO</p>
+
+@code {
+
+    public Link Link { get; set; } = new()
+    {
+        Text = "Categories",
+        Route = "/admin/categories",
+        SortOrder = 3,
+        Section = Constants.BackOffice.NavigationSectionCore
+    };
+
+}
