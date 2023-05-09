@@ -32,4 +32,8 @@
       <_ContentIncludedByDefault Remove="Components\Backoffice\Navigation.razor" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Shared\Models\" />
+    </ItemGroup>
+
 </Project>

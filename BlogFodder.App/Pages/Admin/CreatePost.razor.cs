@@ -235,6 +235,19 @@ public partial class CreatePost : ComponentBase
         await Form.Validate();
         if (Form.IsValid)
         {
+            // Couple of manual checks
+            if (PostCommand.FeaturedImage == null && PostCommand.Post.FeaturedImage == null)
+            {
+                Errors = new[] {"You need to add a featured image"};
+                return;
+            }
+            
+            if (!PostCommand.Post.ContentItems.Any())
+            {
+                Errors = new[] {"You need to add some content"};
+                return;
+            }
+            
             // Call mediatr and return and check for errors
             // Send the email
             var result = await Mediator.Send(PostCommand).ConfigureAwait(false);

@@ -2,6 +2,7 @@ using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Posts.Commands;
 using BlogFodder.Core.Posts.Models;
+using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,12 @@ namespace BlogFodder.Core.Posts.Handlers;
 public class DeletePostHandler: IRequestHandler<DeletePostCommand, HandlerResult<Post>>
 {
     private readonly BlogFodderDbContext _dbContext;
+    private readonly ProviderService _providerService;
 
-    public DeletePostHandler(BlogFodderDbContext dbContext)
+    public DeletePostHandler(BlogFodderDbContext dbContext, ProviderService providerService)
     {
         _dbContext = dbContext;
+        _providerService = providerService;
     }
     
     public async Task<HandlerResult<Post>> Handle(DeletePostCommand request, CancellationToken cancellationToken)
@@ -37,11 +40,13 @@ public class DeletePostHandler: IRequestHandler<DeletePostCommand, HandlerResult
         var featuredImage = await _dbContext.Files.FirstOrDefaultAsync(x => x.Id == postToDelete.FeaturedImageId, cancellationToken: cancellationToken);
         if (socialImage != null)
         {
-            _dbContext.Remove(socialImage);   
+            _dbContext.Remove(socialImage);
+            _providerService.StorageProvider?.DeleteFile(socialImage.Url);
         }
         if (featuredImage != null)
         {
             _dbContext.Remove(featuredImage);   
+            _providerService.StorageProvider?.DeleteFile(featuredImage.Url);
         }
 
         // Delete the content items

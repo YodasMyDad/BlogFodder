@@ -27,7 +27,8 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
     public async Task<HandlerResult<Post>> Handle(CreateUpdatePostCommand request, CancellationToken cancellationToken)
     {
         var handlerResult = new HandlerResult<Post>();
-
+        var fileIdToDelete = new List<Guid>();
+        
         // Set any empty values like the Url
         if (request.Post.Url.IsNullOrWhiteSpace() || request.Post.Url.IsNullOrWhiteSpace())
         {
@@ -46,63 +47,83 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
 
         if (!request.IsUpdate)
         {
-            request.Post.DateCreated = DateTime.Now;
-            request.Post.DateUpdated = DateTime.Now;
+            request.Post.DateCreated = DateTime.UtcNow;
+            request.Post.DateUpdated = DateTime.UtcNow;
         }
         else
         {
-            request.Post.DateUpdated = DateTime.Now;
+            request.Post.DateUpdated = DateTime.UtcNow;
         }
 
         if (_providerService.StorageProvider != null)
         {
-            // See if this post already exsists as we will need to remove the images
+            // See if this post already exists as we will need to remove the images
             var post = _dbContext.Posts
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
-                .FirstOrDefault(x => x.Id != request.Post.Id);
+                .FirstOrDefault(x => x.Id == request.Post.Id);
             
             // Profile Image - Need to save image and then create a file
             if (request.FeaturedImage != null)
             {
+                // Delete the old one if there is one
+                if (post?.FeaturedImage != null)
+                {
+                    fileIdToDelete.Add(post.FeaturedImage.Id);
+                }
+                
                 // Save the file, create a file and attach it to the user
                 var fileResult = await SaveImage(request.FeaturedImage, request.Post.Id, handlerResult);
 
                 // Set the file to the user
                 request.Post.FeaturedImage = fileResult;
                 
-                // Delete the old one if there is one
-                if (post?.FeaturedImage != null)
-                {
-                    _dbContext.Files.Remove(post.FeaturedImage);
-                }
             }
             else if(post?.FeaturedImage != null 
                     && request.Post.FeaturedImageId == null)
             {
                 // Delete the image
-                _dbContext.Files.Remove(post.FeaturedImage);
+                fileIdToDelete.Add(post.FeaturedImage.Id);
+                post.FeaturedImageId = null;
+                post.FeaturedImage = null;
             }
 
             if (request.SocialImage != null)
             {
+                // Delete the old one if there is one
+                if (post?.SocialImage != null)
+                {
+                    fileIdToDelete.Add(post.SocialImage.Id);
+                }
+                
                 // Save the file, create a file and attach it to the user
                 var fileResult = await SaveImage(request.SocialImage, request.Post.Id, handlerResult);
 
                 // Set the file to the user
                 request.Post.SocialImage = fileResult;
                 
-                // Delete the old one if there is one
-                if (post?.SocialImage != null)
-                {
-                    _dbContext.Files.Remove(post.SocialImage);
-                }
             }
             else if(post?.SocialImage != null 
                     && request.Post.SocialImageId == null)
             {
                 // Delete the image
-                _dbContext.Files.Remove(post.SocialImage);
+                fileIdToDelete.Add(post.SocialImage.Id);
+                post.SocialImageId = null;
+                post.SocialImage = null;
+            }
+
+            if (post != null && fileIdToDelete.Any())
+            {
+                foreach (var guid in fileIdToDelete)
+                {
+                    var file = _dbContext.Files.FirstOrDefault(x => x.Id == guid);
+                    if (file != null)
+                    {
+                        _dbContext.Files.Remove(file);
+                    }
+                }
+                
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
         }
 

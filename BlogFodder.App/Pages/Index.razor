@@ -8,14 +8,10 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
 
-<PageTitle>BlogFodder</PageTitle>
+<PageTitle>@Settings.Value.FrontEnd.DefaultPageTitle</PageTitle>
 <HeadContent>
-    <meta name="description" content="Get this data from the DB or appSettings?">
+    <meta name="description" content="@Settings.Value.FrontEnd.DefaultMetaDescription">
 </HeadContent>
-
-
-<p>If you want to edit these posts, go to the <a href="/admin" @onclick="@NavigateToAdmin" @onclick:preventDefault>Admin Section</a></p>
-
 
 @ExtensionManager.CreateComponent(PostListComponent, new Dictionary<string, object>
 {
@@ -48,7 +44,7 @@
         Posts = new PaginatedList<Post>(DbContext.Posts
             .Include(x => x.FeaturedImage)
             .Include(x => x.SocialImage)
-            .AsNoTracking().OrderBy(x => x.DateCreated), count,1,18);
+            .AsNoTracking().OrderByDescending(x => x.DateUpdated), count,1,18);
     }
 
     protected override void OnParametersSet()

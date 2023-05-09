@@ -16,8 +16,24 @@ public class BlogFodderSettings
     public FrontEndSettings FrontEnd { get; set; } = new();
 }
 
+public class SiteNavigation
+{
+    public List<SiteNavigationItem> TopNav { get; set; } = new();
+    public List<SiteNavigationItem> FooterNav { get; set; } = new();
+}
+
+public class SiteNavigationItem
+{
+    public string? Name { get; set; }
+    public string? Link { get; set; }
+    public bool ForceReload { get; set; }
+}
+
 public class FrontEndSettings
 {
+    public string? DefaultPageTitle { get; set; }
+    public string? DefaultMetaDescription { get; set; }
+    public SiteNavigation SiteNavigation { get; set; } = new();
     public string? HeaderComponent { get; set; }
     public string? FooterComponent { get; set; }
     public string? PostListComponent { get; set; }
