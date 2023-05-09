@@ -4,7 +4,7 @@ using BlogFodder.Core.Plugins.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BlogFodder.Plugins.Authentication.Extensions;
+namespace BlogFodder.Plugins;
 
 public static class ServiceCollectionExtensions
 {

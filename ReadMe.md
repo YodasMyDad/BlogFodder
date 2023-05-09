@@ -18,6 +18,8 @@ It's very simple right now, it has no authentication, and is just a simple front
 
 The admin (/admin) section is where I have been focusing, and you can create a simple post which currently has two POC plugins available, A Rich Text Editor & Markdown Editor. Where you can create the post content content sections, sort them etc...
 
+To get it running, just make sure BlogFodder.App is set as the Start Up project, and you have restored all the nuget packages.
+
 ### Current Plugins
 
 The final concept will be users can create Nuget packages that just reference the `BlogFodder.Plugins` project/nuget package (When the nuget package is created). That's it. Oh, also, all plugins Namespaces must start with BlogFodder.Plugins.XX (Again, all this is subject to change)
@@ -56,7 +58,7 @@ You can create your own Storage provider for saving files. The app comes with th
 
 While the login/authentication hasn't been hooked up yet, the site is using .Net Identity as the authentication provider, but will only allow login via external providers. This was all the password management can be handled by the providers.
 
-You can add External Authentication providers by Implementing the `IExternalAuthenticationProvider`. The site will launch with 3 existing providers already created which are Facebook, Google & Microsoft. You can see the code for these providers in `BlogFodder.Core`
+You can add External Authentication providers by Implementing the `IExternalAuthenticationProvider`. The site will launch with 3 existing providers already created which are Facebook, Google & Microsoft. You can see the code for these providers in `BlogFodder.Plugins` project
 
 #### IPostPlugin
 
@@ -69,6 +71,8 @@ You can add External Authentication providers by Implementing the `IExternalAuth
 #### IRenderPlugin
 
 *Coming soon*. This plugin will be executed in middleware and will allow you to manipulate the final HTML of the page before it gets to the user.
+
+Some ideas for this will be replace keys in the content, for example, you have have something `#Year#` in the content and that is replaced with the current year **2023**
 
 #### Theme Customisation
 

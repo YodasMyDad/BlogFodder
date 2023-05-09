@@ -4,7 +4,7 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Settings;
-using BlogFodder.Plugins.Authentication.Extensions;
+using BlogFodder.Plugins;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Extensions;
