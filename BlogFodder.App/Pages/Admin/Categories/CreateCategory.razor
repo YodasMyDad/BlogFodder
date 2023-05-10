@@ -1,0 +1,92 @@
+@page "/admin/createcategory"
+@page "/admin/createcategory/{Id:guid}"
+@layout AdminLayout
+<PageTitle>Create Category</PageTitle>
+@if (Errors.Length > 0)
+{
+    <MudAlert Severity="Severity.Error" Class="my-2">
+        @foreach (var error in Errors)
+        {
+            <MudText>@error</MudText>
+        }
+    </MudAlert>
+}
+<MudForm Model="@CategoryCommand" @ref="@Form" @bind-Errors="@Errors" Validation="@(CommandValidator.ValidateValue)" ValidationDelay="0">
+    <MudTextField Label="Title of this category" Class="my-2"
+                  Counter="1000" MaxLength="1000"
+                  @bind-Value="CategoryCommand.Category.Name" For="@(() => CategoryCommand.Category.Name)" Variant="Variant.Outlined">
+    </MudTextField>
+
+    <MudTabs Outlined="true" Position="Position.Top" Rounded="true" Border="true" KeepPanelsAlive="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+
+        <MudTabPanel Text="Details">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudNumericField @bind-Value="CategoryCommand.Category.SortOrder" Label="Sort Order" Variant="Variant.Outlined" Margin="Margin.Dense" Max="500" For="@(() => CategoryCommand.Category.SortOrder)" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="CategoryCommand.Category.Url" Label="Url" Variant="Variant.Outlined" Margin="Margin.Dense" HelperText="Url is generated from the category title if left blank"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudDatePicker Label="Date Created" Variant="Variant.Outlined" Margin="Margin.Dense" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="CategoryCommand.Category.DateCreated"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudDatePicker Label="Date Updated" Variant="Variant.Outlined" Margin="Margin.Dense" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="CategoryCommand.Category.DateUpdated"/>
+                </MudItem>
+            </MudGrid>
+
+        </MudTabPanel>
+
+        <MudTabPanel Text="SEO">
+
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField Label="Page Title" HelperText="Max. 60 characters" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  @bind-Value="CategoryCommand.Category.PageTitle" For="@(() => CategoryCommand.Category.PageTitle)"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Lines="4" Label="Meta Description" HelperText="Max. 300 characters" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  @bind-Value="CategoryCommand.Category.MetaDescription" For="@(() => CategoryCommand.Category.MetaDescription)"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudField Label="Social Image">
+                        @if (CategoryCommand.Category.SocialImage != null)
+                        {
+                            <MudImage ObjectFit="ObjectFit.Cover" Width="100" Src="@($"{CategoryCommand.Category.SocialImage.Url}?width=100")" Class="rounded"/>
+                        }
+                        @if (CategoryCommand.SocialImage != null)
+                        {
+                            <MudChip Color="Color.Default" OnClose="RemoveSelectedSocialImage">
+                                @CategoryCommand.SocialImage.Name
+                            </MudChip>
+                        }
+                        <MudStack Row="true">
+                            <MudFileUpload T="IBrowserFile" For="@(() => CategoryCommand.SocialImage)" @bind-Files="CategoryCommand.SocialImage" OnFilesChanged="CheckImageSize">
+                                <ButtonTemplate>
+                                    <MudButton HtmlTag="label"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               StartIcon="@Icons.Material.Filled.Image"
+                                               for="@context">
+                                        Upload Image
+                                    </MudButton>
+                                </ButtonTemplate>
+                            </MudFileUpload>
+                            @if (CategoryCommand.Category.SocialImage != null)
+                            {
+                                <MudButton Variant="Variant.Text" OnClick="RemoveSocialImage">Remove Image</MudButton>
+                            }
+                        </MudStack>
+                    </MudField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSwitch @bind-Checked="@CategoryCommand.Category.NoIndex" Label="No Index" Color="Color.Info"/>
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+
+    </MudTabs>
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudButton Variant="Variant.Filled" OnClick="@(async () => await SubmitForm())" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">Save</MudButton>
+    </MudItem>
+</MudForm>

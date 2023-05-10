@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Identity.Models;
 using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Plugins.Models;
@@ -15,6 +16,7 @@ public class BlogFodderDbContext : IdentityDbContext<User, Role, Guid, UserClaim
     }
 
     public DbSet<Post> Posts => Set<Post>();
+    public DbSet<Category> Categories => Set<Category>();
     public DbSet<PostContentItem> PostContentItems => Set<PostContentItem>();
     public DbSet<BlogFodderFile> Files => Set<BlogFodderFile>();
     public DbSet<GlobalSettings> PluginSettings => Set<GlobalSettings>();

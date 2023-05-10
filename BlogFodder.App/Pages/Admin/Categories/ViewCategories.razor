@@ -1,0 +1,82 @@
+@page "/admin/categories"
+@using BlogFodder.Core.Data
+@using BlogFodder.Core.Extensions
+@using BlogFodder.Core.Posts.Commands
+@using BlogFodder.Core.Posts.Models
+@using Humanizer
+@using MediatR
+@using Microsoft.EntityFrameworkCore
+@using BlogFodder.Core.Categories.Models
+@using BlogFodder.Core.Categories.Commands
+@layout AdminLayout
+<PageTitle>View Categories</PageTitle>
+
+<MudTable Items="@Categories" Hover="true" OnRowClick="RowClickEvent" T="Category">
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh>Date Updated</MudTh>
+        <MudTh>Delete</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Date Updated">@context.DateUpdated.Humanize()</MudTd>
+        <MudTd DataLabel="Delete">
+            <MudButton Color="Color.Primary" OnClick="@(() => DeletePost(context))">Delete</MudButton>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    
+    [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] public IMediator Mediator { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] private IDialogService DialogService { get; set; } = default!;
+    
+    public List<Category> Categories { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        SetCategories();
+    }
+
+    private async Task DeletePost(Category category)
+    {
+        var dialogResult = await DialogService.ShowMessageBox(
+            "Warning", 
+            "Once you click delete the category is gone", 
+            yesText:"Delete", cancelText:"Cancel");
+        if (dialogResult == true)
+        {
+            var result = await Mediator.Send(new DeleteCategoryCommand{CategoryId = category.Id}).ConfigureAwait(false);
+            if (result is {Success: false})
+            {
+                foreach (var errorMessage in result.Messages.ErrorMessagesToList())
+                {
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Category Deleted", Severity.Success);
+                SetCategories();
+                StateHasChanged();
+            }   
+        }
+    }
+
+    private void SetCategories()
+    {
+        Categories = DbContext.Categories.AsNoTracking().OrderByDescending(x => x.SortOrder).ToList();
+    }
+    
+    private void RowClickEvent(TableRowClickEventArgs<Category> tableRowClickEventArgs)
+    {
+        NavigationManager.NavigateTo($"/admin/createcategory/{tableRowClickEventArgs.Item.Id}");
+    }
+
+}

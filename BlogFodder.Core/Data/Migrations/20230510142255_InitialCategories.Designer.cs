@@ -3,6 +3,7 @@ using System;
 using BlogFodder.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    partial class BlogFodderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230510142255_InitialCategories")]
+    partial class InitialCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -21,6 +24,9 @@ namespace BlogFodder.Core.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CategoryImageId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DateCreated")
@@ -62,6 +68,8 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryImageId");
 
                     b.HasIndex("SocialImageId");
 
@@ -436,9 +444,15 @@ namespace BlogFodder.Core.Data.Migrations
 
             modelBuilder.Entity("BlogFodder.Core.Categories.Models.Category", b =>
                 {
+                    b.HasOne("BlogFodder.Core.Media.Models.BlogFodderFile", "CategoryImage")
+                        .WithMany()
+                        .HasForeignKey("CategoryImageId");
+
                     b.HasOne("BlogFodder.Core.Media.Models.BlogFodderFile", "SocialImage")
                         .WithMany()
                         .HasForeignKey("SocialImageId");
+
+                    b.Navigation("CategoryImage");
 
                     b.Navigation("SocialImage");
                 });

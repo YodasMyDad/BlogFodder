@@ -30,7 +30,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         var fileIdToDelete = new List<Guid>();
         
         // Set any empty values like the Url
-        if (request.Post.Url.IsNullOrWhiteSpace() || request.Post.Url.IsNullOrWhiteSpace())
+        if (request.Post.Url.IsNullOrWhiteSpace())
         {
             request.Post.Url = _slugHelper.GenerateSlug(request.Post.Name);
         }
@@ -145,12 +145,12 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
     /// Saves the BrowserFile as a BlogFodderFile using the set StorageProvider
     /// </summary>
     /// <param name="browserFile"></param>
-    /// <param name="postId"></param>
+    /// <param name="id"></param>
     /// <param name="result"></param>
     /// <returns></returns>
-    private async Task<BlogFodderFile?> SaveImage(IBrowserFile browserFile, Guid postId, HandlerResult<Post> result)
+    private async Task<BlogFodderFile?> SaveImage(IBrowserFile browserFile, Guid id, HandlerResult<Post> result)
     {
-        var fileSaveResult = await _providerService.StorageProvider!.SaveFile(browserFile, postId.ToString())
+        var fileSaveResult = await _providerService.StorageProvider!.SaveFile(browserFile, id.ToString())
             .ConfigureAwait(false);
         if (!fileSaveResult.Success)
         {
@@ -168,7 +168,6 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
 
         // Save the file first
         _dbContext.Files.Add(file);
-        //await DbContext.SaveChangesAsync().ConfigureAwait(false);
 
         // Set the file to the user
         return file;

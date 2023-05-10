@@ -46,8 +46,6 @@ You can choose which section to add the link to and also add new sections of lin
 }
 ```
 
-
-
 #### IStorageProvider
 
 You can create your own Storage provider for saving files. The app comes with the default `DiskStorageProvider` which stores all files to disk. But you can implement your own version to use say Azure Blob storage. Then you just need to update the `appSettings` to use your version i.e.

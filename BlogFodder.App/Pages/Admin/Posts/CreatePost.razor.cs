@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Utilities;
 
-namespace BlogFodder.App.Pages.Admin;
+namespace BlogFodder.App.Pages.Admin.Posts;
 
 public partial class CreatePost : ComponentBase
 {

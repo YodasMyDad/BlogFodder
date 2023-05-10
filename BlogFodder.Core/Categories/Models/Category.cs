@@ -1,37 +1,24 @@
-﻿using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Media.Models;
+using BlogFodder.Core.Posts.Models;
 
-namespace BlogFodder.Core.Posts.Models;
+namespace BlogFodder.Core.Categories.Models;
 
-public class Post
+public class Category
 {
     public Guid Id { get; set; } = Guid.NewGuid().NewSequentialGuid();
     public string? Name { get; set; }
+    public int SortOrder { get; set; }
     public DateTime? DateCreated { get; set; } = DateTime.UtcNow;
     public DateTime? DateUpdated { get; set; } = DateTime.UtcNow;
-    
-    public string? Excerpt { get; set; } 
-    
-    public int AuthorId { get; set; }
 
-    public Guid? FeaturedImageId { get; set; }
-    public virtual BlogFodderFile? FeaturedImage { get; set; }
-    
-    // TODO - Tags, Categories?
-    
     // SEO
     public string? PageTitle { get; set; }
     public string? MetaDescription { get; set; }
     public bool NoIndex { get; set; }
-    
     public Guid? SocialImageId { get; set; }
     public virtual BlogFodderFile? SocialImage { get; set; }
     public string? Url { get; set; }
-    
     public Dictionary<string, string> ExtendedData { get; set; } = new();
-
-    public List<PostContentItem> ContentItems { get; set; } = new();
-    
-    public List<Category> Categories { get; set; } = new();
+    public List<Post> Posts { get; set; } = new();
 }
