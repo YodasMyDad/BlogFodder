@@ -1,5 +1,7 @@
 using System.Text.Json;
 using BlogFodder.App.Pages.Admin.Dialogs;
+using BlogFodder.Core.Categories.Commands;
+using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
@@ -35,11 +37,15 @@ public partial class CreatePost : ComponentBase
     private string? SelectedEditorAlias { get; set; }
     private MudForm Form { get; set; } = default!;
     private CreateUpdatePostCommandValidator CommandValidator { get; set; } = new();
+    private List<Category> Categories { get; set; } = new();
+    private Category? SelectedCategory { get; set; }
+    private IEnumerable<Category> SelectedCategories { get; set; } = new HashSet<Category>();
     private string?[] Errors { get; set; } =  Array.Empty<string>();
     private const string DefaultDropZoneSelector = "plugins";
-    protected override void OnInitialized()
+    
+    protected override async Task OnInitializedAsync()
     {
-
+        Categories = await Mediator.Send(new GetCategoriesCommand()).ConfigureAwait(false);
         // See if this is an edit or not
         if (Id != null)
         {
@@ -48,6 +54,7 @@ public partial class CreatePost : ComponentBase
                 .Include(x => x.ContentItems)
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
+                .Include(x => x.Categories)
                 .FirstOrDefault(x => x.Id == Id.Value);
             
             if (dbPost != null)
@@ -59,6 +66,8 @@ public partial class CreatePost : ComponentBase
                 {
                     postContentItem.Selector = DefaultDropZoneSelector;
                 }
+
+                SelectedCategories = dbPost.Categories;
 
                 PostCommand.IsUpdate = true;
             }
@@ -72,6 +81,8 @@ public partial class CreatePost : ComponentBase
         }
     }
 
+    private readonly Func<Category,string> _categoryToName = p => p.Name ?? "Missing Category Name";
+    
     /// <summary>
     /// Refreshes the dop list to show new data
     /// </summary>
@@ -247,6 +258,8 @@ public partial class CreatePost : ComponentBase
                 Errors = new[] {"You need to add some content"};
                 return;
             }
+
+            PostCommand.Post.Categories = SelectedCategories.ToList();
             
             // Call mediatr and return and check for errors
             // Send the email

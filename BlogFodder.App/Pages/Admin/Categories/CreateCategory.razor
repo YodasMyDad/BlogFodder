@@ -22,7 +22,7 @@
         <MudTabPanel Text="Details">
             <MudGrid>
                 <MudItem xs="12">
-                    <MudNumericField @bind-Value="CategoryCommand.Category.SortOrder" Label="Sort Order" Variant="Variant.Outlined" Margin="Margin.Dense" Max="500" For="@(() => CategoryCommand.Category.SortOrder)" />
+                    <MudNumericField @bind-Value="CategoryCommand.Category.SortOrder" Label="Sort Order" Variant="Variant.Outlined" Margin="Margin.Dense" Max="500" For="@(() => CategoryCommand.Category.SortOrder)"/>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField @bind-Value="CategoryCommand.Category.Url" Label="Url" Variant="Variant.Outlined" Margin="Margin.Dense" HelperText="Url is generated from the category title if left blank"></MudTextField>

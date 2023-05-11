@@ -1,6 +1,7 @@
 @page "/admin/createpost"
 @page "/admin/createpost/{Id:guid}"
 @using BlogFodder.Core.Posts.Models
+@using BlogFodder.Core.Categories.Models
 @layout AdminLayout
 <PageTitle>Create Post</PageTitle>
 @if (Errors.Length > 0)
@@ -58,6 +59,14 @@
                     </MudField>
                 </MudItem>
                 <MudItem xs="12">
+                    <MudSelect MultiSelection="true" @bind-Value="SelectedCategory" ToStringFunc="@_categoryToName" @bind-SelectedValues="SelectedCategories" T="Category" Label="Categories" AdornmentIcon="@Icons.Material.Filled.Search" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var category in Categories.OrderBy(x => x.SortOrder))
+                        {
+                            <MudSelectItem T="Category" Value="@category">@category.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12">
                     <MudTextField @bind-Value="PostCommand.Post.Url" Label="Url" Variant="Variant.Outlined" Margin="Margin.Dense" HelperText="Url is generated from the post title if left blank"></MudTextField>
                 </MudItem>
                 <MudItem xs="12">
@@ -99,7 +108,7 @@
                         <MudCard @onclick="() => ShowEditor(context)" Elevation="2" Class="rounded-lg pb-4">
                             <MudCardContent>
                                 <div class="d-flex align-content-center flex-grow-1 gap-4">
-                                    <MudIcon Icon="@Icons.Material.Outlined.ControlCamera" Color="Color.Default" />
+                                    <MudIcon Icon="@Icons.Material.Outlined.ControlCamera" Color="Color.Default"/>
                                     <div class="flex-grow-1">
                                         <DynamicComponent Type="@AvailableEditorPlugins[context.PluginAlias!].Editor?.PreviewComponent"
                                                           Parameters="@(new Dictionary<string, object> {{"PostContentItem", context}})"/>
@@ -162,9 +171,9 @@
         </MudTabPanel>
 
         <MudTabPanel Text="Plugins">
-            
+
             TODO
-            
+
         </MudTabPanel>
 
     </MudTabs>
