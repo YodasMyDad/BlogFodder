@@ -20,6 +20,8 @@ public class CategoryDbMapping : IEntityTypeConfiguration<Category>
         builder.Property(x => x.Url).HasMaxLength(500);
         builder.Property(x => x.ExtendedData).ToJsonConversion(4000);
         
+        builder.HasIndex(x => x.Url).HasDatabaseName("IX_CategoryUrl");
+        
         // Many to many
         builder.HasMany(e => e.Posts)
                 .WithMany(e => e.Categories);

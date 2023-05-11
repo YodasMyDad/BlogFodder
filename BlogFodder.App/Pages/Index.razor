@@ -1,10 +1,10 @@
 ﻿@page "/"
 @using BlogFodder.Core.Data
+@using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
 @using BlogFodder.Core.Shared.Models
-@using Humanizer
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
 
@@ -38,21 +38,17 @@
 
     protected override void OnInitialized()
     {
-        //TODO - This will be via a service/Mediatr
-        var count = DbContext.Posts.AsNoTracking().Count();
-        Posts = new PaginatedList<Post>(DbContext.Posts
+        Posts = DbContext.Posts
+            .AsQueryable()
             .Include(x => x.FeaturedImage)
-            .Include(x => x.SocialImage)
-            .AsNoTracking().OrderByDescending(x => x.DateUpdated), count,1,18);
+            .Include(x => x.Categories)
+            .AsNoTracking()
+            .OrderByDescending(x => x.DateUpdated)
+            .ToPaginatedList(0,18);
     }
 
     protected override void OnParametersSet()
     {
         PostListComponent = Settings.Value.FrontEnd.PostListComponent!;
-    }
-
-    void NavigateToAdmin()
-    {
-        NavigationManager.NavigateTo("/admin", true);
     }
 }

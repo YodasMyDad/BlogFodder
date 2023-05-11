@@ -11,11 +11,12 @@ public class PaginatedList<T>
     {
     }
 
-    public PaginatedList(IEnumerable<T> items, int count, int pageIndex, int pageSize)
+    public PaginatedList(IQueryable<T> items, int pageIndex, int pageSize)
     {
-        PageIndex = pageIndex;
+        var count = items.Count();
+        PageIndex = pageIndex-1;
         TotalPages = (int) Math.Ceiling(count / (double) pageSize);
-        Items = items;
+        Items = items.Skip(pageIndex * pageSize).Take(pageSize).ToList();
         TotalItems = count;
     }
 

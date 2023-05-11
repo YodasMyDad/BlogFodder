@@ -12,6 +12,8 @@ public class Category
     public DateTime? DateCreated { get; set; } = DateTime.UtcNow;
     public DateTime? DateUpdated { get; set; } = DateTime.UtcNow;
 
+    public int PostsPerPage { get; set; } = 10;
+    
     // SEO
     public string? PageTitle { get; set; }
     public string? MetaDescription { get; set; }

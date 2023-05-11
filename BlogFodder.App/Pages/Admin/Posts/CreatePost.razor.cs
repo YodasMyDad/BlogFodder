@@ -45,7 +45,8 @@ public partial class CreatePost : ComponentBase
     
     protected override async Task OnInitializedAsync()
     {
-        Categories = await Mediator.Send(new GetCategoriesCommand()).ConfigureAwait(false);
+        Categories = await DbContext.Categories.ToListAsync();
+        
         // See if this is an edit or not
         if (Id != null)
         {

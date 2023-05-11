@@ -52,4 +52,17 @@ public static class DbContextExtensions
 
         return crudResult;
     }
+
+    /// <summary>
+    /// Returns paginated list from a queryable
+    /// </summary>
+    /// <param name="items"></param>
+    /// <param name="pageIndex"></param>
+    /// <param name="pageSize"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static PaginatedList<T> ToPaginatedList<T>(this IQueryable<T> items, int pageIndex, int pageSize)
+    {
+        return new PaginatedList<T>(items,0,18);
+    }
 }

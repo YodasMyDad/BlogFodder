@@ -22,6 +22,11 @@
         <MudTabPanel Text="Details">
             <MudGrid>
                 <MudItem xs="12">
+                    <MudNumericField @bind-Value="CategoryCommand.Category.PostsPerPage" Label="Posts Per Page" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                     HelperText="How many posts are displayed"
+                                     Max="100" For="@(() => CategoryCommand.Category.SortOrder)"/>
+                </MudItem>
+                <MudItem xs="12">
                     <MudNumericField @bind-Value="CategoryCommand.Category.SortOrder" Label="Sort Order" Variant="Variant.Outlined" Margin="Margin.Dense" Max="500" For="@(() => CategoryCommand.Category.SortOrder)"/>
                 </MudItem>
                 <MudItem xs="12">
@@ -34,7 +39,6 @@
                     <MudDatePicker Label="Date Updated" Variant="Variant.Outlined" Margin="Margin.Dense" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="CategoryCommand.Category.DateUpdated"/>
                 </MudItem>
             </MudGrid>
-
         </MudTabPanel>
 
         <MudTabPanel Text="SEO">

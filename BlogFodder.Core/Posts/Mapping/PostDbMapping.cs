@@ -23,5 +23,7 @@ public class PostDbMapping : IEntityTypeConfiguration<Post>
         builder.Property(x => x.MetaDescription).HasMaxLength(350);
         builder.Property(x => x.Url).HasMaxLength(500);
         builder.Property(x => x.ExtendedData).ToJsonConversion(4000);
+        
+        builder.HasIndex(x => x.Url).HasDatabaseName("IX_PostUrl");
     }
 }

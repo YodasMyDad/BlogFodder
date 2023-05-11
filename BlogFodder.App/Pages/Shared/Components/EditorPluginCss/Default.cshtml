@@ -2,5 +2,5 @@
 
 @foreach (var cssFile in Model)
 {
-    <link rel="stylesheet" href="@cssFile" asp-append-version="true"/>
+    <link rel="stylesheet" href="@cssFile" @Html.Raw(cssFile.StartsWith("http") ? "crossorigin=\"anonymous\"" : "") asp-append-version="true"/>
 }

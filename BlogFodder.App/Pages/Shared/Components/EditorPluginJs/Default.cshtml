@@ -2,5 +2,5 @@
 
 @foreach (var jsFile in Model)
 {
-    <script src="@jsFile" asp-append-version="true"></script>
+    <script src="@jsFile" @Html.Raw(jsFile.StartsWith("http") ? "crossorigin=\"anonymous\"" : "") asp-append-version="true"></script>
 }

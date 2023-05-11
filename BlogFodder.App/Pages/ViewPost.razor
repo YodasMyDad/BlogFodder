@@ -1,56 +1,36 @@
-@page "/post/{Slug}"
+@page "/p/{Slug}"
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Data
-@using BlogFodder.Core.Plugins.Interfaces
 @using BlogFodder.Core.Posts.Models
-@using Humanizer
+@using BlogFodder.Core.Settings
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
 <PageTitle>@Post.PageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Post.MetaDescription">
+    @if (Post.NoIndex)
+    {
+        <meta name="robots" content="noindex">   
+    }
     @*
-    //TODO - Need to add Schema and open graph tags etc... including noindex
+    //TODO - Need to add Schema and open graph/social tags etc... including noindex
     *@
 </HeadContent>
 
+@if (CanBeFound)
+{
+    @ExtensionManager.CreateComponent(PostViewComponent, new Dictionary<string, object>
+    {
+        {"Post", Post}
+    })
+}
+else
+{
+    <h1>Unable to find the post by the url</h1>
+    <p>Need to make this return a 404!</p>
+}
 
-<div class="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-4">
-    <div class="lg:col-span-3 lg:col-start-1">
-        <div>
-            <div class="flex-shrink-0">
-                <img class="h-48 w-full object-cover" src="@Post.FeaturedImage?.Url?width=900" alt="">
-            </div>
-            <div class="mx-auto max-w-xl">
-                <p class="block text-center text-sm text-indigo-600">Last Updated: @Post.DateUpdated.Humanize()</p>
-                <h1 class="mt-2 block text-center text-3xl font-bold leading-8 tracking-tight text-gray-900 sm:text-4xl">
-                    @Post.Name
-                </h1>
-            </div>
-            <div class="prose prose-lg prose-indigo mx-auto mt-6 text-gray-500">
-                @if (!CanBeFound)
-                {
-                    <h1>Unable to find the post by the url</h1>
-                    <p>Need to make this return a 404!</p>
-                }
-                else
-                {
-                    foreach (var postContentItem in Post.ContentItems)
-                    {
-                        @* TODO - Margin and padding should be on the content items so can adjust per post/per content item *@
-                        <div class="postContentItem my-4">
-                            <DynamicComponent Type="@AvailableEditorPlugins[postContentItem.PluginAlias!].Content.Component"
-                                              Parameters="@(new Dictionary<string, object> {{"Model", postContentItem.PluginData ?? ""}})"/>
-                        </div>
-                    }
-                }
-            </div>
-        </div>
-    </div>
-    <div class="lg:col-span-1 lg:col-start-4">
-        This is column two, Need to add plugins here
-    </div>
-</div>
 
 @code {
 
@@ -58,22 +38,24 @@
     public string? Slug { get; set; }
 
     [Inject]
-    public ExtensionManager ExtensionManager { get; set; } = default!;
-
-    [Inject]
     public BlogFodderDbContext DbContext { get; set; } = default!;
+    
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+    
+    [Inject]
+    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+    
+    private string PostViewComponent { get; set; } = ""; 
 
     private Post Post { get; set; } = new();
 
     private bool CanBeFound { get; set; }
-    private Dictionary<string, IEditorPlugin> AvailableEditorPlugins { get; set; } = new();
 
     protected override void OnInitialized()
     {
         if (!Slug.IsNullOrWhiteSpace())
         {
-    // TODO - Again, this all needs to be done in a service or mediatr call
-    // Get this post by slug
             var post = DbContext.Posts
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
@@ -82,13 +64,12 @@
             {
                 CanBeFound = true;
                 Post = post;
-                var editorPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true);
-                foreach (var plugin in editorPlugins)
-                {
-                    AvailableEditorPlugins.Add(plugin.Value.Alias, plugin.Value);
-                }
             }
         }
     }
-
+    
+    protected override void OnParametersSet()
+    {
+        PostViewComponent = Settings.Value.FrontEnd.PostViewComponent!;
+    }
 }

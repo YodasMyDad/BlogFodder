@@ -38,6 +38,7 @@ public class FrontEndSettings
     public string? FooterComponent { get; set; }
     public string? PostListComponent { get; set; }
     public string? PostListItemComponent { get; set; }
+    public string? PostViewComponent { get; set; }
     public List<string> Styles { get; set; } = new();
     public List<string> Scripts { get; set; } = new();
 }

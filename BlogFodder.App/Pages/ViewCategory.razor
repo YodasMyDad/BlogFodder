@@ -1,0 +1,90 @@
+@page "/c/{Slug}"
+@using BlogFodder.Core.Extensions
+@using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Data
+@using BlogFodder.Core.Posts.Models
+@using Microsoft.EntityFrameworkCore
+@using BlogFodder.Core.Categories.Models
+@using BlogFodder.Core.Settings
+@using BlogFodder.Core.Shared.Models
+@using Microsoft.Extensions.Options
+<PageTitle>@Category.PageTitle</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Category.MetaDescription">
+    @if (Category.NoIndex)
+    {
+        <meta name="robots" content="noindex">   
+    }
+</HeadContent>
+
+@if (CanBeFound)
+{
+    if (Posts.Items.Any())
+    {
+        @ExtensionManager.CreateComponent(PostListComponent, new Dictionary<string, object>
+        {
+            {"Posts", Posts}
+        })   
+    }
+    else
+    {
+        <p>There are no posts in this category</p>
+    }
+}
+else
+{
+    <h1>Unable to find the category by the url</h1>
+    <p>Need to make this return a 404!</p>
+}
+
+@code {
+
+    [Parameter]
+    public string? Slug { get; set; }
+
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+
+    [Inject]
+    public BlogFodderDbContext DbContext { get; set; } = default!;
+    
+    [Inject]
+    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+
+    private Category Category { get; set; } = new();
+    
+    private PaginatedList<Post> Posts { get; set; } = new();
+
+    private bool CanBeFound { get; set; }
+    
+    private string PostListComponent { get; set; } = ""; 
+    
+    
+    protected override void OnParametersSet()
+    {
+        PostListComponent = Settings.Value.FrontEnd.PostListComponent!;
+        
+        if (!Slug.IsNullOrWhiteSpace())
+        {
+            var category = DbContext.Categories
+                .Include(x => x.SocialImage)
+                .AsNoTracking().FirstOrDefault(x => x.Url == Slug);
+            
+            if (category != null)
+            {
+                CanBeFound = true;
+                Category = category;
+                var postsPerPage = category.PostsPerPage > 0 ? category.PostsPerPage : 10;
+                
+                // Get the posts
+                Posts = DbContext.Posts
+                    .Include(x => x.Categories)
+                    .Include(x => x.FeaturedImage)
+                    .AsNoTracking()
+                    .Where(x => x.Categories.Any(c => c.Id == category.Id))
+                    .OrderByDescending(x => x.DateUpdated)
+                    .ToPaginatedList(0,postsPerPage);
+            }
+        }
+    }
+}
