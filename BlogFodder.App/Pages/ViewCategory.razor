@@ -24,7 +24,19 @@
         @ExtensionManager.CreateComponent(PostListComponent, new Dictionary<string, object>
         {
             {"Posts", Posts}
-        })   
+        })
+        
+        @ExtensionManager.CreateComponent(PaginationComponent, new Dictionary<string, object>
+        {
+            {"CurrentPage", Posts.PageIndex+1},
+            {"PageCount", Posts.TotalPages},
+            {"OnPageChanged", new Func<int, Task>(async e => { CurrentPage = e; await GetPosts();})},
+            {"ShowFirstLast", false},
+            {"ShowPageNumbers", true},
+            {"VisiblePages", 8},
+            {"FirstText", "First"},
+            {"LastText", "Last"}
+        })
     }
     else
     {
@@ -57,12 +69,30 @@ else
 
     private bool CanBeFound { get; set; }
     
-    private string PostListComponent { get; set; } = ""; 
+    private string PostListComponent { get; set; } = "";
+    private string PaginationComponent { get; set; } = "";
+
+    private int CurrentPage { get; set; } = 1;
+    private int PostsPerPage { get; set; } = 10;
     
+    private async Task GetPosts()
+    {
+        Posts = DbContext.Posts
+            .AsQueryable()
+            .Include(x => x.FeaturedImage)
+            .Include(x => x.Categories)
+            .Where(x => x.Categories.Any(c => c.Id == Category.Id))
+            .AsNoTracking()
+            .OrderByDescending(x => x.DateUpdated)
+            .ToPaginatedList(CurrentPage,PostsPerPage);
+        
+        StateHasChanged();
+    }
     
     protected override void OnParametersSet()
     {
         PostListComponent = Settings.Value.FrontEnd.PostListComponent!;
+        PaginationComponent = Settings.Value.FrontEnd.PaginationComponent!;
         
         if (!Slug.IsNullOrWhiteSpace())
         {
@@ -74,16 +104,10 @@ else
             {
                 CanBeFound = true;
                 Category = category;
-                var postsPerPage = category.PostsPerPage > 0 ? category.PostsPerPage : 10;
+                PostsPerPage = category.PostsPerPage > 0 ? category.PostsPerPage : 10;
                 
                 // Get the posts
-                Posts = DbContext.Posts
-                    .Include(x => x.Categories)
-                    .Include(x => x.FeaturedImage)
-                    .AsNoTracking()
-                    .Where(x => x.Categories.Any(c => c.Id == category.Id))
-                    .OrderByDescending(x => x.DateUpdated)
-                    .ToPaginatedList(0,postsPerPage);
+                GetPosts();
             }
         }
     }

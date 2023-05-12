@@ -63,6 +63,6 @@ public static class DbContextExtensions
     /// <returns></returns>
     public static PaginatedList<T> ToPaginatedList<T>(this IQueryable<T> items, int pageIndex, int pageSize)
     {
-        return new PaginatedList<T>(items,0,18);
+        return new PaginatedList<T>(items, pageIndex, pageSize);
     }
 }

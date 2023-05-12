@@ -1,0 +1,177 @@
+@*Most of this code is from https://github.com/villainoustourist/Blazor.Pagination so kudos*@
+
+<style>
+    .sort-link {
+        cursor: pointer;
+    }
+
+/*    .noselect {
+        -webkit-touch-callout: none; !* iOS Safari *!
+        -webkit-user-select: none; !* Safari *!
+        -khtml-user-select: none; !* Konqueror HTML *!
+        -moz-user-select: none; !* Firefox *!
+        -ms-user-select: none; !* Internet Explorer/Edge *!
+        user-select: none; !* Non-prefixed version, currently
+                                  supported by Chrome and Opera *!
+    }*/
+</style>
+
+
+@if (PageCount > 1)
+{
+    var adjusted = Math.Min(VisiblePages, PageCount);
+    var half = (int) Math.Floor(adjusted / 2d);
+    var start = Math.Max(CurrentPage - half, 1);
+    var finish = Math.Min(CurrentPage + half, PageCount);
+    if (start <= 1)
+    {
+        start = 1;
+        finish = adjusted;
+    }
+    if (finish >= PageCount)
+    {
+        start = PageCount - adjusted;
+    }
+    if (start <= 1)
+    {
+        start = 1;
+    }
+    var hasPrevious = CurrentPage > 1 && PageCount > 1;
+    var hasNext = CurrentPage < PageCount;
+    <div class="container">
+        <div class="py-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @if (ShowFirstLast)
+                    {
+                        if (CurrentPage == 1)
+                        {
+                            <li class="page-item disabled noselect">
+                                <a class="page-link" tabindex="-1">
+                                    @FirstText
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item noselect">
+                                <a class="page-link sort-link" @onclick="@(() => PagerButtonClicked(1))">
+                                    @FirstText
+                                </a>
+                            </li>
+                        }
+                    }
+                    @if (hasPrevious)
+                    {
+                        <li class="page-item noselect">
+                            <a class="page-link sort-link" @onclick="@(() => PagerButtonClicked(CurrentPage - 1))">
+                                @PreviousText
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled noselect">
+                            <a class="page-link" tabindex="-1">
+                                @PreviousText
+                            </a>
+                        </li>
+                    }
+                    @if (ShowPageNumbers)
+                    {
+                        for (var i = start; i <= finish; i++)
+                        {
+                            var currentIndex = i;
+                            if (i == CurrentPage)
+                            {
+                                <li class="page-item active noselect">
+                                    <a class="page-link">@i</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item noselect">
+                                    <a class="page-link sort-link" @onclick="@(() => PagerButtonClicked(currentIndex))">@currentIndex</a>
+                                </li>
+                            }
+                        }
+                    }
+                    @if (hasNext)
+                    {
+                        <li class="page-item">
+                            <a class="page-link sort-link" @onclick="@(() => PagerButtonClicked(CurrentPage + 1))">
+                                @NextText
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">
+                                @NextText
+                            </a>
+                        </li>
+                    }
+                    @if (ShowFirstLast)
+                    {
+                        if (CurrentPage == PageCount)
+                        {
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">
+                                    @LastText
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link sort-link" @onclick="@(() => PagerButtonClicked(PageCount))">
+                                    @LastText
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public int PageCount { get; set; }
+
+    [Parameter]
+    public int CurrentPage { get; set; }
+
+    [Parameter]
+    public Func<int, Task> OnPageChanged { get; set; } = null;
+
+    [Parameter]
+    public bool ShowFirstLast { get; set; } = false;
+
+    [Parameter]
+    public bool ShowPageNumbers { get; set; } = true;
+
+    [Parameter]
+    public string FirstText { get; set; } = "First";
+
+    [Parameter]
+    public string LastText { get; set; } = "Last";
+
+    [Parameter]
+    public string PreviousText { get; set; } = "Previous";
+
+    [Parameter]
+    public string NextText { get; set; } = "Next";
+
+    [Parameter]
+    public int VisiblePages { get; set; } = 5;
+
+    private void PagerButtonClicked(int page)
+    {
+        OnPageChanged?.Invoke(page);
+    }
+
+}

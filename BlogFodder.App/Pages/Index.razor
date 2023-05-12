@@ -18,6 +18,29 @@
     {"Posts", Posts}
 })
 
+@ExtensionManager.CreateComponent(PaginationComponent, new Dictionary<string, object>
+{
+    {"CurrentPage", Posts.PageIndex+1},
+    {"PageCount", Posts.TotalPages},
+    {"OnPageChanged", new Func<int, Task>(async e => { CurrentPage = e; await GetPosts();})},
+    {"ShowFirstLast", false},
+    {"ShowPageNumbers", true},
+    {"VisiblePages", 8},
+    {"FirstText", "First"},
+    {"LastText", "Last"}
+})
+
+@*
+<Pagination CurrentPage="@(Posts.PageIndex+1)"
+         PageCount="@Posts.TotalPages"
+         OnPageChanged="async e => { CurrentPage = e; await GetPosts();}"
+         ShowFirstLast="false"
+         ShowPageNumbers="true"
+         VisiblePages="10"
+         FirstText="First"
+         LastText="Last" />    
+         *@
+
 @code
 {
     [Inject]
@@ -32,11 +55,14 @@
     [Inject]
     IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
 
-    public PaginatedList<Post> Posts { get; set; } = new();
+    private PaginatedList<Post> Posts { get; set; } = new();
 
-    private string PostListComponent { get; set; } = ""; 
+    private string PostListComponent { get; set; } = "";
+    private string PaginationComponent { get; set; } = "";
 
-    protected override void OnInitialized()
+    private int CurrentPage { get; set; } = 1;
+
+    private async Task GetPosts()
     {
         Posts = DbContext.Posts
             .AsQueryable()
@@ -44,11 +70,15 @@
             .Include(x => x.Categories)
             .AsNoTracking()
             .OrderByDescending(x => x.DateUpdated)
-            .ToPaginatedList(0,18);
+            .ToPaginatedList(CurrentPage,1);
+        
+        StateHasChanged();
     }
 
     protected override void OnParametersSet()
     {
         PostListComponent = Settings.Value.FrontEnd.PostListComponent!;
+        PaginationComponent = Settings.Value.FrontEnd.PaginationComponent!;
+        GetPosts();
     }
 }

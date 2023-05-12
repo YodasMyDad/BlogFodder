@@ -1,5 +1,3 @@
-using System.Net.Http.Headers;
-
 namespace BlogFodder.Core.Settings;
 
 public class BlogFodderSettings
@@ -39,6 +37,7 @@ public class FrontEndSettings
     public string? PostListComponent { get; set; }
     public string? PostListItemComponent { get; set; }
     public string? PostViewComponent { get; set; }
+    public string? PaginationComponent { get; set; }
     public List<string> Styles { get; set; } = new();
     public List<string> Scripts { get; set; } = new();
 }

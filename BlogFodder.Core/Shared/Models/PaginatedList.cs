@@ -16,7 +16,8 @@ public class PaginatedList<T>
         var count = items.Count();
         PageIndex = pageIndex-1;
         TotalPages = (int) Math.Ceiling(count / (double) pageSize);
-        Items = items.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+        var skip = PageIndex * pageSize;
+        Items = skip > 0 ? items.Skip(skip).Take(pageSize).ToList() : items.Take(pageSize).ToList();
         TotalItems = count;
     }
 
