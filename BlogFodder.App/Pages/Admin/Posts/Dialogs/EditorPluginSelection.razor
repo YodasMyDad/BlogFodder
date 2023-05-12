@@ -1,0 +1,54 @@
+@using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Plugins.Interfaces
+<MudDialog Class="mud-ex-dialog-initial">
+    <DialogContent>
+
+        <MudGrid>
+            @foreach (var editor in Plugins)
+            {
+                <MudItem xs="12">
+                    <MudCard @onclick="@(() => SelectEditor(editor.Value))" Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
+                        <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
+                            <MudIcon Icon="@editor.Value.Icon" Color="Color.Default"/>
+                            <div class="flex-grow-1">
+                                <div style="color: @Colors.BlueGrey.Lighten1">
+                                    <MudText Typo="Typo.subtitle1">@editor.Value.Name</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.body1">@editor.Value.Description</MudText>
+                                </div>
+                            </div>
+                            <MudIcon Color="Color.Secondary" Icon="@Icons.Material.Filled.AddCircle"/>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    private Dictionary<string, IEditorPlugin> Plugins { get; set; } = new();
+
+    private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
+
+    private void SelectEditor(IEditorPlugin editor)
+    {
+        MudDialog.Close(DialogResult.Ok(editor));
+    }
+
+    protected override void OnInitialized()
+    {
+        Plugins = ExtensionManager.GetInstances<IEditorPlugin>(true);
+    }
+
+}

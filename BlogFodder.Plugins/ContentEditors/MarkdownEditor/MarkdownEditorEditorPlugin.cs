@@ -9,6 +9,7 @@ public class MarkdownEditorEditorPlugin : IEditorPlugin
     public string Alias => "MarkdownEditorPlugin";
     public string Name => "Markdown Editor";
     public string Description => "Plugin that uses a Markdown editor";
+    public string Icon => Icons.Material.Filled.ModeEdit;
 
     public EditorPlugin? Editor { get; set; } = new ()
     {

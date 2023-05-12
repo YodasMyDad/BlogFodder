@@ -31,7 +31,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.4" />
-        <PackageReference Include="MudBlazor" Version="6.2.2" />
+        <PackageReference Include="MudBlazor" Version="6.2.3" />
         <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
         <PackageReference Include="SixLabors.ImageSharp.Web" Version="3.0.1" />
     </ItemGroup>

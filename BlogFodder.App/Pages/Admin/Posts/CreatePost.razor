@@ -81,21 +81,9 @@
 
         <MudTabPanel Text="Content">
 
-            <MudGrid Row="true">
-                <MudItem>
-                    <MudSelect Style="width: 400px" T="string" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               ValueChanged="SelectedEditorChanged"
-                               Label="Choose your content type" AnchorOrigin="Origin.BottomCenter">
-                        @foreach (var editor in AvailableEditorPlugins)
-                        {
-                            <MudSelectItem Value="@editor.Key">@editor.Value.Name</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
-                <MudItem>
-                    <MudFab OnClick="AddNewContentItem" Color="Color.Primary" Size="Size.Medium" StartIcon="@Icons.Material.Filled.Add" Label="Add"/>
-                </MudItem>
-            </MudGrid>
+            <MudPaper Class="d-flex justify-center flex-grow-1 gap-4 mb-4" Elevation="0">
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" @onclick="@(ShowContentEditors)">Add Content Editor</MudButton>
+            </MudPaper>
 
             <MudDropContainer T="PostContentItem" @ref="DropContainer" Items="PostCommand.Post.ContentItems" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="DropItemUpdated" Class="d-flex flex-wrap flex-grow-1">
                 <ChildContent>
@@ -105,16 +93,17 @@
                 </ChildContent>
                 <ItemRenderer>
                     <MudItem xs="12" Class="mb-8">
-                        <MudCard @onclick="() => ShowEditor(context)" Elevation="2" Class="rounded-lg pb-4">
-                            <MudCardContent>
-                                <div class="d-flex align-content-center flex-grow-1 gap-4">
-                                    <MudIcon Icon="@Icons.Material.Outlined.ControlCamera" Color="Color.Default"/>
-                                    <div class="flex-grow-1">
-                                        <DynamicComponent Type="@AvailableEditorPlugins[context.PluginAlias!].Editor?.PreviewComponent"
-                                                          Parameters="@(new Dictionary<string, object> {{"PostContentItem", context}})"/>
+                        <MudCard @onclick="() => ShowEditor(context)" Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
+                            <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
+                                <MudIcon Icon="@AvailableEditorPlugins[context.PluginAlias!].Icon" Color="Color.Default"/>
+                                <div class="flex-grow-1">
+                                    <div style="color: @Colors.BlueGrey.Lighten1">
+                                        <MudText Typo="Typo.subtitle1">@AvailableEditorPlugins[context.PluginAlias!].Name</MudText>
                                     </div>
-                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Outlined.RemoveCircleOutline" Size="Size.Medium" OnClick="() => RemoveContentItem(context)"/>
+                                    <DynamicComponent Type="@AvailableEditorPlugins[context.PluginAlias!].Editor?.PreviewComponent"
+                                                      Parameters="@(new Dictionary<string, object> {{"PostContentItem", context}})"/>
                                 </div>
+                                <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Outlined.RemoveCircleOutline" Size="Size.Medium" OnClick="() => RemoveContentItem(context)"/>
                             </MudCardContent>
                         </MudCard>
                     </MudItem>

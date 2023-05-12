@@ -10,10 +10,8 @@ public class RichTextEditorEditorPlugin : IEditorPlugin
     public string Alias => RichTextEditorConstants.PluginAlias;
     public string Name => RichTextEditorConstants.PluginName;
     public string Description => "Plugin that uses the TinyMCE editor";
+    public string Icon => Icons.Material.Filled.EditNote;
 
-    // TODO - Icon?
-    // TODO - What to pull through in block list? I.e. Short description etc...
-    
     public EditorPlugin? Editor { get; set; } = new()
     {
         CssFiles = new List<string>

@@ -18,6 +18,11 @@ public interface IEditorPlugin
     /// Short description of what your plugin is and does
     /// </summary>
     string Description { get; }
+    
+    /// <summary>
+    /// Icon which displays when they are selecting the editor and also in preview list
+    /// </summary>
+    string Icon { get; }
 
     /// <summary>
     /// The plugin for the editor that the user will use to edit and save data

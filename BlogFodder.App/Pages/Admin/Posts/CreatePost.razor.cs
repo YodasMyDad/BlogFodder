@@ -1,6 +1,5 @@
 using System.Text.Json;
-using BlogFodder.App.Pages.Admin.Dialogs;
-using BlogFodder.Core.Categories.Commands;
+using BlogFodder.App.Pages.Admin.Posts.Dialogs;
 using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
@@ -16,6 +15,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using MudBlazor.Extensions;
+using MudBlazor.Extensions.Options;
 using MudBlazor.Utilities;
 
 namespace BlogFodder.App.Pages.Admin.Posts;
@@ -30,23 +31,24 @@ public partial class CreatePost : ComponentBase
     [Inject] public ProviderService ProviderService { get; set; } = default!;
 
     [Parameter] public Guid? Id { get; set; }
-    
+
     private CreateUpdatePostCommand PostCommand { get; set; } = new();
     private Dictionary<string, IEditorPlugin> AvailableEditorPlugins { get; set; } = new();
     private MudDropContainer<PostContentItem>? DropContainer { get; set; }
-    private string? SelectedEditorAlias { get; set; }
     private MudForm Form { get; set; } = default!;
     private CreateUpdatePostCommandValidator CommandValidator { get; set; } = new();
     private List<Category> Categories { get; set; } = new();
     private Category? SelectedCategory { get; set; }
     private IEnumerable<Category> SelectedCategories { get; set; } = new HashSet<Category>();
-    private string?[] Errors { get; set; } =  Array.Empty<string>();
+    private string?[] Errors { get; set; } = Array.Empty<string>();
     private const string DefaultDropZoneSelector = "plugins";
-    
+    private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
+    private DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
+
     protected override async Task OnInitializedAsync()
     {
         Categories = await DbContext.Categories.ToListAsync();
-        
+
         // See if this is an edit or not
         if (Id != null)
         {
@@ -57,7 +59,7 @@ public partial class CreatePost : ComponentBase
                 .Include(x => x.SocialImage)
                 .Include(x => x.Categories)
                 .FirstOrDefault(x => x.Id == Id.Value);
-            
+
             if (dbPost != null)
             {
                 PostCommand.Post = dbPost;
@@ -82,8 +84,8 @@ public partial class CreatePost : ComponentBase
         }
     }
 
-    private readonly Func<Category,string> _categoryToName = p => p.Name ?? "Missing Category Name";
-    
+    private readonly Func<Category, string> _categoryToName = p => p.Name ?? "Missing Category Name";
+
     /// <summary>
     /// Refreshes the dop list to show new data
     /// </summary>
@@ -97,16 +99,6 @@ public partial class CreatePost : ComponentBase
     }
 
     /// <summary>
-    /// When the editor dropdown changes this stores the currently selected editor
-    /// </summary>
-    /// <param name="alias"></param>
-    private void SelectedEditorChanged(string alias)
-    {
-        // Add in 
-        SelectedEditorAlias = alias;
-    }
-
-    /// <summary>
     /// Removes the selected social images
     /// </summary>
     private void RemoveSelectedSocialImage()
@@ -114,7 +106,7 @@ public partial class CreatePost : ComponentBase
         PostCommand.SocialImage = null;
         StateHasChanged();
     }
-    
+
     /// <summary>
     /// Removes the saved social image
     /// </summary>
@@ -124,7 +116,7 @@ public partial class CreatePost : ComponentBase
         PostCommand.Post.SocialImage = null;
         StateHasChanged();
     }
-    
+
     /// <summary>
     /// Removes the featured image
     /// </summary>
@@ -133,7 +125,7 @@ public partial class CreatePost : ComponentBase
         PostCommand.FeaturedImage = null;
         StateHasChanged();
     }
-    
+
     /// <summary>
     /// Removes the featured image
     /// </summary>
@@ -143,7 +135,7 @@ public partial class CreatePost : ComponentBase
         PostCommand.Post.FeaturedImage = null;
         StateHasChanged();
     }
-    
+
     /// <summary>
     /// Checks the image size and notifies the user if the image selected is too large
     /// </summary>
@@ -168,41 +160,8 @@ public partial class CreatePost : ComponentBase
     {
         if (dropItem.Item != null) dropItem.Item.Selector = dropItem.DropzoneIdentifier;
         // TODO - This doesn't seem to set the correct order!
-        PostCommand.Post.ContentItems.UpdateOrder(dropItem, item => item.SortOrder, PostCommand.Post.ContentItems.Count);
-    }
-
-    /// <summary>
-    /// Adds a new content item based on an editor plugin alias
-    /// </summary>
-    private async Task AddNewContentItem()
-    {
-        if (SelectedEditorAlias != null && AvailableEditorPlugins.TryGetValue(SelectedEditorAlias, out var plugin))
-        {
-            var postContentItem = new PostContentItem
-            {
-                PluginAlias = plugin.Alias,
-                Selector = DefaultDropZoneSelector,
-                SortOrder = PostCommand.Post.ContentItems.Count + 1,
-                PostId = PostCommand.Post.Id,
-                IsNew = true
-            };
-
-            if (plugin.Settings != null)
-            {
-                // TODO - Get the global settings from the DB
-                var globalSettings = new GetPluginSettingsCommand
-                {
-                    Alias = plugin.Alias
-                };
-                var result = await Mediator.Send(globalSettings).ConfigureAwait(false);
-                postContentItem.GlobalSettings = result.Success ? 
-                    JsonSerializer.Serialize(result.Entity.Data, new JsonSerializerOptions {WriteIndented = false}) : 
-                    JsonSerializer.Serialize(plugin.Settings.Model, new JsonSerializerOptions {WriteIndented = false});
-            }
-
-            PostCommand.Post.ContentItems.Add(postContentItem);
-            RefreshDopList();
-        }
+        PostCommand.Post.ContentItems.UpdateOrder(dropItem, item => item.SortOrder,
+            PostCommand.Post.ContentItems.Count);
     }
 
     /// <summary>
@@ -214,7 +173,7 @@ public partial class CreatePost : ComponentBase
         PostCommand.Post.ContentItems.Remove(postContentItem);
         RefreshDopList();
     }
-
+    
     /// <summary>
     /// Shows the popup content editor and renders the Plugin Editor
     /// </summary>
@@ -226,8 +185,9 @@ public partial class CreatePost : ComponentBase
             {"ContentItem", contentItem}
         };
 
-        var dialog = await Dialog.ShowAsync<ContentItemEditor>("", parameters,
-            new DialogOptions {MaxWidth = MaxWidth.Medium, FullWidth = true});
+        var dialog = await Dialog.ShowAsync<ContentItemEditor>(AvailableEditorPlugins[contentItem.PluginAlias!].Name, parameters, _defaultDialogOptions);
+
+        /*var dialog = await Dialog.ShowEx<ContentItemEditor>("", parameters, Options);*/
         var result = await dialog.Result;
 
         if (!result.Canceled)
@@ -236,6 +196,46 @@ public partial class CreatePost : ComponentBase
             // to find the one with the Id? And set the data that way?
             contentItem = result.Data as PostContentItem ?? contentItem;
             RefreshDopList();
+        }
+    }
+
+    private async Task ShowContentEditors()
+    {
+        var dialog = await Dialog.ShowAsync<EditorPluginSelection>("Select Content Editor", new DialogParameters(), _defaultDialogOptions);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            // Save the data to this contentItem, or do we have to loop
+            // to find the one with the Id? And set the data that way?
+            var plugin = result.Data as IEditorPlugin;
+            if (plugin != null)
+            {
+                var postContentItem = new PostContentItem
+                {
+                    PluginAlias = plugin.Alias,
+                    Selector = DefaultDropZoneSelector,
+                    SortOrder = PostCommand.Post.ContentItems.Count + 1,
+                    PostId = PostCommand.Post.Id,
+                    IsNew = true
+                };
+
+                if (plugin.Settings != null)
+                {
+                    var globalSettings = new GetPluginSettingsCommand
+                    {
+                        Alias = plugin.Alias
+                    };
+                    var settingsResult = await Mediator.Send(globalSettings).ConfigureAwait(false);
+                    postContentItem.GlobalSettings = settingsResult.Success
+                        ? JsonSerializer.Serialize(settingsResult.Entity.Data,
+                            new JsonSerializerOptions {WriteIndented = false})
+                        : JsonSerializer.Serialize(plugin.Settings.Model,
+                            new JsonSerializerOptions {WriteIndented = false});
+                }
+
+                PostCommand.Post.ContentItems.Add(postContentItem);
+                RefreshDopList();
+            }
         }
     }
 
@@ -253,7 +253,7 @@ public partial class CreatePost : ComponentBase
                 Errors = new[] {"You need to add a featured image"};
                 return;
             }
-            
+
             if (!PostCommand.Post.ContentItems.Any())
             {
                 Errors = new[] {"You need to add some content"};
@@ -261,7 +261,7 @@ public partial class CreatePost : ComponentBase
             }
 
             PostCommand.Post.Categories = SelectedCategories.ToList();
-            
+
             // Call mediatr and return and check for errors
             // Send the email
             var result = await Mediator.Send(PostCommand).ConfigureAwait(false);
@@ -270,7 +270,7 @@ public partial class CreatePost : ComponentBase
                 PostCommand.Post = result.Entity;
                 PostCommand.SocialImage = null;
                 PostCommand.FeaturedImage = null;
-                
+
                 var correctText = PostCommand.IsUpdate ? "Updated" : "Created";
                 Snackbar.Add("Post " + correctText, Severity.Success);
 
