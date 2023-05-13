@@ -12,6 +12,7 @@ public static class Constants
     public static class BackOffice
     {
         public const string NavigationSectionCore = "Core";
+        public const string NavigationSectionUtilities = "Utilities";
         public const string NavigationSectionPlugins = "Plugins";
         public const string BackOfficeUrlDenoter = "/admin";
     }

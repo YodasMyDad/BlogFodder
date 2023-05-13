@@ -24,6 +24,11 @@ public partial class Navigation : ComponentBase
             Name = ""
         });
 
+        NavigationSections.Add(Constants.BackOffice.NavigationSectionUtilities, new NavigationSection
+        {
+            Name = Constants.BackOffice.NavigationSectionUtilities
+        });
+
         NavigationSections.Add(Constants.BackOffice.NavigationSectionPlugins, new NavigationSection
         {
             Name = Constants.BackOffice.NavigationSectionPlugins

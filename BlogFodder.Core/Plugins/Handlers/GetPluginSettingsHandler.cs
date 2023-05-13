@@ -29,7 +29,7 @@ public class GetPluginSettingsHandler : IRequestHandler<GetPluginSettingsCommand
         }
         else
         {
-            result.AddMessage("Unable to find any settings with that alias", HandlerResultMessageType.Error);
+            result.AddMessage("Unable to find any settings with that alias", HandlerResultMessageType.Warning);
         }
         
         return result;
