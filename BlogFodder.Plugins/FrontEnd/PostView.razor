@@ -14,10 +14,12 @@
                 <p>Last Updated: @Post.DateUpdated.Humanize()</p>
                 @foreach (var postContentItem in Post.ContentItems)
                 {
-                    @* TODO - Margin and padding should be on the content items so can adjust per post/per content item *@
-                    <div class="postContentItem my-4">
+                    <div class="postContentItem">
                         <DynamicComponent Type="@AvailableEditorPlugins[postContentItem.PluginAlias!].Content.Component"
-                                          Parameters="@(new Dictionary<string, object> {{"Model", postContentItem.PluginData ?? ""}})"/>
+                                          Parameters="@(new Dictionary<string, object> {
+                                                          {"Model", postContentItem.PluginData ?? ""},
+                                                          {"Settings", postContentItem.PluginSettings ?? ""}
+                                                      })"/>
                     </div>
                 }
             </article>

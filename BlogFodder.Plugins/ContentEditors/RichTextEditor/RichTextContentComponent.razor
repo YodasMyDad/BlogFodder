@@ -1,14 +1,24 @@
 ﻿@using System.Text.Json
+@using BlogFodder.Core.Extensions
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginContentComponent
 
 @if (Model != null)
 {
-    @((MarkupString)Model)   
+    <div class="@((MarkupString)EditorSettings.PaddingMargin())">
+        @((MarkupString)Model)
+    </div>
 }
 
 @code {
     [Parameter] public string? Model { get; set; }
+    [Parameter] public string? Settings { get; set; }
+    
+    private RichTextEditorSettings EditorSettings { get; set; } = new();
     protected override void OnInitialized()
     {
+        if (!Settings.IsNullOrWhiteSpace())
+        {
+            EditorSettings = JsonSerializer.Deserialize<RichTextEditorSettings>(Settings) ?? new RichTextEditorSettings();
+        }
     }
-
 }

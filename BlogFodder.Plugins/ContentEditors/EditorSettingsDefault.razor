@@ -1,0 +1,30 @@
+@using BlogFodder.Core.Plugins.Interfaces
+<MudGrid>
+    <MudItem xs="12">
+        <MudNumericField @bind-Value="EditorSettings.PaddingTop" Label="Padding Top" Variant="Variant.Outlined" Margin="Margin.Dense"
+                         Min="0"
+                         Max="10" For="@(() => EditorSettings.PaddingTop)"/>
+    </MudItem>
+    <MudItem xs="12">
+        <MudNumericField @bind-Value="EditorSettings.PaddingBottom" Label="Padding Bottom" Variant="Variant.Outlined" Margin="Margin.Dense"
+                         Min="0"
+                         Max="10" For="@(() => EditorSettings.PaddingBottom)"/>
+    </MudItem>
+    <MudItem xs="12">
+        <MudNumericField @bind-Value="EditorSettings.MarginTop" Label="Margin Top" Variant="Variant.Outlined" Margin="Margin.Dense"
+                         Min="0"
+                         Max="10" For="@(() => EditorSettings.MarginTop)"/>
+    </MudItem>
+    <MudItem xs="12">
+        <MudNumericField @bind-Value="EditorSettings.MarginBottom" Label="Margin Bottom" Variant="Variant.Outlined" Margin="Margin.Dense"
+                         Min="0"
+                         Max="10" For="@(() => EditorSettings.MarginBottom)"/>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter]
+    public IEditorSettings EditorSettings { get; set; } = default!;
+
+}

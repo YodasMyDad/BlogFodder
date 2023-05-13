@@ -1,9 +1,10 @@
-@using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Posts.Models
+@using System.Text.Json
+@using BlogFodder.Core.Extensions
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
 @inject IJSRuntime JsRuntime
 
-<MudDialog Class="mud-ex-dialog-initial">
+<MudDialog>
     <DialogContent>
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
@@ -12,10 +13,10 @@
                     <textarea id="@EditorId">@PostContentItem.PluginData</textarea>
                 </MudCard>
             </MudTabPanel>
-
-            @*<MudTabPanel Text="Settings">
-
-            </MudTabPanel>*@
+            
+            <MudTabPanel Text="Settings">
+                <EditorSettingsDefault EditorSettings="@EditorSettings" />
+            </MudTabPanel>
 
         </MudTabs>
     </DialogContent>
@@ -35,11 +36,12 @@
     public EventCallback<PostContentItem> SaveAndClose { get; set; }
     
     private string EditorId { get; set; } = string.Empty;
+    private MarkdownEditorSettings EditorSettings { get; set; } = new();
 
     public async Task<Task> Submit()
     {
         PostContentItem.PluginData = await GetEditorValue();
-        //PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions{ WriteIndented = false});
+        PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions{ WriteIndented = false}); // Is this compact JSON?
         return SaveAndClose.InvokeAsync(PostContentItem);
     }
     
@@ -47,10 +49,10 @@
     {
         EditorId = $"easymde-{PostContentItem.Id}";
         
-        /*if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
+        if (!PostContentItem.PluginSettings.IsNullOrWhiteSpace())
         {
-            await SetEditorValue(PostContentItem.PluginData);
-        }*/
+            EditorSettings = JsonSerializer.Deserialize<MarkdownEditorSettings>(PostContentItem.PluginSettings) ?? new MarkdownEditorSettings();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

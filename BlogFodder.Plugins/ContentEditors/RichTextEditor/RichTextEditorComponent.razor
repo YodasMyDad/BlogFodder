@@ -4,7 +4,7 @@
 @using JsonSerializer = System.Text.Json.JsonSerializer
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
 
-<MudDialog Class="mud-ex-dialog-initial">
+<MudDialog>
     <DialogContent>
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
@@ -12,9 +12,9 @@
                 <TinyMCE.Blazor.Editor Conf="@DefaultEditorSettings" ApiKey="@GlobalSettings.ApiKey" @bind-Value="@EditorData" />
             </MudTabPanel>
 
-            @*<MudTabPanel Text="Settings">>
-
-            </MudTabPanel>*@
+            <MudTabPanel Text="Settings">
+                <EditorSettingsDefault EditorSettings="@EditorSettings" />
+            </MudTabPanel>
             
         </MudTabs>
     </DialogContent>

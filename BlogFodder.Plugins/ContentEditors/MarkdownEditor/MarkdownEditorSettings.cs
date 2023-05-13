@@ -1,8 +1,8 @@
 using BlogFodder.Core.Plugins.Interfaces;
 
-namespace BlogFodder.Plugins.ContentEditors.RichTextEditor;
+namespace BlogFodder.Plugins.ContentEditors.MarkdownEditor;
 
-public class RichTextEditorSettings : IEditorSettings
+public class MarkdownEditorSettings : IEditorSettings
 {
     public int PaddingTop { get; set; }
     public int PaddingBottom { get; set; }

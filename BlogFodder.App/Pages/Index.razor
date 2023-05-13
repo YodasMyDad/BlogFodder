@@ -30,17 +30,6 @@
     {"LastText", "Last"}
 })
 
-@*
-<Pagination CurrentPage="@(Posts.PageIndex+1)"
-         PageCount="@Posts.TotalPages"
-         OnPageChanged="async e => { CurrentPage = e; await GetPosts();}"
-         ShowFirstLast="false"
-         ShowPageNumbers="true"
-         VisiblePages="10"
-         FirstText="First"
-         LastText="Last" />    
-         *@
-
 @code
 {
     [Inject]

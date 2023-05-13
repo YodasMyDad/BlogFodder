@@ -1,12 +1,25 @@
-@using System.Text.Json
 @using Markdig
+@using BlogFodder.Core.Extensions
+@using System.Text.Json
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginContentComponent
 
-@((MarkupString)Markdown.ToHtml(Model))
+@if (Model != null)
+{
+    <div class="@((MarkupString)EditorSettings.PaddingMargin())">
+        @((MarkupString)Markdown.ToHtml(Model))
+    </div>   
+}
 
 @code {
     [Parameter] public string? Model { get; set; }
+    [Parameter] public string? Settings { get; set; }
+    private MarkdownEditorSettings EditorSettings { get; set; } = new();
     protected override void OnInitialized()
     {
+        if (!Settings.IsNullOrWhiteSpace())
+        {
+            EditorSettings = JsonSerializer.Deserialize<MarkdownEditorSettings>(Settings) ?? new MarkdownEditorSettings();
+        }
     }
 
 }
