@@ -1,10 +1,13 @@
-using BlogFodder.Core.Media;
 using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Shared.Models;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace BlogFodder.Core.Plugins.Interfaces;
 
+/// <summary>
+/// Implement if you want to override the default DiskStorageProvider
+/// and update in the appSettings to point to the one you make
+/// </summary>
 public interface IStorageProvider
 {
     /// <summary>

@@ -12,6 +12,8 @@ public class PostContentItem
     public string? PluginData { get; set; }
     public string? PluginSettings { get; set; }
     
+    public bool IsPostPlugin { get; set; }
+    
     // EF Ignore
     public string? Selector  { get; set; }
     public string? GlobalSettings { get; set; }

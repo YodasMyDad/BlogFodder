@@ -24,8 +24,6 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Hand
     {
         var result = new HandlerResult<Category>();
         
-
-        
         // get the category
         var categoryToDelete = await _dbContext.Categories
             .FirstOrDefaultAsync(x => x.Id == request.CategoryId, cancellationToken: cancellationToken);

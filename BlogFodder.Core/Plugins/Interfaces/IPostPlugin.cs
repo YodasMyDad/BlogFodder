@@ -1,12 +1,8 @@
-﻿using BlogFodder.Core.Plugins.Models;
+using BlogFodder.Core.Plugins.Models;
 
 namespace BlogFodder.Core.Plugins.Interfaces;
 
-/// <summary>
-/// The interface which allows you to create an editor for a blog post, also a preview in the post editor
-/// and a component to display the content on the front end of the site
-/// </summary>
-public interface IEditorPlugin
+public interface IPostPlugin
 {
     /// <summary>
     /// Alias is important, do not change the alias of your plugin when updating it
@@ -29,14 +25,14 @@ public interface IEditorPlugin
     string Icon { get; }
 
     /// <summary>
-    /// The plugin for the editor that the user will use to edit and save data
+    /// The plugin for the editor that the user will use to edit/view/save data on the post
     /// </summary>
-    EditorPlugin? Editor { get; set; }
+    PostPlugin? Editor { get; set; }
 
     /// <summary>
-    /// The plugin to display content of the editor on the front end
+    /// The plugin to display content of the plugin on the front end
     /// </summary>
-    EditorContentPlugin Content { get; set; }
+    PostContentPlugin Content { get; set; }
     
     /// <summary>
     /// The plugin for the global settings, so use this if you have configurable settings needed for each instance of the editor
