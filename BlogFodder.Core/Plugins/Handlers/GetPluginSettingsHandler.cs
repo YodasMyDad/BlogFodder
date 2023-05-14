@@ -3,35 +3,28 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins.Commands;
 using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Shared.Models;
+using BlogFodder.Core.Shared.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogFodder.Core.Plugins.Handlers;
 
-public class GetPluginSettingsHandler : IRequestHandler<GetPluginSettingsCommand, HandlerResult<GlobalSettings>>
+public class GetPluginSettingsHandler : IRequestHandler<GetPluginSettingsCommand, GlobalSettings?>
 {
     private readonly BlogFodderDbContext _dbContext;
+    private readonly ICacheService _cacheService;
 
-    public GetPluginSettingsHandler(BlogFodderDbContext dbContext)
+    public GetPluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
     {
         _dbContext = dbContext;
+        _cacheService = cacheService;
     }
 
-    public async Task<HandlerResult<GlobalSettings>> Handle(GetPluginSettingsCommand request, CancellationToken cancellationToken)
+    public async Task<GlobalSettings?> Handle(GetPluginSettingsCommand request, CancellationToken cancellationToken)
     {
-        var result = new HandlerResult<GlobalSettings>();
-
-        var pluginSettings = await _dbContext.PluginSettings.AsNoTracking().FirstOrDefaultAsync(x => x.Alias == request.Alias, cancellationToken: cancellationToken);
-        if (pluginSettings != null)
+        return  await _cacheService.GetSetCachedItemAsync(typeof(GlobalSettings).ToCacheKey(request.Alias!), async () =>
         {
-            result.Entity = pluginSettings;
-            result.Success = true;
-        }
-        else
-        {
-            result.AddMessage("Unable to find any settings with that alias", HandlerResultMessageType.Warning);
-        }
-        
-        return result;
+            return await _dbContext.PluginSettings.AsNoTracking().FirstOrDefaultAsync(x => x.Alias == request.Alias, cancellationToken: cancellationToken);
+        });
     }
 }

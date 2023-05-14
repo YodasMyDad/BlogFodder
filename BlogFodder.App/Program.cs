@@ -4,9 +4,9 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Settings;
+using BlogFodder.Core.Shared.Services;
 using BlogFodder.Plugins;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor;
 using MudBlazor.Extensions;
 using Serilog;
 using SixLabors.ImageSharp.Web.DependencyInjection;
@@ -29,6 +29,7 @@ builder.Services.AddImageSharp();
 
 builder.Services.AddScoped<ExtensionManager>();
 builder.Services.AddScoped<ProviderService>();
+builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 
 builder.Services.AddMudServicesWithExtensions();
 

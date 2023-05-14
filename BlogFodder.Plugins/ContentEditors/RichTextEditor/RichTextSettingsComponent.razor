@@ -62,20 +62,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var globalSettings = new GetPluginSettingsCommand
+        var globalSettingsCommand = new GetPluginSettingsCommand
         {
             Alias = RichTextEditorConstants.PluginAlias
         };
 
-        var result = await Mediator.Send(globalSettings).ConfigureAwait(false);
-        if (result.Success)
+        var globalSettings = await Mediator.Send(globalSettingsCommand).ConfigureAwait(false);
+        if (globalSettings != null)
         {
             SavePluginSettingsCommand.IsUpdate = true;
-            SavePluginSettingsCommand.Settings = result.Entity;
+            SavePluginSettingsCommand.Settings = globalSettings;
 
-            if (!result.Entity.Data.IsNullOrWhiteSpace())
+            if (!globalSettings.Data.IsNullOrWhiteSpace())
             {
-                RichTextGlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(result.Entity.Data)!;
+                RichTextGlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(globalSettings.Data)!;
             }
         }
         else

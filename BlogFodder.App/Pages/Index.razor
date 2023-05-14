@@ -2,15 +2,18 @@
 @using BlogFodder.Core.Data
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Plugins.Commands
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
+@using BlogFodder.Core.Settings.Models
 @using BlogFodder.Core.Shared.Models
+@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
 
-<PageTitle>@Settings.Value.FrontEnd.DefaultPageTitle</PageTitle>
+<PageTitle>@Settings.DefaultPageTitle</PageTitle>
 <HeadContent>
-    <meta name="description" content="@Settings.Value.FrontEnd.DefaultMetaDescription">
+    <meta name="description" content="@Settings.DefaultMetaDescription">
 </HeadContent>
 
 @ExtensionManager.CreateComponent(PostListComponent, new Dictionary<string, object>
@@ -42,13 +45,16 @@
     public ExtensionManager ExtensionManager { get; set; } = default!;
     
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+    IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+    
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
 
     private PaginatedList<Post> Posts { get; set; } = new();
 
     private string PostListComponent { get; set; } = "";
     private string PaginationComponent { get; set; } = "";
-
+    private Settings Settings { get; set; } = default!;
     private int CurrentPage { get; set; } = 1;
 
     private async Task GetPosts()
@@ -59,15 +65,25 @@
             .Include(x => x.Categories)
             .AsNoTracking()
             .OrderByDescending(x => x.DateUpdated)
-            .ToPaginatedList(CurrentPage,1);
+            .ToPaginatedList(CurrentPage,Settings.HomeAmountPerPage);
         
         StateHasChanged();
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var settings = await Mediator.Send(new GetPluginSettingsCommand {Alias = Settings.Alias}).ConfigureAwait(false);
+        var dbSettings = settings?.ToType<Settings>();
+        if (dbSettings != null)
+        {
+            Settings = dbSettings;
+        }
+    }
+
     protected override void OnParametersSet()
     {
-        PostListComponent = Settings.Value.FrontEnd.PostListComponent!;
-        PaginationComponent = Settings.Value.FrontEnd.PaginationComponent!;
+        PostListComponent = BlogFodderSettings.Value.FrontEnd.PostListComponent!;
+        PaginationComponent = BlogFodderSettings.Value.FrontEnd.PaginationComponent!;
         GetPosts();
     }
 }

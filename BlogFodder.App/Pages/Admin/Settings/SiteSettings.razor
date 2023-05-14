@@ -22,7 +22,7 @@
 
     <MudTabs Outlined="true" Position="Position.Top" Rounded="true" Border="true" KeepPanelsAlive="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
 
-        <MudTabPanel Text="Plugins">
+        <MudTabPanel Text="General">
 
             <MudGrid>
                 <MudItem xs="12">
@@ -33,6 +33,9 @@
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField @bind-Value="Settings.DefaultMetaDescription" Lines="4" Label="Default Meta Description" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudNumericField @bind-Value="Settings.HomeAmountPerPage" Label="Home (Posts Per Page)" Variant="Variant.Outlined" Margin="Margin.Dense" Min="1" For="@(() => Settings.HomeAmountPerPage)"/>
                 </MudItem>
             </MudGrid>
 
@@ -63,26 +66,24 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await Mediator.Send(new GetPluginSettingsCommand {Alias = Settings.Alias}).ConfigureAwait(false);
-        if (result.Success)
+        GlobalSettings.Alias = Settings.Alias;
+        var dbGlobalSettings = await Mediator.Send(new GetPluginSettingsCommand {Alias = GlobalSettings.Alias}).ConfigureAwait(false);
+        if (dbGlobalSettings != null)
         {
-            GlobalSettings = result.Entity;
+            GlobalSettings = dbGlobalSettings;
             IsUpdate = true;
-            if (!GlobalSettings.Data.IsNullOrWhiteSpace())
+            var dbSettings = dbGlobalSettings.ToType<Settings>();
+            if (dbSettings != null)
             {
-                Settings = JsonSerializer.Deserialize<Settings>(GlobalSettings.Data) ?? new Settings();
+                Settings = dbSettings;
             }
-        }
-        else
-        {
-            GlobalSettings.Alias = Settings.Alias;
         }
     }
 
     private async Task SubmitForm()
     {
         GlobalSettings.Data = JsonSerializer.Serialize(Settings);
-        var result = await Mediator.Send(new SavePluginSettingsCommand {Settings = GlobalSettings});
+        var result = await Mediator.Send(new SavePluginSettingsCommand {Settings = GlobalSettings, IsUpdate = IsUpdate});
         if (result.Success)
         {
             GlobalSettings = result.Entity;
@@ -94,6 +95,10 @@
             {
                 IsUpdate = true;
             }
+        }
+        else
+        {
+            Errors = result.Messages.ErrorMessagesToList().ToArray();
         }
     }
 

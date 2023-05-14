@@ -3,6 +3,7 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins.Commands;
 using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Shared.Models;
+using BlogFodder.Core.Shared.Services;
 using MediatR;
 
 namespace BlogFodder.Core.Plugins.Handlers;
@@ -10,16 +11,24 @@ namespace BlogFodder.Core.Plugins.Handlers;
 public class SavePluginSettingsHandler : IRequestHandler<SavePluginSettingsCommand, HandlerResult<GlobalSettings>>
 {
     private readonly BlogFodderDbContext _dbContext;
-
-    public SavePluginSettingsHandler(BlogFodderDbContext dbContext)
+    private readonly ICacheService _cacheService;
+    
+    public SavePluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
     {
         _dbContext = dbContext;
+        _cacheService = cacheService;
     }
     
     public async Task<HandlerResult<GlobalSettings>> Handle(SavePluginSettingsCommand request, CancellationToken cancellationToken)
     {
         var result = new HandlerResult<GlobalSettings>();
-        return await _dbContext.CreateOrUpdate(request.Settings, result, !request.IsUpdate, cancellationToken)
+        
+        result = await _dbContext.CreateOrUpdate(request.Settings, result, !request.IsUpdate, cancellationToken)
             .ConfigureAwait(false);
+        
+        // Clear the cache
+        _cacheService.ClearCachedItem(typeof(GlobalSettings).ToCacheKey(result.Entity.Alias!));
+        
+        return result;
     }
 }

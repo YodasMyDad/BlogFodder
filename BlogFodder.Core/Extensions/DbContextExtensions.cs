@@ -46,7 +46,7 @@ public static class DbContextExtensions
         catch (Exception ex)
         {
             crudResult.Success = false;
-            crudResult.AddMessage(ex.Message, HandlerResultMessageType.Error);
+            crudResult.AddMessage($"{ex.Message} - {ex.InnerException?.Message}", HandlerResultMessageType.Error);
             Log.Error(ex, $"{nameof(T)} not saved using SaveChangesAsync");
         }
 

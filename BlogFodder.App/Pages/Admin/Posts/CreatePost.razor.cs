@@ -221,13 +221,13 @@ public partial class CreatePost : ComponentBase
 
                 if (plugin.Settings != null)
                 {
-                    var globalSettings = new GetPluginSettingsCommand
+                    var globalSettingsCommand = new GetPluginSettingsCommand
                     {
                         Alias = plugin.Alias
                     };
-                    var settingsResult = await Mediator.Send(globalSettings).ConfigureAwait(false);
-                    postContentItem.GlobalSettings = settingsResult.Success
-                        ? JsonSerializer.Serialize(settingsResult.Entity.Data,
+                    var globalSettings = await Mediator.Send(globalSettingsCommand).ConfigureAwait(false);
+                    postContentItem.GlobalSettings = globalSettings != null
+                        ? JsonSerializer.Serialize(globalSettings.Data,
                             new JsonSerializerOptions {WriteIndented = false})
                         : JsonSerializer.Serialize(plugin.Settings.Model,
                             new JsonSerializerOptions {WriteIndented = false});

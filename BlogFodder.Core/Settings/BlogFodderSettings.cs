@@ -29,8 +29,6 @@ public class SiteNavigationItem
 
 public class FrontEndSettings
 {
-    public string? DefaultPageTitle { get; set; }
-    public string? DefaultMetaDescription { get; set; }
     public SiteNavigation SiteNavigation { get; set; } = new();
     public string? HeaderComponent { get; set; }
     public string? FooterComponent { get; set; }
