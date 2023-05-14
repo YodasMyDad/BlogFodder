@@ -1,13 +1,17 @@
 @using BlogFodder.Core.Settings
+@using BlogFodder.Core.Settings.Models
+@using MediatR
 @using Microsoft.Extensions.Options
+@using BlogFodder.Core.Plugins.Commands
+@using BlogFodder.Core.Extensions
 
 <footer class="bg-secondary-subtle mt-6">
     <div class="container">
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4">
-            <p class="col-md-4 mb-0 text-muted">&copy; @DateTime.Now.Year SiteName TODO</p>
+            <p class="col-md-4 mb-0 text-muted">&copy; @DateTime.Now.Year @Settings.SiteName</p>
 
             <ul class="nav col-md-4 justify-content-end">
-                @foreach (var footerNav in Settings.Value.FrontEnd.SiteNavigation.FooterNav)
+                @foreach (var footerNav in BlogFodderSettings.Value.FrontEnd.SiteNavigation.FooterNav)
                 {
                     <li>
                         <a href="@footerNav.Link" class="nav-link px-2 text-muted">@footerNav.Link</a>
@@ -21,6 +25,21 @@
 @code{
 
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+    IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+    
+    private Settings Settings { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var settings = await Mediator.Send(new GetPluginSettingsCommand {Alias = Settings.Alias}).ConfigureAwait(false);
+        var dbSettings = settings?.ToType<Settings>();
+        if (dbSettings != null)
+        {
+            Settings = dbSettings;
+        }
+    }
 
 }

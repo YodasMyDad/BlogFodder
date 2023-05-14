@@ -3,6 +3,9 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Categories.Models
 @using BlogFodder.Core.Data
+@using BlogFodder.Core.Plugins.Commands
+@using BlogFodder.Core.Settings.Models
+@using MediatR
 @using Microsoft.EntityFrameworkCore
 @implements BlogFodder.Core.Plugins.Interfaces.IContentPlugin
 
@@ -10,14 +13,14 @@
 <nav class="navbar navbar-expand-lg bg-secondary-subtle">
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="Bootstrap" width="30" height="24">
+            <img src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="@Settings.SiteName Logo" width="24" height="24">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnavigation" aria-controls="mainnavigation" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainnavigation">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                @foreach (var topnav in Settings.Value.FrontEnd.SiteNavigation.TopNav)
+                @foreach (var topnav in BlogFodderSettings.Value.FrontEnd.SiteNavigation.TopNav)
                 {
                     @*<a class="nav-link active" aria-current="page" href="#">Home</a>*@
                     @if (topnav.Link?.Equals("#catlist#", StringComparison.OrdinalIgnoreCase) == true)
@@ -68,7 +71,7 @@
 @code {
 
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+    IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
 
     [Inject]
     NavigationManager NavigationManager { get; set; } = default!;
@@ -76,11 +79,23 @@
     [Inject]
     public BlogFodderDbContext DbContext { get; set; } = default!;
 
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+    
+    private Settings Settings { get; set; } = default!;
+
     private List<Category> Categories { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         Categories = await DbContext.Categories.AsNoTracking().ToListAsync();
+        
+        var settings = await Mediator.Send(new GetPluginSettingsCommand {Alias = Settings.Alias}).ConfigureAwait(false);
+        var dbSettings = settings?.ToType<Settings>();
+        if (dbSettings != null)
+        {
+            Settings = dbSettings;
+        }
     }
 
     private void GoTo(SiteNavigationItem item)
