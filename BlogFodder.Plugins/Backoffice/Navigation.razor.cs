@@ -57,11 +57,12 @@ public partial class Navigation : ComponentBase
                 Icon = Icons.Material.Outlined.Dashboard
             });
         }
-        
-        var settingsPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x.Value.Settings != null).ToList();
-        if (settingsPlugins.Any())
+
+        var editorPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true).Where(x => x.Value.Settings != null)
+            .ToList();
+        if (editorPlugins.Any())
         {
-            var foundSettingsLinks = settingsPlugins.Select(x => x.Value.Settings?.BackOfficeLink).Where(x => x != null);
+            var foundSettingsLinks = editorPlugins.Select(x => x.Value.Settings?.BackOfficeLink).Where(x => x != null);
             foreach (var settingsLink in foundSettingsLinks)
             {
                 if (settingsLink != null)
@@ -77,12 +78,28 @@ public partial class Navigation : ComponentBase
             }
         }
 
+        var plugins = ExtensionManager.GetInstances<IPlugin>(true).Where(x => x.Value.Settings != null).ToList();
+        if (plugins.Any())
+        {
+            var foundSettingsLinks = plugins.Select(x => x.Value.Settings.BackOfficeLink).Where(x => x != null);
+            foreach (var settingsLink in foundSettingsLinks)
+            {
+                foreach (var link in settingsLink)
+                {
+                    if (NavigationSections.TryGetValue(link.Section, out var section))
+                    {
+                        section.Links.Add(link);
+                    }
+                }
+            }
+        }
+
         var backOfficeNavigationItems = ExtensionManager.GetInstances<IBackOfficeNavigationItem>(true).ToList();
         if (backOfficeNavigationItems.Any())
         {
             foreach (var navigationItem in backOfficeNavigationItems)
             {
-                if (!navigationItem.Value.Link.Route.IsNullOrWhiteSpace() || 
+                if (!navigationItem.Value.Link.Route.IsNullOrWhiteSpace() ||
                     !navigationItem.Value.Link.Text.IsNullOrWhiteSpace())
                 {
                     if (NavigationSections.TryGetValue(navigationItem.Value.Link.Section, out var section))

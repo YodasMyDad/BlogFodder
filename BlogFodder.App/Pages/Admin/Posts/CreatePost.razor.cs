@@ -32,6 +32,7 @@ public partial class CreatePost : ComponentBase
 
     private CreateUpdatePostCommand PostCommand { get; set; } = new();
     private Dictionary<string, IEditorPlugin> AvailableEditorPlugins { get; set; } = new();
+    private Dictionary<string, IPlugin> AvailablePlugins { get; set; } = new();
     private MudDropContainer<PostContentItem>? DropContainer { get; set; }
     private MudForm Form { get; set; } = default!;
     private CreateUpdatePostCommandValidator CommandValidator { get; set; } = new();
@@ -53,6 +54,7 @@ public partial class CreatePost : ComponentBase
             // Yes, should probably be in a service or Mediatr call
             var dbPost = DbContext.Posts
                 .Include(x => x.ContentItems)
+                .Include(x => x.Plugins)
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
                 .Include(x => x.Categories)
@@ -79,6 +81,13 @@ public partial class CreatePost : ComponentBase
         foreach (var plugin in editorPlugins)
         {
             AvailableEditorPlugins.Add(plugin.Value.Alias, plugin.Value);
+        }
+        
+        // Get all the available plugins that have a editor
+        var plugins = ExtensionManager.GetInstances<IPlugin>(true).Where(x => x.Value.Editor != null);
+        foreach (var plugin in plugins)
+        {
+            AvailablePlugins.Add(plugin.Value.Alias, plugin.Value);
         }
     }
 
@@ -170,6 +179,28 @@ public partial class CreatePost : ComponentBase
     {
         PostCommand.Post.ContentItems.Remove(postContentItem);
         RefreshDopList();
+    }
+
+    /// <summary>
+    /// Shows the dialog for the post plugins
+    /// </summary>
+    /// <param name="plugin"></param>
+    /// <param name="postPlugin"></param>
+    private async Task ShowPostPlugin(IPlugin plugin, PostPlugin? postPlugin)
+    {
+        var parameters = new DialogParameters
+        {
+            {"PostPlugin", postPlugin},
+            {"Plugin", plugin}
+        };
+        
+        var dialog = await Dialog.ShowAsync<PostPluginEditor>(plugin.Name, parameters, _defaultDialogOptions);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            // TODO - Update this
+        }
     }
     
     /// <summary>

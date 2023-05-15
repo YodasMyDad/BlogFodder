@@ -1,0 +1,120 @@
+@page "/admin/plugins/postcommentsettings"
+@using MediatR
+@using BlogFodder.Core.Plugins.Commands
+@using BlogFodder.Core.Plugins.Models
+@using BlogFodder.Core.Extensions
+@using System.Text.Json
+@using BlogFodder.Plugins.Comments.Models
+@layout AdminLayout
+
+<PageTitle>Post Comment Settings</PageTitle>
+@if (Errors.Length > 0)
+{
+    <MudAlert Severity="Severity.Error" Class="my-2">
+        @foreach (var error in Errors)
+        {
+            <MudText>@error</MudText>
+        }
+    </MudAlert>
+}
+<MudForm Model="@Settings" @ref="@Form" @bind-Errors="@Errors" ValidationDelay="0">
+    <MudTabs Outlined="true" Position="Position.Top" Rounded="true" Border="true" KeepPanelsAlive="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+
+        <MudTabPanel Text="Settings">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSwitch Label="Enabled"
+                               @bind-Checked="Settings.Enabled" For="@(() => Settings.Enabled)"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSwitch Label="Manually Approve Comments"
+                               @bind-Checked="Settings.ManuallyApproveComments"
+                               For="@(() => Settings.Enabled)"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSwitch Label="Enable Akismet Spam Filtering"
+                               @bind-Checked="Settings.EnableAkismetSpamCheck" For="@(() => Settings.Enabled)"/>
+                </MudItem>
+            </MudGrid>
+
+        </MudTabPanel>
+        <MudTabPanel Text="Awaiting Approval">
+            
+            <p>TODO</p>
+
+        </MudTabPanel>
+        <MudTabPanel Text="Flagged Comments" BadgeData='"99+"' BadgeColor="Color.Error">
+
+            <p>TODO</p>
+
+        </MudTabPanel>
+
+    </MudTabs>
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudButton Variant="Variant.Filled" OnClick="@(async () => await SubmitForm())" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">Save</MudButton>
+    </MudItem>
+</MudForm>
+
+@code
+{
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+
+    private MudForm Form { get; set; } = default!;
+    private string?[] Errors { get; set; } = Array.Empty<string>();
+    private PostCommentSettings Settings { get; set; } = new();
+    private SavePluginSettingsCommand SavePluginSettingsCommand { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var globalSettings = await Mediator.Send(new GetPluginSettingsCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
+        if (globalSettings != null)
+        {
+            SavePluginSettingsCommand.IsUpdate = true;
+            SavePluginSettingsCommand.Settings = globalSettings;
+
+            var postCommentsGlobalSettings = globalSettings.ToType<PostCommentSettings>();
+            if (postCommentsGlobalSettings != null)
+            {
+                Settings = postCommentsGlobalSettings;
+            }
+        }
+        else
+        {
+            SavePluginSettingsCommand.Settings = new GlobalSettings
+            {
+                Alias = PostCommentsConstants.PluginAlias
+            };
+        }
+    }
+
+    /// <summary>
+    /// Submits the form and saves the settings
+    /// </summary>
+    private async Task SubmitForm()
+    {
+        await Form.Validate();
+        if (Form.IsValid)
+        {
+            SavePluginSettingsCommand.Settings!.Data = JsonSerializer.Serialize(Settings, new JsonSerializerOptions {WriteIndented = false}); // Is this compact JSON?
+            var result = await Mediator.Send(SavePluginSettingsCommand).ConfigureAwait(false);
+            if (result.Success)
+            {
+                var correctText = SavePluginSettingsCommand.IsUpdate ? "Updated" : "Created";
+                Snackbar.Add("Settings " + correctText, Severity.Success);
+
+                if (!SavePluginSettingsCommand.IsUpdate)
+                {
+                    SavePluginSettingsCommand.IsUpdate = true;
+                }
+            }
+            else
+            {
+                Errors = result.Messages.ErrorMessagesToList().ToArray();
+            }
+        }
+    }
+}

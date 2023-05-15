@@ -1,4 +1,5 @@
 using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Plugins.Models;
 
 namespace BlogFodder.Core.Posts.Models;
 
@@ -10,6 +11,8 @@ public class PostPlugin
     public string? PluginAlias { get; set; }
     public string? PluginData { get; set; }
     public string? PluginSettings { get; set; }
+    
+    public PluginDisplayArea PluginDisplayArea { get; set; }
     
     // EF Ignore
     public string? GlobalSettings { get; set; }

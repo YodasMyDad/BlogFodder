@@ -1,0 +1,33 @@
+@using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Plugins.Interfaces
+@using BlogFodder.Core.Posts.Models
+
+@if (Plugin != null)
+{
+    <DynamicComponent Type="@Plugin?.Editor?.Component"
+                      Parameters="@(new Dictionary<string, object> {
+                                      {"PostPlugin", PostPlugin},
+                                      {"SaveAndClose", EventCallback.Factory.Create<PostPlugin>(this, SaveAndClose)}
+                                  })"/>
+}
+
+
+@code {
+
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public PostPlugin PostPlugin { get; set; } = new();
+    
+    [Parameter]
+    public IPlugin? Plugin { get; set; }
+
+    public void SaveAndClose(PostPlugin data)
+    {
+        MudDialog.Close(DialogResult.Ok(data));
+    }
+}

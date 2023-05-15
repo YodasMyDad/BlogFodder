@@ -1,0 +1,12 @@
+@implements BlogFodder.Core.Plugins.Interfaces.IPluginContentComponent
+
+@code {
+    [Parameter]
+    public string? Model { get; set; }
+    
+    [Parameter]
+    public string? Settings { get; set; }
+
+    [Parameter] 
+    public string? GlobalSettings { get; set; }
+}

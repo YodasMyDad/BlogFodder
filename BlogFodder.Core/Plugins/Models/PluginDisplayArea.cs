@@ -1,9 +1,14 @@
 namespace BlogFodder.Core.Plugins.Models;
 
+/// <summary>
+/// Areas where plugins can be displayed
+/// </summary>
 public enum PluginDisplayArea
 {
-    PostBefore,
-    PostAfter,
+    HomeBeforeContent,
+    HomeAfterContent,
+    PostBeforeContent,
+    PostAfterContent,
     HeaderTop,
     HeaderBottom,
     FooterTop,

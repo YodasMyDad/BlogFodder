@@ -2,16 +2,20 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Data
+@using BlogFodder.Core.Plugins.Interfaces
+@using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
+@using BlogFodder.Core.Shared
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
+
 <PageTitle>@Post.PageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Post.MetaDescription">
     @if (Post.NoIndex)
     {
-        <meta name="robots" content="noindex">   
+        <meta name="robots" content="noindex">
     }
     @*<meta name="twitter:description" content="Do we actually burn more calories standing vs sitting? And is it worth it? Let&#39;s explore this hot topic to help you decide and get the best out of your working day." />
     <meta property="og:description" content="Do we actually burn more calories standing vs sitting? And is it worth it? Let&#39;s explore this hot topic to help you decide and get the best out of your working day." />
@@ -26,7 +30,7 @@
     <meta property="og:site_name" content="ChairOffice T/A Full Range Furniture Ltd" />
     <meta property="og:type" content="website" />
     <link rel="canonical" href="https://www.chairoffice.co.uk/blog/calories-burned-standing-vs-sitting/" />*@
-    
+
     @*<script type="application/ld+json">
         {
            "@@context":"https://schema.org",
@@ -150,23 +154,48 @@
            ]
         }
     </script>*@
-    
-    
+
+
 </HeadContent>
 
 @if (CanBeFound)
 {
+    @foreach (var postPlugin in Post.Plugins.Where(x => x.PluginDisplayArea == PluginDisplayArea.PostBeforeContent))
+    {
+        if (postPlugin.PluginAlias != null)
+        {
+            if (AvailablePlugins.ContainsKey(postPlugin.PluginAlias, PluginDisplayArea.PostBeforeContent))
+            {
+                var plugin = AvailablePlugins[postPlugin.PluginAlias, PluginDisplayArea.PostBeforeContent];
+                <DynamicComponent Type="@plugin.Component"
+                                  Parameters="@(new Dictionary<string, object> {{"Model", postPlugin.PluginData ?? ""}, {"Settings", postPlugin.PluginSettings ?? ""}, {"GlobalSettings", "TODO"},})"/>
+            }
+        }
+    }
+
     @ExtensionManager.CreateComponent(PostViewComponent, new Dictionary<string, object>
     {
         {"Post", Post}
     })
+
+    @foreach (var postPlugin in Post.Plugins.Where(x => x.PluginDisplayArea == PluginDisplayArea.PostAfterContent))
+    {
+        if (postPlugin.PluginAlias != null)
+        {
+            if (AvailablePlugins.ContainsKey(postPlugin.PluginAlias, PluginDisplayArea.PostAfterContent))
+            {
+                var plugin = AvailablePlugins[postPlugin.PluginAlias, PluginDisplayArea.PostAfterContent];
+                <DynamicComponent Type="@plugin.Component"
+                                  Parameters="@(new Dictionary<string, object> {{"Model", postPlugin.PluginData ?? ""}, {"Settings", postPlugin.PluginSettings ?? ""}, {"GlobalSettings", "TODO"},})"/>
+            }
+        }
+    }
 }
 else
 {
     <h1>Unable to find the post by the url</h1>
     <p>Need to make this return a 404!</p>
 }
-
 
 @code {
 
@@ -175,14 +204,16 @@ else
 
     [Inject]
     public BlogFodderDbContext DbContext { get; set; } = default!;
-    
+
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
-    
+
     [Inject]
     IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
-    
-    private string PostViewComponent { get; set; } = ""; 
+
+    private Dictionary<string, PluginDisplayArea, ContentPlugin> AvailablePlugins { get; set; } = new();
+
+    private string PostViewComponent { get; set; } = "";
 
     private Post Post { get; set; } = new();
 
@@ -195,6 +226,7 @@ else
             var post = DbContext.Posts
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
+                .Include(x => x.Plugins)
                 .Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
             if (post != null)
             {
@@ -202,10 +234,17 @@ else
                 Post = post;
             }
         }
+
+        var plugins = ExtensionManager.GetInstances<IPlugin>(true).Where(x => x.Value.Content is {PluginDisplayArea: not null });
+        foreach (var plugin in plugins)
+        {
+            AvailablePlugins.Add(plugin.Value.Alias, plugin.Value.Content.PluginDisplayArea.Value, plugin.Value.Content);
+        }
     }
-    
+
     protected override void OnParametersSet()
     {
         PostViewComponent = Settings.Value.FrontEnd.PostViewComponent!;
     }
+
 }
