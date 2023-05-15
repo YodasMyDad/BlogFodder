@@ -16,4 +16,6 @@ public class RichTextGlobalSettings : IPluginSettings
     // plugins
     public string? Plugins { get; set; } =
         "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount";
+
+    public bool Enabled { get; set; } = true;
 }

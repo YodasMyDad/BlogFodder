@@ -3,5 +3,9 @@ namespace BlogFodder.Core.Plugins.Models;
 public enum PluginDisplayArea
 {
     PostBefore,
-    PostAfter
+    PostAfter,
+    HeaderTop,
+    HeaderBottom,
+    FooterTop,
+    FooterBottom
 }

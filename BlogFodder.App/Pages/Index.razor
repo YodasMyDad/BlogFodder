@@ -5,6 +5,7 @@
 @using BlogFodder.Core.Plugins.Commands
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
+@using BlogFodder.Core.Settings.Commands
 @using BlogFodder.Core.Settings.Models
 @using BlogFodder.Core.Shared.Models
 @using MediatR
@@ -54,7 +55,7 @@
 
     private string PostListComponent { get; set; } = "";
     private string PaginationComponent { get; set; } = "";
-    private Settings Settings { get; set; } = default!;
+    private SiteSettings Settings { get; set; } = default!;
     private int CurrentPage { get; set; } = 1;
 
     private async Task GetPosts()
@@ -72,12 +73,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var settings = await Mediator.Send(new GetPluginSettingsCommand {Alias = Settings.Alias}).ConfigureAwait(false);
-        var dbSettings = settings?.ToType<Settings>();
-        if (dbSettings != null)
-        {
-            Settings = dbSettings;
-        }
+        Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
     }
 
     protected override void OnParametersSet()

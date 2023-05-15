@@ -3,7 +3,7 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Categories.Models
 @using BlogFodder.Core.Data
-@using BlogFodder.Core.Plugins.Commands
+@using BlogFodder.Core.Settings.Commands
 @using BlogFodder.Core.Settings.Models
 @using MediatR
 @using Microsoft.EntityFrameworkCore
@@ -81,7 +81,7 @@
     [Inject]
     public IMediator Mediator { get; set; } = default!;
     
-    private Settings Settings { get; set; } = default!;
+    private SiteSettings Settings { get; set; } = default!;
 
     private List<Category> Categories { get; set; } = new();
 
@@ -89,12 +89,8 @@
     {
         Categories = await DbContext.Categories.AsNoTracking().ToListAsync();
         
-        var settings = await Mediator.Send(new GetPluginSettingsCommand {Alias = Settings.Alias}).ConfigureAwait(false);
-        var dbSettings = settings?.ToType<Settings>();
-        if (dbSettings != null)
-        {
-            Settings = dbSettings;
-        }
+        Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        
     }
 
     private void GoTo(SiteNavigationItem item)

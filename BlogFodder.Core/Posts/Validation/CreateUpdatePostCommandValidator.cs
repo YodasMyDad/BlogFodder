@@ -8,7 +8,6 @@ public class CreateUpdatePostCommandValidator : BaseFluentValidator<CreateUpdate
 {
     public CreateUpdatePostCommandValidator()
     {
-        //RuleFor(p => p.FeaturedImage).NotNull().WithMessage("You must select a featured image");
         RuleFor(model => model.Post)
             .SetValidator(model => new PostValidator(model));
     }

@@ -2,7 +2,7 @@ using BlogFodder.Core.Plugins.Models;
 
 namespace BlogFodder.Core.Plugins.Interfaces;
 
-public interface IPostPlugin
+public interface IPlugin
 {
     /// <summary>
     /// Alias is important, do not change the alias of your plugin when updating it
@@ -18,24 +18,24 @@ public interface IPostPlugin
     /// Short description of what your plugin is and does
     /// </summary>
     string Description { get; }
-    
+
     /// <summary>
     /// Icon which displays when they are selecting the editor and also in preview list
     /// </summary>
     string Icon { get; }
 
     /// <summary>
-    /// The plugin for the editor that the user will use to edit/view/save data on the post
+    /// The optional plugin for the editor that the user will use to edit/view/save data on a post
     /// </summary>
-    PostPlugin? Editor { get; set; }
+    PostPluginEditor? Editor { get; set; }
 
     /// <summary>
     /// The plugin to display content of the plugin on the front end
     /// </summary>
-    PostContentPlugin Content { get; set; }
+    ContentPlugin Content { get; set; }
     
     /// <summary>
-    /// The plugin for the global settings, so use this if you have configurable settings needed for each instance of the editor
+    /// The optional plugin for the global settings, so use this if you have configurable settings needed for each instance of the editor
     /// </summary>
     SettingsPlugin? Settings { get; set; }
 }

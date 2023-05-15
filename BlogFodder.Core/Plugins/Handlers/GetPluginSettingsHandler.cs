@@ -2,7 +2,6 @@ using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins.Commands;
 using BlogFodder.Core.Plugins.Models;
-using BlogFodder.Core.Shared.Models;
 using BlogFodder.Core.Shared.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

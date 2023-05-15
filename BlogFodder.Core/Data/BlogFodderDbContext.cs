@@ -4,6 +4,7 @@ using BlogFodder.Core.Identity.Models;
 using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Posts.Models;
+using BlogFodder.Core.Settings.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +19,10 @@ public class BlogFodderDbContext : IdentityDbContext<User, Role, Guid, UserClaim
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<PostContentItem> PostContentItems => Set<PostContentItem>();
+    public DbSet<PostPlugin> PostPlugins => Set<PostPlugin>();
     public DbSet<BlogFodderFile> Files => Set<BlogFodderFile>();
     public DbSet<GlobalSettings> PluginSettings => Set<GlobalSettings>();
+    public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -2,8 +2,7 @@
 @using BlogFodder.Core.Settings.Models
 @using MediatR
 @using Microsoft.Extensions.Options
-@using BlogFodder.Core.Plugins.Commands
-@using BlogFodder.Core.Extensions
+@using BlogFodder.Core.Settings.Commands
 
 <footer class="bg-secondary-subtle mt-6">
     <div class="container">
@@ -30,16 +29,11 @@
     [Inject]
     public IMediator Mediator { get; set; } = default!;
     
-    private Settings Settings { get; set; } = default!;
+    private SiteSettings Settings { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        var settings = await Mediator.Send(new GetPluginSettingsCommand {Alias = Settings.Alias}).ConfigureAwait(false);
-        var dbSettings = settings?.ToType<Settings>();
-        if (dbSettings != null)
-        {
-            Settings = dbSettings;
-        }
+        Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
     }
 
 }

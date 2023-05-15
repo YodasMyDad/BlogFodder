@@ -2,5 +2,5 @@
 
 public interface IPluginSettings
 {
-    
+    bool Enabled { get; set; }
 }

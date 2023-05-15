@@ -15,8 +15,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-using MudBlazor.Extensions;
-using MudBlazor.Extensions.Options;
 using MudBlazor.Utilities;
 
 namespace BlogFodder.App.Pages.Admin.Posts;

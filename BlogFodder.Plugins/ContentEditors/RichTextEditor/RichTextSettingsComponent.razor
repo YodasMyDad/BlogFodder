@@ -26,14 +26,14 @@
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudNumericField @bind-Value="RichTextGlobalSettings.Height" Label="Height" Variant="Variant.Outlined" Margin="Margin.Dense" Min="100" For="@(() => RichTextGlobalSettings.Height)" />
+                    <MudNumericField @bind-Value="RichTextGlobalSettings.Height" Label="Height" Variant="Variant.Outlined" Margin="Margin.Dense" Min="100" For="@(() => RichTextGlobalSettings.Height)"/>
                 </MudItem>
-                
+
                 <MudItem xs="12">
                     <MudTextField Lines="3" Label="Toolbar" Variant="Variant.Outlined" Margin="Margin.Dense"
                                   HelperText="Check the TinyMCE website for more info" @bind-Value="RichTextGlobalSettings.ToolBar" For="@(() => RichTextGlobalSettings.ToolBar)"/>
                 </MudItem>
-                
+
                 <MudItem xs="12">
                     <MudTextField Lines="3" Label="Plugins" Variant="Variant.Outlined" Margin="Margin.Dense"
                                   HelperText="Check the TinyMCE website for more info" @bind-Value="RichTextGlobalSettings.Plugins" For="@(() => RichTextGlobalSettings.Plugins)"/>
@@ -62,20 +62,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var globalSettingsCommand = new GetPluginSettingsCommand
-        {
-            Alias = RichTextEditorConstants.PluginAlias
-        };
-
-        var globalSettings = await Mediator.Send(globalSettingsCommand).ConfigureAwait(false);
+        var globalSettings = await Mediator.Send(new GetPluginSettingsCommand {Alias = RichTextEditorConstants.PluginAlias}).ConfigureAwait(false);
         if (globalSettings != null)
         {
             SavePluginSettingsCommand.IsUpdate = true;
             SavePluginSettingsCommand.Settings = globalSettings;
 
-            if (!globalSettings.Data.IsNullOrWhiteSpace())
+            var richTextGlobalSettings = globalSettings.ToType<RichTextGlobalSettings>();
+            if (richTextGlobalSettings != null)
             {
-                RichTextGlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(globalSettings.Data)!;
+                RichTextGlobalSettings = richTextGlobalSettings;
             }
         }
         else

@@ -52,7 +52,7 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
 
         if (_providerService.StorageProvider != null)
         {
-            // See if this post already exists as we will need to remove the images
+            // See if this category already exists as we will need to remove the images
             var category = _dbContext.Categories
                 .Include(x => x.SocialImage)
                 .FirstOrDefault(x => x.Id == request.Category.Id);
@@ -68,7 +68,7 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
                 }
 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await SaveImage(request.SocialImage, request.Category.Id, handlerResult);
+                var fileResult = await request.SocialImage.SaveFileToDb(request.Category.Id, handlerResult, _providerService, _dbContext);
 
                 // Set the file to the user
                 request.Category.SocialImage = fileResult;
@@ -98,35 +98,4 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
             .ConfigureAwait(false);
     }
     
-    /// <summary>
-    /// Saves the BrowserFile as a BlogFodderFile using the set StorageProvider
-    /// </summary>
-    /// <param name="browserFile"></param>
-    /// <param name="id"></param>
-    /// <param name="result"></param>
-    /// <returns></returns>
-    private async Task<BlogFodderFile?> SaveImage(IBrowserFile browserFile, Guid id, HandlerResult<Category> result)
-    {
-        var fileSaveResult = await _providerService.StorageProvider!.SaveFile(browserFile, id.ToString())
-            .ConfigureAwait(false);
-        if (!fileSaveResult.Success)
-        {
-            foreach (var errorMessage in fileSaveResult.ErrorMessages)
-            {
-                result.AddMessage(errorMessage, HandlerResultMessageType.Warning);
-            }
-
-            return null;
-        }
-
-        // Create the file
-        var file = await _providerService.StorageProvider.ToBlogFodderFile(fileSaveResult)
-            .ConfigureAwait(false);
-
-        // Save the file first
-        _dbContext.Files.Add(file);
-
-        // Set the file to the user
-        return file;
-    }
 }

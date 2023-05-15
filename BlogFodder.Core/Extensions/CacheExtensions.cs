@@ -7,7 +7,7 @@ public static class CacheExtensions
 {
     public const int MemoryCacheInMinutes = 60;
 
-    public static string ToCacheKey(this Type item, string identifier)
+    public static string ToCacheKey(this Type item, string? identifier)
     {
         return $"{nameof(item)}-{identifier}";
     }

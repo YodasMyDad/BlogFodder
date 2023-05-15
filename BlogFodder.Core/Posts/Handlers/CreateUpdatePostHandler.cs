@@ -73,7 +73,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
                 }
                 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await SaveImage(request.FeaturedImage, request.Post.Id, handlerResult);
+                var fileResult = await request.FeaturedImage.SaveFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
 
                 // Set the file to the user
                 request.Post.FeaturedImage = fileResult;
@@ -97,7 +97,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
                 }
                 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await SaveImage(request.SocialImage, request.Post.Id, handlerResult);
+                var fileResult = await request.SocialImage.SaveFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
 
                 // Set the file to the user
                 request.Post.SocialImage = fileResult;
@@ -139,37 +139,5 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         
         return await _dbContext.CreateOrUpdate(request.Post, handlerResult, !request.IsUpdate, cancellationToken)
             .ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Saves the BrowserFile as a BlogFodderFile using the set StorageProvider
-    /// </summary>
-    /// <param name="browserFile"></param>
-    /// <param name="id"></param>
-    /// <param name="result"></param>
-    /// <returns></returns>
-    private async Task<BlogFodderFile?> SaveImage(IBrowserFile browserFile, Guid id, HandlerResult<Post> result)
-    {
-        var fileSaveResult = await _providerService.StorageProvider!.SaveFile(browserFile, id.ToString())
-            .ConfigureAwait(false);
-        if (!fileSaveResult.Success)
-        {
-            foreach (var errorMessage in fileSaveResult.ErrorMessages)
-            {
-                result.AddMessage(errorMessage, HandlerResultMessageType.Warning);
-            }
-
-            return null;
-        }
-
-        // Create the file
-        var file = await _providerService.StorageProvider.ToBlogFodderFile(fileSaveResult)
-            .ConfigureAwait(false);
-
-        // Save the file first
-        _dbContext.Files.Add(file);
-
-        // Set the file to the user
-        return file;
     }
 }

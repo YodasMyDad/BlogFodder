@@ -1,11 +1,50 @@
+using BlogFodder.Core.Data;
 using BlogFodder.Core.Media;
 using BlogFodder.Core.Media.Models;
+using BlogFodder.Core.Providers;
+using BlogFodder.Core.Shared.Models;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace BlogFodder.Core.Extensions;
 
     public static class FileExtensions
     {
+        /// <summary>
+        /// Saves the BrowserFile as a BlogFodderFile using the set StorageProvider
+        /// </summary>
+        /// <param name="browserFile"></param>
+        /// <param name="id"></param>
+        /// <param name="result"></param>
+        /// <param name="providerService"></param>
+        /// <param name="dbContext"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static async Task<BlogFodderFile?> SaveFileToDb<T>(this IBrowserFile browserFile, Guid id, HandlerResult<T> result, 
+            ProviderService providerService, BlogFodderDbContext dbContext)
+        {
+            var fileSaveResult = await providerService.StorageProvider!.SaveFile(browserFile, id.ToString())
+                .ConfigureAwait(false);
+            if (!fileSaveResult.Success)
+            {
+                foreach (var errorMessage in fileSaveResult.ErrorMessages)
+                {
+                    result.AddMessage(errorMessage, HandlerResultMessageType.Warning);
+                }
+
+                return null;
+            }
+
+            // Create the file
+            var file = await providerService.StorageProvider.ToBlogFodderFile(fileSaveResult)
+                .ConfigureAwait(false);
+
+            // Save the file first
+            dbContext.Files.Add(file);
+
+            // Set the file to the user
+            return file;
+        }
+        
         /// <summary>
         /// Is this file a video based on the extension
         /// </summary>

@@ -3,6 +3,7 @@ using System;
 using BlogFodder.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    partial class BlogFodderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230515091543_PostAliasIndexes")]
+    partial class PostAliasIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -460,49 +463,6 @@ namespace BlogFodder.Core.Data.Migrations
                     b.ToTable("BlogFodderPostPlugins", (string)null);
                 });
 
-            modelBuilder.Entity("BlogFodder.Core.Settings.Models.SiteSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("DateUpdated")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DefaultMetaDescription")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DefaultPageTitle")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ExtendedData")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<int>("HomeAmountPerPage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("LogoId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SiteName")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LogoId");
-
-                    b.ToTable("BlogFodderSiteSettings", (string)null);
-                });
-
             modelBuilder.Entity("CategoryPost", b =>
                 {
                     b.Property<Guid>("CategoriesId")
@@ -613,15 +573,6 @@ namespace BlogFodder.Core.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("BlogFodder.Core.Settings.Models.SiteSettings", b =>
-                {
-                    b.HasOne("BlogFodder.Core.Media.Models.BlogFodderFile", "Logo")
-                        .WithMany()
-                        .HasForeignKey("LogoId");
-
-                    b.Navigation("Logo");
                 });
 
             modelBuilder.Entity("CategoryPost", b =>

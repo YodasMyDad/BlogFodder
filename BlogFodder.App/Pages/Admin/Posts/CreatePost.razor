@@ -85,7 +85,7 @@
                 <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" @onclick="@(ShowContentEditors)">Add Content Editor</MudButton>
             </MudPaper>
 
-            <MudDropContainer T="PostContentItem" @ref="DropContainer" Items="PostCommand.Post.ContentItems.Where(x => !x.IsPostPlugin)" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="DropItemUpdated" Class="d-flex flex-wrap flex-grow-1">
+            <MudDropContainer T="PostContentItem" @ref="DropContainer" Items="PostCommand.Post.ContentItems" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="DropItemUpdated" Class="d-flex flex-wrap flex-grow-1">
                 <ChildContent>
                     <MudGrid Class="mt-8">
                         <MudDropZone T="PostContentItem" Identifier="plugins" AllowReorder="true" Class="flex-grow-1"/>
