@@ -8,12 +8,12 @@ using MediatR;
 
 namespace BlogFodder.Core.Plugins.Handlers;
 
-public class SavePluginSettingsHandler : IRequestHandler<SavePluginSettingsCommand, HandlerResult<GlobalSettings>>
+public class CreateUpdatePluginSettingsHandler : IRequestHandler<SavePluginSettingsCommand, HandlerResult<GlobalSettings>>
 {
     private readonly BlogFodderDbContext _dbContext;
     private readonly ICacheService _cacheService;
     
-    public SavePluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
+    public CreateUpdatePluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;

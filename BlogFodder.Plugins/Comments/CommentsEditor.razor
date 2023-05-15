@@ -1,0 +1,11 @@
+@using BlogFodder.Core.Posts.Models
+@implements BlogFodder.Core.Plugins.Interfaces.IPluginComponent
+
+
+@code {
+    [Parameter]
+    public PostPlugin PostPlugin { get; set; }
+    
+    [Parameter]
+    public EventCallback<PostPlugin> SaveAndClose { get; set; }
+}
