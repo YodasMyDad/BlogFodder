@@ -1,7 +1,11 @@
 @using BlogFodder.Core.Data
+@using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Plugins.Commands
 @using BlogFodder.Core.Plugins.Interfaces
 @using BlogFodder.Core.Plugins.Models
+@using BlogFodder.Plugins.ContentEditors.RichTextEditor
+@using MediatR
 @using Microsoft.EntityFrameworkCore
 
 @foreach (var plugin in Plugins)
@@ -11,9 +15,11 @@
         PluginData.TryGetValue(plugin.Key, out var p);
         <DynamicComponent Type="@plugin.Value.Content.Component"
                           Parameters="@(new Dictionary<string, object> 
-                                      {{"Model", p?.PluginData ?? ""}, 
-                                          {"Settings", p?.PluginSettings ?? ""}, 
-                                          {"GlobalSettings", "TODO"},})"/>   
+                                      {
+                                            {"Model", p?.PluginData ?? ""}, 
+                                            {"Settings", p?.PluginSettings ?? ""}, 
+                                            {"GlobalSettings",  p?.GlobalSettings ?? ""}
+                                      })"/>   
     }
 }
 
@@ -27,11 +33,14 @@
 
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
+    
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
 
     private Dictionary<string, Plugin> PluginData { get; set; } = new();
     private Dictionary<string, IPlugin> Plugins { get; set; } = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (PluginDisplayArea != null)
         {
@@ -48,6 +57,18 @@
             var pluginData = DbContext.Plugins.AsNoTracking();
             pluginData = PostId != null ? pluginData.Where(x => x.PostId == PostId && pluginAliases.Contains(x.PluginAlias)) : pluginData.Where(x => pluginAliases.Contains(x.PluginAlias));
             PluginData = pluginData.ToDictionary(x => x.PluginAlias ?? "", x => x);
+
+            foreach (var plugin in PluginData)
+            {
+                // TODO = Must be a better way to do this, even though each one is cached, still individual calls
+                // TODO = Needs to be one call into a dictionary which is cached
+                // TODO = Need a clear cache by key starts with too. So when settings are saved they are all cleared 
+                var globalSettings = await Mediator.Send(new GetPluginSettingsCommand {Alias = plugin.Key}).ConfigureAwait(false);
+                if (globalSettings != null)
+                {
+                    plugin.Value.GlobalSettings = globalSettings.Data;
+                }
+            }
         }
     }
 }
