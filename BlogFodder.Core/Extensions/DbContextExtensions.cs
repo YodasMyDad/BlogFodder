@@ -1,11 +1,27 @@
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace BlogFodder.Core.Extensions;
 
 public static class DbContextExtensions
 {
+    public static IQueryable<T>? ToTyped<T>(this BlogFodderDbContext context) where T : class
+    {
+        try
+        {
+            var dbSet = context.Set<T>();
+            return dbSet.AsQueryable();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Unable to get {nameof(T)} as DbSet");
+        }
+
+        return null;
+    }
+    
     public static async Task<HandlerResult<T>> CreateOrUpdate<T>(this BlogFodderDbContext context, T entity, bool isNew, CancellationToken cancellationToken)
     {
         var crudResult = new HandlerResult<T>();

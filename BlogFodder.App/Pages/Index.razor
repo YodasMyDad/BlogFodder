@@ -3,6 +3,7 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Plugins.Commands
+@using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
 @using BlogFodder.Core.Settings.Commands
@@ -16,7 +17,7 @@
 <HeadContent>
     <meta name="description" content="@Settings.DefaultMetaDescription">
 </HeadContent>
-
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.HomeBeforeContent" />
 @ExtensionManager.CreateComponent(PostListComponent, new Dictionary<string, object>
 {
     {"Posts", Posts}
@@ -33,7 +34,7 @@
     {"FirstText", "First"},
     {"LastText", "Last"}
 })
-
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.HomeAfterContent" />
 @code
 {
     [Inject]

@@ -37,5 +37,5 @@ public interface IPlugin
     /// <summary>
     /// The optional plugin for the global settings, so use this if you have configurable settings needed for each instance of the editor
     /// </summary>
-    SettingsPlugin Settings { get; set; }
+    SettingsPlugin? Settings { get; set; }
 }

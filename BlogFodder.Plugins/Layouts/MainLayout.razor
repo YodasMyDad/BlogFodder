@@ -1,15 +1,21 @@
 ﻿@using BlogFodder.Core.Settings
 @using Microsoft.Extensions.Options
 @using BlogFodder.Core.Plugins
+@using BlogFodder.Core.Plugins.Models
 @inherits LayoutComponentBase
 
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.HeaderTop" />
 @ExtensionManager.CreateComponent(HeaderComponent!)
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.HeaderBottom" />
+
 
 <CascadingValue Value="this">
     @Body
 </CascadingValue>
 
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.FooterTop" />
 @ExtensionManager.CreateComponent(FooterComponent!)
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.FooterBottom" />
 
 @code {
 

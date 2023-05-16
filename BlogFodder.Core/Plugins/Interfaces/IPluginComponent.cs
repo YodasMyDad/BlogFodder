@@ -1,4 +1,4 @@
-using BlogFodder.Core.Posts.Models;
+using BlogFodder.Core.Plugins.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace BlogFodder.Core.Plugins.Interfaces;
@@ -9,6 +9,6 @@ namespace BlogFodder.Core.Plugins.Interfaces;
 
 public interface IPluginComponent
 {
-    PostPlugin PostPlugin { get; set; }
-    EventCallback<PostPlugin> SaveAndClose { get; set; }
+    Plugin Plugin { get; set; }
+    EventCallback<Plugin> SaveAndClose { get; set; }
 }

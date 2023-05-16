@@ -32,7 +32,6 @@ public class Post
     public Dictionary<string, string> ExtendedData { get; set; } = new();
 
     public List<PostContentItem> ContentItems { get; set; } = new();
-    public List<PostPlugin> Plugins { get; set; } = new();
-    
+
     public List<Category> Categories { get; set; } = new();
 }

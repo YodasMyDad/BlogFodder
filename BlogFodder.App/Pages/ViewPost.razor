@@ -2,11 +2,9 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Data
-@using BlogFodder.Core.Plugins.Interfaces
 @using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
-@using BlogFodder.Core.Shared
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
 
@@ -154,42 +152,19 @@
            ]
         }
     </script>*@
-
-
+    
 </HeadContent>
 
 @if (CanBeFound)
 {
-    @foreach (var postPlugin in Post.Plugins.Where(x => x.PluginDisplayArea == PluginDisplayArea.PostBeforeContent))
-    {
-        if (postPlugin.PluginAlias != null)
-        {
-            if (AvailablePlugins.ContainsKey(postPlugin.PluginAlias, PluginDisplayArea.PostBeforeContent))
-            {
-                var plugin = AvailablePlugins[postPlugin.PluginAlias, PluginDisplayArea.PostBeforeContent];
-                <DynamicComponent Type="@plugin.Component"
-                                  Parameters="@(new Dictionary<string, object> {{"Model", postPlugin.PluginData ?? ""}, {"Settings", postPlugin.PluginSettings ?? ""}, {"GlobalSettings", "TODO"},})"/>
-            }
-        }
-    }
+   <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostBeforeContent" PostId="Post.Id" />
 
     @ExtensionManager.CreateComponent(PostViewComponent, new Dictionary<string, object>
     {
         {"Post", Post}
     })
-
-    @foreach (var postPlugin in Post.Plugins.Where(x => x.PluginDisplayArea == PluginDisplayArea.PostAfterContent))
-    {
-        if (postPlugin.PluginAlias != null)
-        {
-            if (AvailablePlugins.ContainsKey(postPlugin.PluginAlias, PluginDisplayArea.PostAfterContent))
-            {
-                var plugin = AvailablePlugins[postPlugin.PluginAlias, PluginDisplayArea.PostAfterContent];
-                <DynamicComponent Type="@plugin.Component"
-                                  Parameters="@(new Dictionary<string, object> {{"Model", postPlugin.PluginData ?? ""}, {"Settings", postPlugin.PluginSettings ?? ""}, {"GlobalSettings", "TODO"},})"/>
-            }
-        }
-    }
+    
+    <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostAfterContent" PostId="Post.Id" />
 }
 else
 {
@@ -211,9 +186,7 @@ else
     [Inject]
     IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
 
-    private Dictionary<string, PluginDisplayArea, ContentPlugin> AvailablePlugins { get; set; } = new();
-
-    private string PostViewComponent { get; set; } = "";
+   private string PostViewComponent { get; set; } = "";
 
     private Post Post { get; set; } = new();
 
@@ -226,19 +199,12 @@ else
             var post = DbContext.Posts
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
-                .Include(x => x.Plugins)
                 .Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
             if (post != null)
             {
                 CanBeFound = true;
                 Post = post;
             }
-        }
-
-        var plugins = ExtensionManager.GetInstances<IPlugin>(true).Where(x => x.Value.Content is {PluginDisplayArea: not null });
-        foreach (var plugin in plugins)
-        {
-            AvailablePlugins.Add(plugin.Value.Alias, plugin.Value.Content.PluginDisplayArea.Value, plugin.Value.Content);
         }
     }
 

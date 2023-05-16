@@ -6,6 +6,7 @@ using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Commands;
 using BlogFodder.Core.Plugins.Interfaces;
+using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Posts.Commands;
 using BlogFodder.Core.Posts.Models;
 using BlogFodder.Core.Posts.Validation;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Utilities;
+using PostPluginEditor = BlogFodder.App.Pages.Admin.Posts.Dialogs.PostPluginEditor;
 
 namespace BlogFodder.App.Pages.Admin.Posts;
 
@@ -33,6 +35,7 @@ public partial class CreatePost : ComponentBase
     private CreateUpdatePostCommand PostCommand { get; set; } = new();
     private Dictionary<string, IEditorPlugin> AvailableEditorPlugins { get; set; } = new();
     private Dictionary<string, IPlugin> AvailablePlugins { get; set; } = new();
+    private Dictionary<string, Plugin> PluginData { get; set; } = new();
     private MudDropContainer<PostContentItem>? DropContainer { get; set; }
     private MudForm Form { get; set; } = default!;
     private CreateUpdatePostCommandValidator CommandValidator { get; set; } = new();
@@ -54,7 +57,6 @@ public partial class CreatePost : ComponentBase
             // Yes, should probably be in a service or Mediatr call
             var dbPost = DbContext.Posts
                 .Include(x => x.ContentItems)
-                .Include(x => x.Plugins)
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
                 .Include(x => x.Categories)
@@ -88,6 +90,14 @@ public partial class CreatePost : ComponentBase
         foreach (var plugin in plugins)
         {
             AvailablePlugins.Add(plugin.Value.Alias, plugin.Value);
+        }
+        
+        // Finally get the db plugin data for this post
+        var pluginData = DbContext.Plugins.Where(x => x.PostId == PostCommand.Post.Id)
+            .ToDictionary(x => x.PluginAlias ?? "misc", x => x);
+        if (pluginData.Any())
+        {
+            PluginData = pluginData;
         }
     }
 
@@ -184,22 +194,22 @@ public partial class CreatePost : ComponentBase
     /// <summary>
     /// Shows the dialog for the post plugins
     /// </summary>
+    /// <param name="iplugin"></param>
     /// <param name="plugin"></param>
-    /// <param name="postPlugin"></param>
-    private async Task ShowPostPlugin(IPlugin plugin, PostPlugin? postPlugin)
+    private async Task ShowPostPlugin(IPlugin iplugin, Plugin? plugin)
     {
         var parameters = new DialogParameters
         {
-            {"PostPlugin", postPlugin},
-            {"Plugin", plugin}
+            {"PostPlugin", plugin},
+            {"Plugin", iplugin}
         };
         
-        var dialog = await Dialog.ShowAsync<PostPluginEditor>(plugin.Name, parameters, _defaultDialogOptions);
+        var dialog = await Dialog.ShowAsync<PostPluginEditor>(iplugin.Name, parameters, _defaultDialogOptions);
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            // TODO - Update this
+            // TODO - Need to save this data here as it won't be saved with the post
         }
     }
     

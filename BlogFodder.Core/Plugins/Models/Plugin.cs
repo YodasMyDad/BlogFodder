@@ -1,18 +1,15 @@
 using BlogFodder.Core.Extensions;
-using BlogFodder.Core.Plugins.Models;
 
-namespace BlogFodder.Core.Posts.Models;
+namespace BlogFodder.Core.Plugins.Models;
 
-public class PostPlugin
+public class Plugin
 {
-    public Post Post { get; set; } = default!;
-    public Guid PostId { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid().NewSequentialGuid();
     public string? PluginAlias { get; set; }
     public string? PluginData { get; set; }
     public string? PluginSettings { get; set; }
-    
-    public PluginDisplayArea PluginDisplayArea { get; set; }
+    public Guid? PostId { get; set; }
+    public List<PluginDisplayArea> PluginDisplayAreas { get; set; } = new();
     
     // EF Ignore
     public string? GlobalSettings { get; set; }

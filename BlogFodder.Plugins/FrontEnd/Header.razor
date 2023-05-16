@@ -3,11 +3,11 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Categories.Models
 @using BlogFodder.Core.Data
+@using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Settings.Commands
 @using BlogFodder.Core.Settings.Models
 @using MediatR
 @using Microsoft.EntityFrameworkCore
-
 
 <nav class="navbar navbar-expand-lg bg-secondary-subtle">
     <div class="container">
@@ -39,7 +39,7 @@
                     else
                     {
                         <li class="nav-item">
-                        <NavLink class="nav-link" href="@topnav.Link" @onclick="@(() => GoTo(topnav))">@topnav.Name</NavLink>   
+                            <NavLink class="nav-link" href="@topnav.Link" @onclick="@(() => GoTo(topnav))">@topnav.Name</NavLink>   
                         </li>
                     }
                 }

@@ -1,8 +1,8 @@
-@using BlogFodder.Core.Posts.Models
+@using BlogFodder.Core.Plugins.Models
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginComponentPreview
 
 
 @code {
     [Parameter]
-    public PostPlugin? PostPlugin { get; set; }
+    public Plugin? Plugin { get; set; }
 }

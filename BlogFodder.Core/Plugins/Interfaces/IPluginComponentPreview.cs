@@ -1,4 +1,4 @@
-using BlogFodder.Core.Posts.Models;
+using BlogFodder.Core.Plugins.Models;
 
 namespace BlogFodder.Core.Plugins.Interfaces;
 
@@ -7,5 +7,5 @@ namespace BlogFodder.Core.Plugins.Interfaces;
 /// </summary>
 public interface IPluginComponentPreview
 {
-    PostPlugin? PostPlugin { get; set; }
+    Plugin? Plugin { get; set; }
 }

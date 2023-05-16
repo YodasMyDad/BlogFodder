@@ -165,9 +165,9 @@
                     </MudGrid>
             @foreach (var plugin in AvailablePlugins)
             {
-                var pluginData = PostCommand.Post.Plugins.FirstOrDefault(x => x.PluginAlias == plugin.Key);
+                var pluginData = PluginData.FirstOrDefault(x => x.Key == plugin.Key);
                 <MudItem xs="12" Class="mb-8">
-                    <MudCard @onclick="@(() => ShowPostPlugin(plugin.Value, pluginData))" Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
+                    <MudCard @onclick="@(() => ShowPostPlugin(plugin.Value, pluginData.Value))" Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
                         <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
                             <MudIcon Icon="@plugin.Value.Icon" Color="Color.Default"/>
                             <div class="flex-grow-1">
