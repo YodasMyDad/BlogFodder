@@ -7,5 +7,5 @@ public interface IPluginContentComponent
 {
     string? Model { get; set; }
     string? Settings { get; set; }
-    string? GlobalSettings { get; set; }
+    Guid? PostId { get; set; }
 }

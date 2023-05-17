@@ -5,7 +5,7 @@ namespace BlogFodder.Core.Extensions;
 
 public static class SettingsExtensions
 {
-    public static T? ToType<T>(this PluginSettings? globalSettings)
+    public static T? ToType<T>(this GlobalPluginSettings? globalSettings)
     {
         if (globalSettings != null)
         {
@@ -14,6 +14,17 @@ public static class SettingsExtensions
                 return JsonSerializer.Deserialize<T>(globalSettings.Data);
             }
         }
+
+        return default;
+    }
+
+    public static T? ToType<T>(this string data)
+    {
+        if (!data.IsNullOrWhiteSpace())
+        {
+            return JsonSerializer.Deserialize<T>(data);
+        }
+
         return default;
     }
 }

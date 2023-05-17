@@ -8,20 +8,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogFodder.Core.Plugins.Handlers;
 
-public class GetPluginSettingsHandler : IRequestHandler<GetPluginSettingsCommand, PluginSettings?>
+public class GetGlobalPluginSettingsHandler : IRequestHandler<GetGlobalPluginSettingsCommand, GlobalPluginSettings?>
 {
     private readonly BlogFodderDbContext _dbContext;
     private readonly ICacheService _cacheService;
 
-    public GetPluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
+    public GetGlobalPluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
     }
 
-    public async Task<PluginSettings?> Handle(GetPluginSettingsCommand request, CancellationToken cancellationToken)
+    public async Task<GlobalPluginSettings?> Handle(GetGlobalPluginSettingsCommand request, CancellationToken cancellationToken)
     {
-        return await _cacheService.GetSetCachedItemAsync(typeof(PluginSettings).ToCacheKey(request.Alias!), async () =>
+        return await _cacheService.GetSetCachedItemAsync(typeof(GlobalPluginSettings).ToCacheKey(request.Alias!), async () =>
         {
             return await _dbContext.PluginSettings.AsNoTracking().FirstOrDefaultAsync(x => x.Alias == request.Alias, cancellationToken: cancellationToken);
         });

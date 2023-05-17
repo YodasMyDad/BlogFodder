@@ -23,16 +23,16 @@
         <MudTabPanel Text="Settings">
             <MudGrid>
                 <MudItem xs="12">
-                    <MudSwitch Label="Enabled"
+                    <MudSwitch Label="Enabled" Color="Color.Primary"
                                @bind-Checked="Settings.Enabled" For="@(() => Settings.Enabled)"/>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudSwitch Label="Manually Approve Comments"
+                    <MudSwitch Label="Manually Approve Comments" Color="Color.Primary"
                                @bind-Checked="Settings.ManuallyApproveComments"
-                               For="@(() => Settings.Enabled)"/>
+                               For="@(() => Settings.ManuallyApproveComments)"/>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudSwitch Label="Enable Akismet Spam Filtering"
+                    <MudSwitch Label="Enable Akismet Spam Filtering" Color="Color.Primary"
                                @bind-Checked="Settings.EnableAkismetSpamCheck" For="@(() => Settings.Enabled)"/>
                 </MudItem>
             </MudGrid>
@@ -66,27 +66,29 @@
     private MudForm Form { get; set; } = default!;
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private PostCommentSettings Settings { get; set; } = new();
-    private SavePluginSettingsCommand SavePluginSettingsCommand { get; set; } = new();
+    private CreateUpdatePluginCommand SavePluginSettingsCommand { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var globalSettings = await Mediator.Send(new GetPluginSettingsCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
-        if (globalSettings != null)
+        var plugin = await Mediator.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
+        if (plugin != null)
         {
             SavePluginSettingsCommand.IsUpdate = true;
-            SavePluginSettingsCommand.Settings = globalSettings;
+            SavePluginSettingsCommand.Plugin = plugin;
 
-            var postCommentsGlobalSettings = globalSettings.ToType<PostCommentSettings>();
+            var postCommentsGlobalSettings = plugin.PluginSettings?.ToType<PostCommentSettings>();
             if (postCommentsGlobalSettings != null)
             {
                 Settings = postCommentsGlobalSettings;
             }
+
+            Settings.Enabled = SavePluginSettingsCommand.Plugin.Enabled;
         }
         else
         {
-            SavePluginSettingsCommand.Settings = new PluginSettings
+            SavePluginSettingsCommand.Plugin = new Plugin
             {
-                Alias = PostCommentsConstants.PluginAlias
+                PluginAlias = PostCommentsConstants.PluginAlias
             };
         }
     }
@@ -99,8 +101,11 @@
         await Form.Validate();
         if (Form.IsValid)
         {
-            SavePluginSettingsCommand.Settings!.Data = JsonSerializer.Serialize(Settings, new JsonSerializerOptions {WriteIndented = false}); // Is this compact JSON?
+            SavePluginSettingsCommand.Plugin!.Enabled = Settings.Enabled;
+            SavePluginSettingsCommand.Plugin!.PluginSettings = JsonSerializer.Serialize(Settings, new JsonSerializerOptions {WriteIndented = false}); // Is this compact JSON?
+            
             var result = await Mediator.Send(SavePluginSettingsCommand).ConfigureAwait(false);
+            
             if (result.Success)
             {
                 var correctText = SavePluginSettingsCommand.IsUpdate ? "Updated" : "Created";

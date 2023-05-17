@@ -14,27 +14,29 @@
     if (plugin.Value.Content != null)
     {
         PluginData.TryGetValue(plugin.Key, out var p);
-        <DynamicComponent Type="@plugin.Value.Content.Component"
-                          Parameters="@(new Dictionary<string, object> 
-                                      {
-                                            {"Model", p?.PluginData ?? ""}, 
-                                            {"Settings", p?.PluginSettings ?? ""}, 
-                                            {"GlobalSettings",  p?.GlobalSettings ?? ""}
-                                      })"/>   
+        var enabled = p?.Enabled == true;
+        if (enabled)
+        {
+            <DynamicComponent Type="@plugin.Value.Content.Component"
+                              Parameters="@(new Dictionary<string, object> {{"Model", p?.PluginData ?? ""}, {"Settings", p?.PluginSettings ?? ""}, {"PostId", PostId!}})"/>
+        }
     }
 }
 
 @code
 {
-    [Parameter] public PluginDisplayArea? PluginDisplayArea { get; set; }
-    [Parameter] public Guid? PostId { get; set; }
-    
+    [Parameter]
+    public PluginDisplayArea? PluginDisplayArea { get; set; }
+
+    [Parameter]
+    public Guid? PostId { get; set; }
+
     [Inject]
     public BlogFodderDbContext DbContext { get; set; } = default!;
 
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
-    
+
     [Inject]
     public IMediator Mediator { get; set; } = default!;
 
@@ -42,7 +44,7 @@
     private Dictionary<string, IPlugin> Plugins { get; set; } = new();
     private Dictionary<string, string?> PluginSettingData { get; set; } = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         if (PluginDisplayArea != null)
         {
@@ -50,26 +52,17 @@
             // and the PluginDisplayArea matches this one
             Plugins = ExtensionManager.GetInstances<IPlugin>(true)
                 .Where(x => x.Value.Content != null && x.Value.Content.PluginDisplayArea == PluginDisplayArea)
-                .ToDictionary(x => x.Key, x => x.Value);
+                .ToDictionary(x => x.Value.Alias, x => x.Value);
 
-            var pluginAliases = Plugins.Select(x => x.Value.Alias).ToList();
-            
-            // Now get the PluginData that matches this data (If a PostId then also include this in the query)
-            // TODO - This needs to be cached, maybe a get all that is cached per request
-            // TODO - Does EF cache this anyway if same query is called multiple times?
-            var pluginData = DbContext.Plugins.AsNoTracking();
-            pluginData = PostId != null ? pluginData.Where(x => x.PostId == PostId && pluginAliases.Contains(x.PluginAlias)) : pluginData.Where(x => pluginAliases.Contains(x.PluginAlias));
-            PluginData = pluginData.ToDictionary(x => x.PluginAlias ?? "", x => x);
-
-            var pluginSettings = await Mediator.Send(new GetPluginSettingsByAliasCommand {Aliases = pluginAliases}).ConfigureAwait(false);
-            PluginSettingData = pluginSettings.ToDictionary(x => x.Alias ?? "neverNull", x => x.Data);
-            
-            foreach (var plugin in PluginData)
+            if (Plugins.Any())
             {
-                if (PluginSettingData.TryGetValue(plugin.Key, out var value))
-                {
-                    plugin.Value.GlobalSettings = value;
-                }
+                var pluginAliases = Plugins.Select(x => x.Value.Alias).ToList();
+
+                // Now get the PluginData that matches this data (If a PostId then also include this in the query)
+                // TODO - This needs to be cached, maybe a get all that is cached per request
+                // TODO - Does EF cache this anyway if same query is called multiple times?
+                var pluginData = DbContext.Plugins.AsNoTracking().Where(x => pluginAliases.Contains(x.PluginAlias));
+                PluginData = pluginData.ToDictionary(x => x.PluginAlias ?? "", x => x);
             }
         }
     }

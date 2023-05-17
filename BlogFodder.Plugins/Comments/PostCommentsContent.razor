@@ -1,12 +1,27 @@
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginContentComponent
 
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            @*<EditForm Model="@exampleModel" OnSubmit="@HandleSubmit">
+                <InputText id="name" @bind-Value="exampleModel.Name"/>
+
+                <button type="submit">Submit</button>
+            </EditForm>*@
+
+            <p>TODO - Display the comments here</p>
+        </div>
+    </div>
+</div>
+
 @code {
+
     [Parameter]
     public string? Model { get; set; }
-    
+
     [Parameter]
     public string? Settings { get; set; }
 
-    [Parameter] 
-    public string? GlobalSettings { get; set; }
+    [Parameter]
+    public Guid? PostId { get; set; }
 }

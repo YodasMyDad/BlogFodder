@@ -4,8 +4,8 @@ using MediatR;
 
 namespace BlogFodder.Core.Plugins.Commands;
 
-public class SavePluginSettingsCommand : IRequest<HandlerResult<PluginSettings>>
+public class CreateUpdatePluginCommand : IRequest<HandlerResult<Plugin>>
 {
     public bool IsUpdate { get; set; }
-    public PluginSettings? Settings { get; set; }
+    public Plugin? Plugin { get; set; }
 }

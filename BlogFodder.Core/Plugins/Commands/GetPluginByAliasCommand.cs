@@ -3,8 +3,7 @@ using MediatR;
 
 namespace BlogFodder.Core.Plugins.Commands;
 
-public class GetPluginSettingsCommand : IRequest<PluginSettings?>
+public class GetPluginByAliasCommand : IRequest<Plugin?>
 {
     public string? Alias { get; set; }
-
 }

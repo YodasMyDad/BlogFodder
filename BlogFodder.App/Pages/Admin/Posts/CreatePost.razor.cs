@@ -93,11 +93,16 @@ public partial class CreatePost : ComponentBase
         }
         
         // Finally get the db plugin data for this post
-        var pluginData = DbContext.Plugins.Where(x => x.PostId == PostCommand.Post.Id)
-            .ToDictionary(x => x.PluginAlias ?? "misc", x => x);
+        var pluginData = DbContext.Plugins.ToList();
         if (pluginData.Any())
         {
-            PluginData = pluginData;
+            foreach (var plugin in pluginData)
+            {
+                if (AvailablePlugins.ContainsKey(plugin.PluginAlias))
+                {
+                    PluginData.Add(plugin.PluginAlias, plugin);   
+                }
+            }
         }
     }
 
@@ -260,7 +265,7 @@ public partial class CreatePost : ComponentBase
 
                 if (plugin.Settings != null)
                 {
-                    var globalSettingsCommand = new GetPluginSettingsCommand
+                    var globalSettingsCommand = new GetGlobalPluginSettingsCommand
                     {
                         Alias = plugin.Alias
                     };

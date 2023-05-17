@@ -8,26 +8,26 @@ using MediatR;
 
 namespace BlogFodder.Core.Plugins.Handlers;
 
-public class CreateUpdatePluginSettingsHandler : IRequestHandler<SavePluginSettingsCommand, HandlerResult<PluginSettings>>
+public class CreateUpdateGlobalPluginSettingsHandler : IRequestHandler<CreateUpdateGlobalPluginSettingsCommand, HandlerResult<GlobalPluginSettings>>
 {
     private readonly BlogFodderDbContext _dbContext;
     private readonly ICacheService _cacheService;
     
-    public CreateUpdatePluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
+    public CreateUpdateGlobalPluginSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
     }
     
-    public async Task<HandlerResult<PluginSettings>> Handle(SavePluginSettingsCommand request, CancellationToken cancellationToken)
+    public async Task<HandlerResult<GlobalPluginSettings>> Handle(CreateUpdateGlobalPluginSettingsCommand request, CancellationToken cancellationToken)
     {
-        var result = new HandlerResult<PluginSettings>();
+        var result = new HandlerResult<GlobalPluginSettings>();
         
         result = await _dbContext.CreateOrUpdate(request.Settings, result, !request.IsUpdate, cancellationToken)
             .ConfigureAwait(false);
         
         // Clear the cache
-        _cacheService.ClearCachedItemsWithPrefix(nameof(PluginSettings));
+        _cacheService.ClearCachedItemsWithPrefix(nameof(GlobalPluginSettings));
         
         return result;
     }

@@ -58,11 +58,11 @@
     private MudForm Form { get; set; } = default!;
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private RichTextGlobalSettings RichTextGlobalSettings { get; set; } = new();
-    private SavePluginSettingsCommand SavePluginSettingsCommand { get; set; } = new();
+    private CreateUpdateGlobalPluginSettingsCommand SavePluginSettingsCommand { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var globalSettings = await Mediator.Send(new GetPluginSettingsCommand {Alias = RichTextEditorConstants.PluginAlias}).ConfigureAwait(false);
+        var globalSettings = await Mediator.Send(new GetGlobalPluginSettingsCommand {Alias = RichTextEditorConstants.PluginAlias}).ConfigureAwait(false);
         if (globalSettings != null)
         {
             SavePluginSettingsCommand.IsUpdate = true;
@@ -76,7 +76,7 @@
         }
         else
         {
-            SavePluginSettingsCommand.Settings = new PluginSettings
+            SavePluginSettingsCommand.Settings = new GlobalPluginSettings
             {
                 Alias = RichTextEditorConstants.PluginAlias
             };

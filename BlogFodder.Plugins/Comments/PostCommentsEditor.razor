@@ -1,8 +1,14 @@
-@using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Plugins.Models
+@using BlogFodder.Plugins.Comments.Models
+@using BlogFodder.Core.Extensions
+@using System.Text.Json
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginComponent
 
-<p>Hello</p>
+@foreach (var comment in Model.Comments)
+{
+    <p>@comment.Comment</p>
+    <p>TODO - Edit and delete?</p>
+}
 
 @code {
     [Parameter]
@@ -11,8 +17,13 @@
     [Parameter]
     public EventCallback<Plugin> SaveAndClose { get; set; }
 
+    private PostCommentsEditorModel Model { get; set; } = new();
+    
     protected override void OnInitialized()
     {
-        
+        if (Plugin?.PluginData.IsNullOrWhiteSpace() == false)
+        {
+            Model = JsonSerializer.Deserialize<PostCommentsEditorModel>(Plugin.PluginData) ?? new PostCommentsEditorModel();
+        }
     }
 }
