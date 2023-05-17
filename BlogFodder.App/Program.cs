@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
@@ -32,6 +33,7 @@ builder.Services.AddScoped<ProviderService>();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 
 builder.Services.AddMudServicesWithExtensions();
+builder.Services.AddBlazoredToast();
 
 builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection(Constants.SettingsConfigName));
 

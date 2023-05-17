@@ -1,18 +1,46 @@
+@using BlogFodder.Core.Extensions
+@using BlogFodder.Plugins.Comments.Models
+@using System.Text.Json
+@using BlogFodder.Core.Plugins.Commands
+@using BlogFodder.Core.Plugins.Models
+@using Humanizer
+@using MediatR
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginContentComponent
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-8">
-            @*<EditForm Model="@exampleModel" OnSubmit="@HandleSubmit">
-                <InputText id="name" @bind-Value="exampleModel.Name"/>
-
-                <button type="submit">Submit</button>
-            </EditForm>*@
-
-            <p>TODO - Display the comments here</p>
+@if (PostId != null)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <EditForm Model="@Comment" OnSubmit="@HandleSubmit">
+                    <div class="mb-3">
+                        <label for="Comment.Comment" class="form-label">Comment</label>
+                        <InputTextArea @bind-Value="@Comment.Comment" id="Comment.Comment" class="form-control" rows="8"/>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Post Comment</button>
+                    </div>
+                </EditForm>
+                <div class="pt-5">
+                    @foreach (var comment in PostComments.Where(x => x.PostId == PostId))
+                    {
+                        <div class="card mb-2">
+                              <div class="card-header">
+                                Name Here TODO
+                              </div>
+                            <div class="card-body">
+                                @comment.Comment
+                            </div>
+                            <div class="card-footer text-muted">
+                                @comment.DateCreated.Humanize()
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
-</div>
+}
 
 @code {
 
@@ -24,4 +52,88 @@
 
     [Parameter]
     public Guid? PostId { get; set; }
+
+    [Inject]
+    public IToastService ToastService { get; set; } = default!;
+    
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+    
+    private List<PostComment> PostComments { get; set; } = new();
+    private PostCommentSettings PostCommentSettings { get; set; } = new();
+    private PostComment Comment { get; set; } = new(){ DateCreated = DateTime.UtcNow};
+
+
+    protected override void OnInitialized()
+    {
+        if (PostId != null)
+        {
+            Comment.PostId = PostId.Value;
+            if (!Model.IsNullOrWhiteSpace())
+            {
+                PostComments = JsonSerializer.Deserialize<List<PostComment>>(Model) ?? new List<PostComment>();
+
+                if (!Settings.IsNullOrWhiteSpace())
+                {
+                    PostCommentSettings = JsonSerializer.Deserialize<PostCommentSettings>(Settings) ?? new PostCommentSettings();
+                }
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (Comment.Comment.IsNullOrWhiteSpace())
+        {
+            ToastService.ShowError("You need to enter a comment");
+        }
+
+        var canPostComment = true;
+        if (PostCommentSettings.EnableAkismetSpamCheck)
+        {
+            // TODO - Do the checks
+            //canPostComment = false;
+        }
+
+        if (canPostComment)
+        {
+            if (PostCommentSettings.ManuallyApproveComments)
+            {
+                PostCommentSettings.CommentsToApprove.Add(Comment);
+            }
+            else
+            {
+                PostComments.Add(Comment);
+            }
+        }
+
+        var createUpdateCommand = new CreateUpdatePluginCommand();
+        var plugin = await Mediator.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
+        if (plugin == null)
+        {
+            // This should not happen, but just in case
+            plugin = new Plugin { PluginAlias = PostCommentsConstants.PluginAlias};
+        }
+        else
+        {
+            createUpdateCommand.IsUpdate = true;
+        }
+        plugin.PluginData = JsonSerializer.Serialize(PostComments);
+        plugin.PluginSettings = JsonSerializer.Serialize(PostCommentSettings);
+        createUpdateCommand.Plugin = plugin;
+        var saveResult = await Mediator.Send(createUpdateCommand).ConfigureAwait(false);
+        if (saveResult.Success)
+        {
+            Comment = new PostComment { PostId = PostId!.Value, DateCreated = DateTime.UtcNow};
+            ToastService.ShowSuccess("Comment added");
+        }
+        else
+        {
+            foreach (var message in saveResult.Messages)
+            {
+                if (message.Message != null) ToastService.ShowError(message.Message);
+            }
+        }
+    }
+
 }

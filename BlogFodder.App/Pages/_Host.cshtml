@@ -17,8 +17,8 @@
     <base href="~/"/>
     <link rel="icon" type="image/png" href="@mainSettings.Favicon"/>
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
+    <link rel="stylesheet" href="BlogFodder.App.styles.css" asp-append-version="true"/>
     @(await Component.InvokeAsync("EditorPluginCss"))
-    
 </head>
 <body>
 <component type="typeof(App)" render-mode="ServerPrerendered"/>
@@ -36,6 +36,21 @@
 
 
 <script src="_framework/blazor.server.js"></script>
+<script>
+    // Wait until a 'reload' button appears
+    new MutationObserver((mutations, observer) => {
+        if (document.querySelector('#components-reconnect-modal h5')) {
+            // Now every 10 seconds, see if the server appears to be back, and if so, reload
+            async function attemptReload() {
+                await fetch(''); // Check the server really is back
+                location.reload();
+            }
+            observer.disconnect();
+            attemptReload();
+            setInterval(attemptReload, 2000);
+        }
+    }).observe(document.body, { childList: true, subtree: true });
+</script>
 @await Component.InvokeAsync("EditorPluginJs")
 </body>
 </html>

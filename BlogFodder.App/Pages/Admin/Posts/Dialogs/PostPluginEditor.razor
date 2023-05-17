@@ -2,13 +2,21 @@
 @using BlogFodder.Core.Plugins.Interfaces
 @using BlogFodder.Core.Plugins.Models
 
-@if (Plugin != null)
+@if (Iplugin != null)
 {
-    <DynamicComponent Type="@Plugin?.Editor?.Component"
-                      Parameters="@(new Dictionary<string, object> {
-                                      {"Plugin", PostPlugin},
-                                      {"SaveAndClose", EventCallback.Factory.Create<Plugin>(this, SaveAndClose)}
-                                  })"/>
+    if (!Plugin.Enabled)
+    {
+        <MudDialog>
+            <DialogContent>
+                <MudText Typo="Typo.body1">You haven't enabled this plugin</MudText>
+            </DialogContent>
+        </MudDialog>
+    }
+    else
+    {
+        <DynamicComponent Type="@Iplugin?.Editor?.Component"
+                          Parameters="@(new Dictionary<string, object> {{"Plugin", Plugin}, {"PostId", PostId}, {"SaveAndClose", EventCallback.Factory.Create<Plugin>(this, SaveAndClose)}})"/>
+    }
 }
 
 
@@ -21,13 +29,17 @@
     MudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
-    public Plugin PostPlugin { get; set; } = new();
-    
+    public Plugin Plugin { get; set; } = new();
+
     [Parameter]
-    public IPlugin? Plugin { get; set; }
+    public Guid PostId { get; set; } = new();
+
+    [Parameter]
+    public IPlugin? Iplugin { get; set; }
 
     public void SaveAndClose(Plugin data)
     {
         MudDialog.Close(DialogResult.Ok(data));
     }
+
 }

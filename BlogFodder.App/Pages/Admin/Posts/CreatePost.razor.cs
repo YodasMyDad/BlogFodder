@@ -205,8 +205,9 @@ public partial class CreatePost : ComponentBase
     {
         var parameters = new DialogParameters
         {
-            {"PostPlugin", plugin},
-            {"Plugin", iplugin}
+            {"Plugin", plugin},
+            {"Iplugin", iplugin},
+            {"PostId", PostCommand.Post.Id}
         };
         
         var dialog = await Dialog.ShowAsync<PostPluginEditor>(iplugin.Name, parameters, _defaultDialogOptions);

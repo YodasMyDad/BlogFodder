@@ -24,13 +24,25 @@ public class EditorPluginCssViewComponent : ViewComponent
 
     public IViewComponentResult Invoke()
     {
-        var plugins = _extensionManager.GetInstances<IEditorPlugin>(true);
-        
+        var cssFiles = new List<string>();
+        var editorPlugins = _extensionManager.GetInstances<IEditorPlugin>(true);
+        var plugins = _extensionManager.GetInstances<IPlugin>(true);
         var currentUrl = HttpContext.Request.Path.Value;
         var startsWithAdmin =
             currentUrl?.StartsWith(Constants.BackOffice.BackOfficeUrlDenoter, StringComparison.OrdinalIgnoreCase) ??
             false;
-        var cssFiles = new List<string>();
+
+        // TODO - need to think about plugins that use CSS isolation, can use the following to add the styles
+        /*foreach (var plugin in plugins)
+        {
+            var assembly = plugin.Value.GetType().Assembly;
+            cssFiles.Add($"{assembly.GetName().Name}.styles.css");
+        }
+        foreach (var plugin in editorPlugins)
+        {
+            var assembly = plugin.Value.GetType().Assembly;
+            cssFiles.Add($"{assembly.GetName().Name}.styles.css");
+        }*/
 
         if (startsWithAdmin)
         {
@@ -39,6 +51,16 @@ public class EditorPluginCssViewComponent : ViewComponent
             cssFiles.Add("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
             cssFiles.Add("_content/MudBlazor/MudBlazor.min.css");
             
+            foreach (var plugin in editorPlugins)
+            {
+                if (plugin.Value.Editor?.CssFiles != null)
+                {
+                    foreach (var cssFile in plugin.Value.Editor.CssFiles)
+                    {
+                        cssFiles.Add(cssFile);
+                    }
+                }
+            }
             foreach (var plugin in plugins)
             {
                 if (plugin.Value.Editor?.CssFiles != null)
@@ -53,6 +75,16 @@ public class EditorPluginCssViewComponent : ViewComponent
         else
         {
             cssFiles.AddRange(_optionsSnapshot.FrontEnd.Styles);
+            foreach (var plugin in editorPlugins)
+            {
+                if (plugin.Value.Content?.CssFiles != null)
+                {
+                    foreach (var cssFile in plugin.Value.Content.CssFiles)
+                    {
+                        cssFiles.Add(cssFile);
+                    }
+                }
+            }
             foreach (var plugin in plugins)
             {
                 if (plugin.Value.Content?.CssFiles != null)

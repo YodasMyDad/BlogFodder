@@ -5,7 +5,7 @@ namespace BlogFodder.Core.Plugins.Interfaces;
 /// <summary>
 /// Interface for IPlugin > PostPluginEditor > PreviewComponent
 /// </summary>
-public interface IPluginComponentPreview
+public interface IPluginPreviewComponent
 {
     Plugin? Plugin { get; set; }
 }

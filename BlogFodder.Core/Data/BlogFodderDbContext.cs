@@ -14,6 +14,7 @@ public class BlogFodderDbContext : IdentityDbContext<User, Role, Guid, UserClaim
 {
     public BlogFodderDbContext(DbContextOptions<BlogFodderDbContext> options) : base(options)
     {
+        this.ChangeTracker.AutoDetectChangesEnabled = false;
     }
 
     public DbSet<Post> Posts => Set<Post>();

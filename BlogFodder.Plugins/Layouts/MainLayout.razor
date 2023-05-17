@@ -2,12 +2,13 @@
 @using Microsoft.Extensions.Options
 @using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Plugins.Models
+@using Blazored.Toast.Configuration
 @inherits LayoutComponentBase
 
+<BlazoredToasts Position="ToastPosition.BottomRight" Timeout="6" />
 <RenderPlugins PluginDisplayArea="PluginDisplayArea.HeaderTop" />
 @ExtensionManager.CreateComponent(HeaderComponent!)
 <RenderPlugins PluginDisplayArea="PluginDisplayArea.HeaderBottom" />
-
 
 <CascadingValue Value="this">
     @Body

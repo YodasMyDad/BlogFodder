@@ -7,8 +7,11 @@ namespace BlogFodder.Core.Plugins.Interfaces;
 /// Interface for IPlugin > PostPluginEditor > Component
 /// </summary>
 
-public interface IPluginComponent
+public interface IPluginEditorComponent
 {
     Plugin Plugin { get; set; }
+    
+    Guid PostId { get; set; }
+    
     EventCallback<Plugin> SaveAndClose { get; set; }
 }

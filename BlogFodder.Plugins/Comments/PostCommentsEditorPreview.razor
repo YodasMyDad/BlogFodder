@@ -1,8 +1,31 @@
 @using BlogFodder.Core.Plugins.Models
-@implements BlogFodder.Core.Plugins.Interfaces.IPluginComponentPreview
+@using BlogFodder.Core.Plugins.Interfaces
+@implements BlogFodder.Core.Plugins.Interfaces.IPluginPreviewComponent
 
+<MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
+    <MudIcon Icon="@Iplugin.Icon" Color="Color.Default"/>
+    <div class="flex-grow-1">
+        <div style="color: @Colors.BlueGrey.Lighten1">
+            <MudText Typo="Typo.subtitle1">@Iplugin.Name</MudText>
+            <MudText Typo="Typo.subtitle2">@Iplugin.Description</MudText>
+        </div>
+    </div>
+    @if (Plugin.Enabled)
+    {
+        <MudIcon Icon="@Icons.Material.Filled.Circle" Color="Color.Success"/>
+    }
+    else
+    {
+        <MudIcon Icon="@Icons.Material.Filled.Circle" Color="Color.Error"/>
+    }
+</MudCardContent>
 
 @code {
+
     [Parameter]
-    public Plugin? Plugin { get; set; }
+    public Plugin Plugin { get; set; } = default!;
+
+    [Parameter]
+    public IPlugin Iplugin { get; set; } = default!;
+
 }

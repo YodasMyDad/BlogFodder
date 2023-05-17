@@ -2,28 +2,77 @@
 @using BlogFodder.Plugins.Comments.Models
 @using BlogFodder.Core.Extensions
 @using System.Text.Json
-@implements BlogFodder.Core.Plugins.Interfaces.IPluginComponent
+@using Humanizer
+@implements BlogFodder.Core.Plugins.Interfaces.IPluginEditorComponent
 
-@foreach (var comment in Model.Comments)
-{
-    <p>@comment.Comment</p>
-    <p>TODO - Edit and delete?</p>
-}
+<MudDialog>
+    <DialogContent>
+        <MudGrid Class="mt-8">
+            @foreach (var comment in PostComments.Where(x => x.PostId == PostId).OrderByDescending(x => x.DateCreated))
+            {
+                <MudItem xs="12" Class="mb-4">
+                    <MudCard Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
+                        <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
+                            <div class="flex-grow-1">
+                                <div style="color: @Colors.BlueGrey.Lighten1">
+                                    <MudText Typo="Typo.subtitle2">Name Here</MudText>
+                                </div>
+                                <MudText Typo="Typo.body1">@comment.Comment</MudText>
+                                <div style="color: @Colors.BlueGrey.Lighten1">
+                                    <MudText Typo="Typo.body2">@comment.DateCreated.Humanize()</MudText>
+                                </div>
+                            </div>
+                            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Outlined.RemoveCircleOutline" Size="Size.Medium" OnClick="() => RemoveComment(comment)"/>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Size="Size.Large" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
 
 @code {
+
     [Parameter]
     public Plugin? Plugin { get; set; }
-    
+
     [Parameter]
     public EventCallback<Plugin> SaveAndClose { get; set; }
 
-    private PostCommentsEditorModel Model { get; set; } = new();
-    
+    [Parameter]
+    public Guid PostId { get; set; }
+
+    private List<PostComment> PostComments { get; set; } = new();
+    private PostCommentSettings PostCommentSettings { get; set; } = new();
+    private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
+
     protected override void OnInitialized()
     {
         if (Plugin?.PluginData.IsNullOrWhiteSpace() == false)
         {
-            Model = JsonSerializer.Deserialize<PostCommentsEditorModel>(Plugin.PluginData) ?? new PostCommentsEditorModel();
+            PostComments = JsonSerializer.Deserialize<List<PostComment>>(Plugin.PluginData) ?? new List<PostComment>();
+        }
+
+        if (Plugin?.PluginSettings.IsNullOrWhiteSpace() == false)
+        {
+            PostCommentSettings = JsonSerializer.Deserialize<PostCommentSettings>(Plugin.PluginSettings) ?? new PostCommentSettings();
         }
     }
+
+    private Task<Task> Submit()
+    {
+        return Task.FromResult(SaveAndClose.InvokeAsync(Plugin));
+    }
+
+    private void RemoveComment(PostComment comment)
+    {
+        PostComments.Remove(comment);
+
+    //TODO - Save the plugin
+    }
+
 }
