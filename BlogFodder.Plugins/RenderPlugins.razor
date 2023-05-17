@@ -7,6 +7,7 @@
 @using BlogFodder.Plugins.ContentEditors.RichTextEditor
 @using MediatR
 @using Microsoft.EntityFrameworkCore
+@using PluginSettings = BlogFodder.Core.Settings.PluginSettings
 
 @foreach (var plugin in Plugins)
 {
@@ -39,6 +40,7 @@
 
     private Dictionary<string, Plugin> PluginData { get; set; } = new();
     private Dictionary<string, IPlugin> Plugins { get; set; } = new();
+    private Dictionary<string, string?> PluginSettingData { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,23 +52,23 @@
                 .Where(x => x.Value.Content != null && x.Value.Content.PluginDisplayArea == PluginDisplayArea)
                 .ToDictionary(x => x.Key, x => x.Value);
 
-            var pluginAliases = Plugins.Select(x => x.Value.Alias);
+            var pluginAliases = Plugins.Select(x => x.Value.Alias).ToList();
             
             // Now get the PluginData that matches this data (If a PostId then also include this in the query)
             // TODO - This needs to be cached, maybe a get all that is cached per request
+            // TODO - Does EF cache this anyway if same query is called multiple times?
             var pluginData = DbContext.Plugins.AsNoTracking();
             pluginData = PostId != null ? pluginData.Where(x => x.PostId == PostId && pluginAliases.Contains(x.PluginAlias)) : pluginData.Where(x => pluginAliases.Contains(x.PluginAlias));
             PluginData = pluginData.ToDictionary(x => x.PluginAlias ?? "", x => x);
 
+            var pluginSettings = await Mediator.Send(new GetPluginSettingsByAliasCommand {Aliases = pluginAliases}).ConfigureAwait(false);
+            PluginSettingData = pluginSettings.ToDictionary(x => x.Alias ?? "neverNull", x => x.Data);
+            
             foreach (var plugin in PluginData)
             {
-                // TODO = Must be a better way to do this, even though each one is cached, still individual calls
-                // TODO = Needs to be one call into a dictionary which is cached
-                // TODO = Need a clear cache by key starts with too. So when settings are saved they are all cleared 
-                var globalSettings = await Mediator.Send(new GetPluginSettingsCommand {Alias = plugin.Key}).ConfigureAwait(false);
-                if (globalSettings != null)
+                if (PluginSettingData.TryGetValue(plugin.Key, out var value))
                 {
-                    plugin.Value.GlobalSettings = globalSettings.Data;
+                    plugin.Value.GlobalSettings = value;
                 }
             }
         }

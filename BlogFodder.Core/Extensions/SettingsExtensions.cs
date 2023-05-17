@@ -5,7 +5,7 @@ namespace BlogFodder.Core.Extensions;
 
 public static class SettingsExtensions
 {
-    public static T? ToType<T>(this GlobalSettings? globalSettings)
+    public static T? ToType<T>(this PluginSettings? globalSettings)
     {
         if (globalSettings != null)
         {

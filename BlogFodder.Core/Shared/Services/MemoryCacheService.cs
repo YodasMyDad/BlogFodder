@@ -1,11 +1,12 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BlogFodder.Core.Shared.Services;
 
-
 public class MemoryCacheService : ICacheService
 {
     private readonly IMemoryCache _cache;
+    private static readonly ConcurrentDictionary<string, byte> Keys = new();
 
     public MemoryCacheService(IMemoryCache cache)
     {
@@ -27,6 +28,7 @@ public class MemoryCacheService : ICacheService
 
             // Save data in cache.
             _cache.Set(cacheKey, cacheEntry, cacheEntryOptions);
+            Keys.TryAdd(cacheKey, default);
         }
 
         return cacheEntry;
@@ -47,6 +49,7 @@ public class MemoryCacheService : ICacheService
 
             // Save data in cache.
             _cache.Set(cacheKey, cacheEntry, cacheEntryOptions);
+            Keys.TryAdd(cacheKey, default);
         }
 
         return cacheEntry;
@@ -55,5 +58,18 @@ public class MemoryCacheService : ICacheService
     public void ClearCachedItem(string cacheKey)
     {
         _cache.Remove(cacheKey);
+        Keys.TryRemove(cacheKey, out _);
+    }
+    
+    public void ClearCachedItemsWithPrefix(string cacheKeyPrefix)
+    {
+        foreach(var key in Keys.Keys)
+        {
+            if(key.StartsWith(cacheKeyPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                _cache.Remove(key);
+                Keys.TryRemove(key, out _);
+            }
+        }
     }
 }

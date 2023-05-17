@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BlogFodder.Core.Plugins.Mapping;
 
-public class GlobalSettingsDbMapping : IEntityTypeConfiguration<GlobalSettings>
+public class PluginSettingsDbMapping : IEntityTypeConfiguration<PluginSettings>
 {
-    public void Configure(EntityTypeBuilder<GlobalSettings> builder)
+    public void Configure(EntityTypeBuilder<PluginSettings> builder)
     {
         builder.ToTable("BlogFodderPluginsGlobalSettings");
         builder.HasKey(x => x.Id);

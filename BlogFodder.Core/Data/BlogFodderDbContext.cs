@@ -21,7 +21,7 @@ public class BlogFodderDbContext : IdentityDbContext<User, Role, Guid, UserClaim
     public DbSet<PostContentItem> PostContentItems => Set<PostContentItem>();
     public DbSet<Plugin> Plugins => Set<Plugin>();
     public DbSet<BlogFodderFile> Files => Set<BlogFodderFile>();
-    public DbSet<GlobalSettings> PluginSettings => Set<GlobalSettings>();
+    public DbSet<PluginSettings> PluginSettings => Set<PluginSettings>();
     public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
