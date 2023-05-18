@@ -12,7 +12,14 @@
 <nav class="navbar navbar-expand-lg bg-secondary-subtle">
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="@Settings.SiteName Logo" width="24" height="24">
+            @if (Settings.LogoId == null)
+            {
+                <img src="/img/b-logo.png?width=24" alt="@Settings.SiteName Logo" width="24" height="24">
+            }
+            else
+            {
+                <img src="@Settings.Logo!.Url?width=24" alt="@Settings.SiteName Logo" width="24" height="24">   
+            }
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnavigation" aria-controls="mainnavigation" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
