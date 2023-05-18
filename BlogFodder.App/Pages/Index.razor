@@ -2,7 +2,6 @@
 @using BlogFodder.Core.Data
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
-@using BlogFodder.Core.Plugins.Commands
 @using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
@@ -12,12 +11,12 @@
 @using MediatR
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-
+@implements IDisposable
 <PageTitle>@Settings.DefaultPageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Settings.DefaultMetaDescription">
 </HeadContent>
-<RenderPlugins PluginDisplayArea="PluginDisplayArea.HomeBeforeContent" />
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.HomeBeforeContent"/>
 @ExtensionManager.CreateComponent(PostListComponent, new Dictionary<string, object>
 {
     {"Posts", Posts}
@@ -25,30 +24,37 @@
 
 @ExtensionManager.CreateComponent(PaginationComponent, new Dictionary<string, object>
 {
-    {"CurrentPage", Posts.PageIndex+1},
+    {"CurrentPage", Posts.PageIndex + 1},
     {"PageCount", Posts.TotalPages},
-    {"OnPageChanged", new Func<int, Task>(async e => { CurrentPage = e; await GetPosts();})},
+    {
+        "OnPageChanged", new Func<int, Task>(async e =>
+        {
+            CurrentPage = e;
+            await GetPosts();
+        })
+    },
     {"ShowFirstLast", false},
     {"ShowPageNumbers", true},
     {"VisiblePages", 8},
     {"FirstText", "First"},
     {"LastText", "Last"}
 })
-<RenderPlugins PluginDisplayArea="PluginDisplayArea.HomeAfterContent" />
+<RenderPlugins PluginDisplayArea="PluginDisplayArea.HomeAfterContent"/>
+
 @code
 {
     [Inject]
-    public BlogFodderDbContext DbContext { get; set; } = default!;
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
-    
+
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
-    
+
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
-    
+    public IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+
     [Inject]
     public IMediator Mediator { get; set; } = default!;
 
@@ -58,6 +64,7 @@
     private string PaginationComponent { get; set; } = "";
     private SiteSettings Settings { get; set; } = default!;
     private int CurrentPage { get; set; } = 1;
+    private BlogFodderDbContext DbContext { get; set; } = default!;
 
     private async Task GetPosts()
     {
@@ -67,13 +74,14 @@
             .Include(x => x.Categories)
             .AsNoTracking()
             .OrderByDescending(x => x.DateUpdated)
-            .ToPaginatedList(CurrentPage,Settings.HomeAmountPerPage);
-        
+            .ToPaginatedList(CurrentPage, Settings.HomeAmountPerPage);
+
         StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
+        DbContext = await DbContextFactory.CreateDbContextAsync();
         Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
     }
 
@@ -82,5 +90,10 @@
         PostListComponent = BlogFodderSettings.Value.FrontEnd.PostListComponent!;
         PaginationComponent = BlogFodderSettings.Value.FrontEnd.PaginationComponent!;
         GetPosts();
+    }
+
+    public void Dispose()
+    {
+        DbContext.Dispose();
     }
 }

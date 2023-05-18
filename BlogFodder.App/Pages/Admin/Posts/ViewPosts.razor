@@ -7,6 +7,7 @@
 @using MediatR
 @using Microsoft.EntityFrameworkCore
 @layout AdminLayout
+@implements IDisposable
 <PageTitle>View Posts</PageTitle>
 
 
@@ -30,17 +31,19 @@
 
 
 @code {
-    
-    [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
+
+    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
     [Inject] public IMediator Mediator { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] private IDialogService DialogService { get; set; } = default!;
+    private BlogFodderDbContext DbContext { get; set; } = default!;
     
     public List<Post> Posts { get; set; } = new();
 
     protected override void OnInitialized()
     {
+        DbContext = DbContextFactory.CreateDbContext();
         Posts = DbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
     }
 
@@ -72,6 +75,11 @@
     private void RowClickEvent(TableRowClickEventArgs<Post> tableRowClickEventArgs)
     {
         NavigationManager.NavigateTo($"/admin/createpost/{tableRowClickEventArgs.Item.Id}");
+    }
+
+    public void Dispose()
+    {
+        DbContext.Dispose();
     }
 
 }

@@ -8,7 +8,7 @@
 @using BlogFodder.Core.Settings.Models
 @using MediatR
 @using Microsoft.EntityFrameworkCore
-
+@implements IDisposable
 <nav class="navbar navbar-expand-lg bg-secondary-subtle">
     <div class="container">
         <a class="navbar-brand" href="/">
@@ -68,25 +68,25 @@
 </nav>
 
 @code {
-
-    [Inject]
-    IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
-
-    [Inject]
-    NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] 
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     
     [Inject]
-    public BlogFodderDbContext DbContext { get; set; } = default!;
+    public IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
 
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+    
     [Inject]
     public IMediator Mediator { get; set; } = default!;
     
     private SiteSettings Settings { get; set; } = default!;
-
     private List<Category> Categories { get; set; } = new();
+    private BlogFodderDbContext DbContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        DbContext = await DbContextFactory.CreateDbContextAsync();
         Categories = await DbContext.Categories.AsNoTracking().ToListAsync();
         
         Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
@@ -100,4 +100,10 @@
             NavigationManager.NavigateTo(item.Link, item.ForceReload);
         }
     }
+
+    public void Dispose()
+    {
+        DbContext.Dispose();
+    }
+
 }

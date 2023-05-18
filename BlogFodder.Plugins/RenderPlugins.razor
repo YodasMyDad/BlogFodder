@@ -8,6 +8,7 @@
 @using MediatR
 @using Microsoft.EntityFrameworkCore
 @using PluginSettings = BlogFodder.Core.Settings.PluginSettings
+@implements IDisposable
 
 @foreach (var plugin in Plugins)
 {
@@ -31,8 +32,8 @@
     [Parameter]
     public Guid? PostId { get; set; }
 
-    [Inject]
-    public BlogFodderDbContext DbContext { get; set; } = default!;
+    [Inject] 
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
 
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
@@ -43,9 +44,12 @@
     private Dictionary<string, Plugin> PluginData { get; set; } = new();
     private Dictionary<string, IPlugin> Plugins { get; set; } = new();
     private Dictionary<string, string?> PluginSettingData { get; set; } = new();
+    private BlogFodderDbContext DbContext { get; set; } = default!;
 
     protected override void OnInitialized()
     {
+        DbContext = DbContextFactory.CreateDbContext();
+        
         if (PluginDisplayArea != null)
         {
             // Get the actual plugins that have a content ContentPlugin
@@ -65,5 +69,10 @@
                 PluginData = pluginData.ToDictionary(x => x.PluginAlias ?? "", x => x);
             }
         }
+    }
+
+    public void Dispose()
+    {
+        DbContext.Dispose();
     }
 }

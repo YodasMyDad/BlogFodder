@@ -17,21 +17,32 @@ public static class ServiceCollectionExtensions
         {
             if (databaseProvider.Equals("Sqlite"))
             {
-                services.AddDbContext<BlogFodderDbContext>(o => o.UseSqlite(connectionString));
+                services.AddDbContextFactory<BlogFodderDbContext>(opt =>
+                {
+                    opt.UseSqlite(connectionString);
+#if DEBUG
+                    opt.EnableSensitiveDataLogging();
+#endif
+                });
             }
             
-            // TODO - Need to test and try these providers
-            /*if (databaseProvider.Equals("SqlServer"))
+            if (databaseProvider.Equals("SqlServer"))
             {
-                services.AddDbContext<BlogFodderDbContext>(o => o.UseSqlServer(connectionString));
+                services.AddDbContextFactory<BlogFodderDbContext>(opt =>
+                {
+                    opt.UseSqlServer(connectionString);
+#if DEBUG
+                    opt.EnableSensitiveDataLogging();
+#endif
+                });
             }
             
-            if (databaseProvider.Equals("Postgres"))
-            {
-                services.AddDbContext<BlogFodderDbContext>(o => o.UseNpgsql(connectionString));
-            }*/
+            // TODO - Need to test and try other providers like MySql
             
+#if DEBUG
             services.AddDatabaseDeveloperPageExceptionFilter();
+#endif
+            
             services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<BlogFodderDbContext>();
         }

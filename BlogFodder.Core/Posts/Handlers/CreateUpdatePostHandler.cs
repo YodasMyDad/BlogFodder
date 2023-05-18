@@ -1,12 +1,10 @@
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
-using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Posts.Commands;
 using BlogFodder.Core.Posts.Models;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogFodder.Core.Posts.Handlers;
@@ -130,10 +128,18 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         if (request.IsUpdate)
         {
             // Add the new content items first
-            foreach (var postContentItem in request.Post.ContentItems.Where(x => x.IsNew))
+            foreach (var postContentItem in request.Post.ContentItems)
             {
-                postContentItem.IsNew = false;
-                _dbContext.PostContentItems.Add(postContentItem);
+                if (postContentItem.IsNew)
+                {
+                    postContentItem.IsNew = false;
+                    _dbContext.PostContentItems.Add(postContentItem);   
+                }
+                else
+                {
+                    postContentItem.IsNew = false;
+                    _dbContext.PostContentItems.Update(postContentItem);
+                }
             }
         }
         

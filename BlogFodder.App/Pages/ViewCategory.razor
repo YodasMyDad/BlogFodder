@@ -8,6 +8,7 @@
 @using BlogFodder.Core.Settings
 @using BlogFodder.Core.Shared.Models
 @using Microsoft.Extensions.Options
+@implements IDisposable
 <PageTitle>@Category.PageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Category.MetaDescription">
@@ -53,27 +54,24 @@ else
 
     [Parameter]
     public string? Slug { get; set; }
+    
+    [Inject] 
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
 
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
-
-    [Inject]
-    public BlogFodderDbContext DbContext { get; set; } = default!;
     
     [Inject]
     IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
 
     private Category Category { get; set; } = new();
-    
     private PaginatedList<Post> Posts { get; set; } = new();
-
     private bool CanBeFound { get; set; }
-    
     private string PostListComponent { get; set; } = "";
     private string PaginationComponent { get; set; } = "";
-
     private int CurrentPage { get; set; } = 1;
     private int PostsPerPage { get; set; } = 10;
+    private BlogFodderDbContext DbContext { get; set; } = default!;
     
     private async Task GetPosts()
     {
@@ -91,6 +89,8 @@ else
     
     protected override void OnParametersSet()
     {
+        DbContext = DbContextFactory.CreateDbContext();
+        
         PostListComponent = Settings.Value.FrontEnd.PostListComponent!;
         PaginationComponent = Settings.Value.FrontEnd.PaginationComponent!;
         
@@ -111,4 +111,10 @@ else
             }
         }
     }
+
+    public void Dispose()
+    {
+        DbContext.Dispose();
+    }
+
 }

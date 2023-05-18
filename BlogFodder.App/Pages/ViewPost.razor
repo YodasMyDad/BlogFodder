@@ -7,7 +7,7 @@
 @using BlogFodder.Core.Settings
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-
+@implements IDisposable
 <PageTitle>@Post.PageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Post.MetaDescription">
@@ -152,19 +152,19 @@
            ]
         }
     </script>*@
-    
+
 </HeadContent>
 
 @if (CanBeFound)
 {
-   <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostBeforeContent" PostId="Post.Id" />
+    <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostBeforeContent" PostId="Post.Id"/>
 
     @ExtensionManager.CreateComponent(PostViewComponent, new Dictionary<string, object>
     {
         {"Post", Post}
     })
-    
-    <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostAfterContent" PostId="Post.Id" />
+
+    <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostAfterContent" PostId="Post.Id"/>
 }
 else
 {
@@ -178,7 +178,7 @@ else
     public string? Slug { get; set; }
 
     [Inject]
-    public BlogFodderDbContext DbContext { get; set; } = default!;
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
 
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
@@ -186,14 +186,15 @@ else
     [Inject]
     IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
 
-   private string PostViewComponent { get; set; } = "";
-
+    private string PostViewComponent { get; set; } = "";
     private Post Post { get; set; } = new();
-
     private bool CanBeFound { get; set; }
+    private BlogFodderDbContext DbContext { get; set; } = default!;
 
     protected override void OnInitialized()
     {
+        DbContext = DbContextFactory.CreateDbContext();
+
         if (!Slug.IsNullOrWhiteSpace())
         {
             var post = DbContext.Posts
@@ -211,6 +212,11 @@ else
     protected override void OnParametersSet()
     {
         PostViewComponent = Settings.Value.FrontEnd.PostViewComponent!;
+    }
+
+    public void Dispose()
+    {
+        DbContext.Dispose();
     }
 
 }
