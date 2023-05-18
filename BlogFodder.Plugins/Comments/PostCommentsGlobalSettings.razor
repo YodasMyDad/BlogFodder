@@ -5,6 +5,7 @@
 @using BlogFodder.Core.Extensions
 @using System.Text.Json
 @using BlogFodder.Plugins.Comments.Models
+@using Humanizer
 @layout AdminLayout
 
 <PageTitle>Post Comment Settings</PageTitle>
@@ -38,17 +39,65 @@
             </MudGrid>
 
         </MudTabPanel>
-        <MudTabPanel Text="Awaiting Approval">
+        @if (Settings.CommentsToApprove.Any())
+        {
+            <MudTabPanel Text="Awaiting Approval" BadgeData="@Settings.CommentsToApprove.Count" BadgeColor="Color.Info">
             
-            <p>TODO</p>
+                <MudGrid Class="mt-8">
+                    @foreach (var comment in Settings.CommentsToApprove.OrderByDescending(x => x.DateCreated))
+                    {
+                        <MudItem xs="12" Class="mb-4">
+                            <MudCard Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
+                                <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
+                                    <div class="flex-grow-1">
+                                        <div style="color: @Colors.BlueGrey.Lighten1">
+                                            <MudText Typo="Typo.subtitle2">Name Here</MudText>
+                                        </div>
+                                        <MudText Typo="Typo.body1">@comment.Comment</MudText>
+                                        <div style="color: @Colors.BlueGrey.Lighten1">
+                                            <MudText Typo="Typo.body2">@comment.DateCreated.Humanize()</MudText>
+                                        </div>
+                                    </div>
+                                    <MudFab Color="Color.Success" StartIcon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" OnClick="() => ApproveComment(comment)"/>
+                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Outlined.RemoveCircleOutline" Size="Size.Large" OnClick="() => Settings.CommentsToApprove.Remove(comment)"/>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
 
-        </MudTabPanel>
-        <MudTabPanel Text="Flagged Comments" BadgeData='"99+"' BadgeColor="Color.Error">
+            </MudTabPanel>
+        }
+        @if (Settings.FlaggedComments.Any())
+        {
+            <MudTabPanel Text="Flagged Comments" BadgeData="@Settings.FlaggedComments.Count" BadgeColor="Color.Error">
 
-            <p>TODO</p>
+                <MudGrid Class="mt-8">
+                    @foreach (var comment in Settings.FlaggedComments.OrderByDescending(x => x.DateCreated))
+                    {
+                        <MudItem xs="12" Class="mb-4">
+                            <MudCard Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
+                                <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
+                                    <div class="flex-grow-1">
+                                        <div style="color: @Colors.BlueGrey.Lighten1">
+                                            <MudText Typo="Typo.subtitle2">Name Here</MudText>
+                                        </div>
+                                        <MudText Typo="Typo.body1">@comment.Comment</MudText>
+                                        <div style="color: @Colors.BlueGrey.Lighten1">
+                                            <MudText Typo="Typo.body2">@comment.DateCreated.Humanize()</MudText>
+                                        </div>
+                                    </div>
+                                    <MudFab Color="Color.Success" StartIcon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" OnClick="() => ApproveComment(comment)"/>
+                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Outlined.RemoveCircleOutline" Size="Size.Large" OnClick="() => Settings.FlaggedComments.Remove(comment)"/>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
 
-        </MudTabPanel>
-
+            </MudTabPanel>    
+        }
+        
     </MudTabs>
     <MudItem xs="12" Class="d-flex justify-center">
         <MudButton Variant="Variant.Filled" OnClick="@(async () => await SubmitForm())" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">Save</MudButton>
@@ -66,7 +115,9 @@
     private MudForm Form { get; set; } = default!;
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private PostCommentSettings Settings { get; set; } = new();
+    private List<PostComment> Comments { get; set; } = new();
     private CreateUpdatePluginCommand SavePluginSettingsCommand { get; set; } = new();
+    private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,6 +132,11 @@
             {
                 Settings = postCommentsGlobalSettings;
             }
+            var postCommentsData = plugin.PluginData?.ToType<List<PostComment>>();
+            if (postCommentsData != null)
+            {
+                Comments = postCommentsData;
+            }
 
             Settings.Enabled = SavePluginSettingsCommand.Plugin.Enabled;
         }
@@ -91,6 +147,13 @@
                 PluginAlias = PostCommentsConstants.PluginAlias
             };
         }
+    }
+    
+    private void ApproveComment(PostComment comment)
+    {
+        Settings.CommentsToApprove.Remove(comment);
+        Settings.FlaggedComments.Remove(comment);
+        Comments.Add(comment);
     }
 
     /// <summary>
@@ -103,6 +166,7 @@
         {
             SavePluginSettingsCommand.Plugin!.Enabled = Settings.Enabled;
             SavePluginSettingsCommand.Plugin!.PluginSettings = JsonSerializer.Serialize(Settings, new JsonSerializerOptions {WriteIndented = false}); // Is this compact JSON?
+            SavePluginSettingsCommand.Plugin!.PluginData = JsonSerializer.Serialize(Comments, new JsonSerializerOptions {WriteIndented = false}); // Is this compact JSON?
             
             var result = await Mediator.Send(SavePluginSettingsCommand).ConfigureAwait(false);
             

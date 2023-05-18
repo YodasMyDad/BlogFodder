@@ -25,7 +25,17 @@ public static class ServiceCollectionExtensions
 
         // Mediatr
         services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(discoverAssemblies));
-        
+
+        // Start up items
+        var startUpItems = extensionManager?.GetInstances<IStartupPlugin>();
+        if (startUpItems != null)
+        {
+            foreach (var startUpItem in startUpItems)
+            {
+                startUpItem.Value.Register(services, configuration);
+            }   
+        }
+
         //services.AddAutoMapper(assembliesArray);
         
         /*// Validation

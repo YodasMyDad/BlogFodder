@@ -1,10 +1,14 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Plugins.Comments.Models
 @using System.Text.Json
+@using Akismet
 @using BlogFodder.Core.Plugins.Commands
 @using BlogFodder.Core.Plugins.Models
+@using Ganss.Xss
 @using Humanizer
 @using MediatR
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.DependencyInjection
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginContentComponent
 
 @if (PostId != null)
@@ -55,9 +59,15 @@
 
     [Inject]
     public IToastService ToastService { get; set; } = default!;
+
+    [Inject]
+    public IConfiguration Configuration { get; set; } = default!;
     
     [Inject]
     public IMediator Mediator { get; set; } = default!;
+
+    [Inject]
+    public IServiceProvider ServiceProvider { get; set; } = default!;
     
     private List<PostComment> PostComments { get; set; } = new();
     private PostCommentSettings PostCommentSettings { get; set; } = new();
@@ -83,16 +93,42 @@
 
     private async Task HandleSubmit()
     {
+        var sanitizer = new HtmlSanitizer();
         if (Comment.Comment.IsNullOrWhiteSpace())
         {
             ToastService.ShowError("You need to enter a comment");
+            return;
         }
-
+        
         var canPostComment = true;
+        
+        // Sanitise comment
+        Comment.Comment = sanitizer.Sanitize(Comment.Comment);
+
         if (PostCommentSettings.EnableAkismetSpamCheck)
         {
-            // TODO - Do the checks
-            //canPostComment = false;
+            // Has the user added Akismet API
+            var akismetSpiKey = Configuration.GetSection("PostCommentsPlugin")["AkismetApiKey"];
+            if (!akismetSpiKey.IsNullOrWhiteSpace())
+            {
+                // Get the akisment service
+                var akismetService = ServiceProvider.GetService<AkismetClient>();
+                if (akismetService != null)
+                {
+                    var comment = new AkismetComment
+                    {
+                        Blog = Configuration.GetSection("PostCommentsPlugin")["Url"],
+                        CommentAuthorEmail = Comment.Name, // TODO - This needs to be the email!
+                        CommentContent = Comment.Comment,
+                    };
+                    var result = await akismetService.CheckCommentAsync(comment);
+                    if (result.IsSpam)
+                    {
+                        PostCommentSettings.FlaggedComments.Add(Comment);
+                        canPostComment = false;
+                    }   
+                }
+            }
         }
 
         if (canPostComment)

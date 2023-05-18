@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Akismet" Version="1.0.0" />
         <PackageReference Include="Blazored.FluentValidation" Version="2.1.0" />
         <PackageReference Include="Blazored.Toast" Version="4.1.0" />
         <PackageReference Include="Markdig" Version="0.31.0" />
