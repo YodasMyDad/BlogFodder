@@ -87,9 +87,10 @@ public class EditorPluginCssViewComponent : ViewComponent
             }
             foreach (var plugin in plugins)
             {
-                if (plugin.Value.Content?.CssFiles != null)
+                var pluginCssFiles = plugin.Value.Content?.SelectMany(x => x.CssFiles);
+                if (pluginCssFiles != null)
                 {
-                    foreach (var cssFile in plugin.Value.Content.CssFiles)
+                    foreach (var cssFile in pluginCssFiles)
                     {
                         cssFiles.Add(cssFile);
                     }

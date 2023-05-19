@@ -20,10 +20,13 @@ public class PostCommentsPlugin : IPlugin
         PreviewComponent = typeof(PostCommentsEditorPreview)
     };
 
-    public ContentPlugin Content { get; set; } = new()
+    public List<ContentPlugin>? Content { get; set; } = new()
     {
-         Component   = typeof(PostCommentsContent),
-         PluginDisplayArea = PluginDisplayArea.PostAfterContent
+        new ContentPlugin
+        {
+            Component = typeof(PostCommentsContent),
+            PluginDisplayArea = PluginDisplayArea.PostAfterContent
+        }
     };
 
     public SettingsPlugin? Settings { get; set; } = new()
@@ -32,7 +35,7 @@ public class PostCommentsPlugin : IPlugin
         Model = new PostCommentSettings(),
         BackOfficeLink = new List<Link>
         {
-            new ()
+            new()
             {
                 Text = "Post Comments",
                 Route = "/admin/plugins/postcommentsettings"

@@ -18,8 +18,11 @@
         var enabled = p?.Enabled == true;
         if (enabled)
         {
-            <DynamicComponent Type="@plugin.Value.Content.Component"
-                              Parameters="@(new Dictionary<string, object> {{"Model", p?.PluginData ?? ""}, {"Settings", p?.PluginSettings ?? ""}, {"PostId", PostId!}})"/>
+            foreach (var cp in plugin.Value.Content.Where(x => x.PluginDisplayArea == PluginDisplayArea))
+            {
+                <DynamicComponent Type="@cp.Component"
+                                  Parameters="@(new Dictionary<string, object> {{"Model", p?.PluginData ?? ""}, {"Settings", p?.PluginSettings ?? ""}, {"PostId", PostId!}})"/>   
+            }
         }
     }
 }
@@ -55,7 +58,7 @@
             // Get the actual plugins that have a content ContentPlugin
             // and the PluginDisplayArea matches this one
             Plugins = ExtensionManager.GetInstances<IPlugin>(true)
-                .Where(x => x.Value.Content != null && x.Value.Content.PluginDisplayArea == PluginDisplayArea)
+                .Where(x => x.Value.Content != null && x.Value.Content.Any(cp => cp.PluginDisplayArea == PluginDisplayArea))
                 .ToDictionary(x => x.Value.Alias, x => x.Value);
 
             if (Plugins.Any())

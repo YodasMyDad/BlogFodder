@@ -32,7 +32,7 @@ public interface IPlugin
     /// <summary>
     /// The plugin to display content of the plugin on the front end
     /// </summary>
-    ContentPlugin? Content { get; set; }
+    List<ContentPlugin>? Content { get; set; }
     
     /// <summary>
     /// The optional plugin for the global settings, so use this if you have configurable settings needed for each instance of the editor
