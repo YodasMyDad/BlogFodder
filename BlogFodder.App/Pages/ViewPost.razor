@@ -5,6 +5,9 @@
 @using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
+@using BlogFodder.Core.Settings.Commands
+@using BlogFodder.Core.Settings.Models
+@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
 @implements IDisposable
@@ -15,144 +18,23 @@
     {
         <meta name="robots" content="noindex">
     }
-    @*<meta name="twitter:description" content="Do we actually burn more calories standing vs sitting? And is it worth it? Let&#39;s explore this hot topic to help you decide and get the best out of your working day." />
-    <meta property="og:description" content="Do we actually burn more calories standing vs sitting? And is it worth it? Let&#39;s explore this hot topic to help you decide and get the best out of your working day." />
-    <meta name="twitter:title" content="Calories Burned Standing vs Sitting - Is it Worth it?" />
-    <meta property="og:title" content="Calories Burned Standing vs Sitting - Is it Worth it?" />
+    <meta name="twitter:description" content="@Post.Excerpt" />
+    <meta property="og:description" content="@Post.Excerpt" />
+    <meta name="twitter:title" content="@Post.PageTitle" />
+    <meta property="og:title" content="@Post.PageTitle" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://www.chairoffice.co.uk/media/19285/standing-vs-sitting.jpg" />
-    <meta property="og:image" content="https://www.chairoffice.co.uk/media/19285/standing-vs-sitting.jpg" />
-    <meta property="og:image:width" content="1500" />
-    <meta property="og:image:height" content="623" />
-    <meta property="og:url" content="https://www.chairoffice.co.uk/blog/calories-burned-standing-vs-sitting/" />
-    <meta property="og:site_name" content="ChairOffice T/A Full Range Furniture Ltd" />
-    <meta property="og:type" content="website" />
-    <link rel="canonical" href="https://www.chairoffice.co.uk/blog/calories-burned-standing-vs-sitting/" />*@
-
-    @*<script type="application/ld+json">
-        {
-           "@@context":"https://schema.org",
-           "@@graph":[
-              {
-                 "@@type":"Article",
-                 "@@id":"@(currentUrl)@(Model.Url)#article",
-                 "name":"@(blogHeading) - @(Model.Website.Name)",
-                 "headline":"@(blogHeading)",
-                 "author":{
-                    "@@id":"@(currentUrl)/#author"
-                 },
-                 "publisher":{
-                    "@@id":"@(currentUrl)/#organization"
-                 },
-                 "image":{
-                    "@@type":"ImageObject",
-                    "url":"@(currentUrl)@(defaultImage?.Url)?width=1200&height=630&mode=stretch",
-                    "width":1200,
-                    "height":630
-                 },
-                 "datePublished":"@(string.Concat(Model.CreateDate.ToUniversalTime().ToString("s"), "+00:00"))",
-                 "dateModified":"@(string.Concat(Model.UpdateDate.ToUniversalTime().ToString("s"), "+00:00"))",
-                 "inLanguage":"en-GB",
-                 "mainEntityOfPage":{
-                    "@@id":"@(currentUrl)@(Model.Url)#webpage"
-                 },
-                 "isPartOf":{
-                    "@@id":"@(currentUrl)@(Model.Url)#webpage"
-                 }
-              },
-              {
-                 "@@type":"BreadcrumbList",
-                 "@@id":"@(currentUrl)@(Model.Url)#breadcrumblist",
-                 "itemListElement":[
-                    {
-                       "@@type":"ListItem",
-                       "@@id":"@(currentUrl)/#listItem",
-                       "position":1,
-                       "item":{
-                          "@@type":"WebPage",
-                          "@@id":"@(currentUrl)",
-                          "name":"Home",
-                          "description":"@(Model.Website.CompanyShortDescription)",
-                          "url":"@(currentUrl)"
-                       },
-                       "nextItem":"@(currentUrl)@(Model.Url)#listItem"
-                    },
-                    {
-                       "@@type":"ListItem",
-                       "@@id":"@(currentUrl)@(Model.Url)#listItem",
-                       "position":2,
-                       "item":{
-                          "@@type":"WebPage",
-                          "@@id":"@(currentUrl)@(Model.Url)",
-                          "name":"@(blogHeading)",
-                          "description":"@(Model.MetaData.Description)",
-                          "url":"@(currentUrl)@(Model.Url)"
-                       },
-                       "previousItem":"@(currentUrl)/#listItem"
-                    }
-                 ]
-              },
-              {
-                 "@@type":"Organization",
-                 "@@id":"@(currentUrl)/#organization",
-                 "name":"@(Model.Website.Name)",
-                 "url":"@(currentUrl)",
-                 "logo":{
-                    "@@type":"ImageObject",
-                    "url":"@(Model.Website.CompanyLogoHeader.Url)",
-                    "@@id":"@(currentUrl)/#organizationLogo",
-                    "width":512,
-                    "height":512,
-                    "caption":"@(Model.Website.Name) logo"
-                 }
-              },
-              {
-                 "@@type":"WebPage",
-                 "@@id":"@(currentUrl)@(Model.Url)#webpage",
-                 "url":"@(currentUrl)@(Model.Url)",
-                 "name":"@(blogHeading) - @(Model.Website.Name)",
-                 "description":"@(Model.MetaData.Description)",
-                 "inLanguage":"en-GB",
-                 "isPartOf":{
-                    "@@id":"@(currentUrl)/#website"
-                 },
-                 "breadcrumb":{
-                    "@@id":"@(currentUrl)@(Model.Url)#breadcrumblist"
-                 },
-                 "author":{
-                    "@@id":"@(currentUrl)/#author"
-                 },
-                 "creator":{
-                    "@@id":"@(currentUrl)/#author"
-                 },
-                 "image":{
-                    "@@type":"ImageObject",
-                    "url":"@(currentUrl)@(defaultImage?.Url)?width=1200&height=630&mode=stretch",
-                    "width":1200,
-                    "height":630,
-                    "@@id":"@(currentUrl)/#mainImage"
-                 },
-                 "primaryImageOfPage":{
-                    "@@id":"@(currentUrl)@(Model.Url)#mainImage"
-                 },
-                 "datePublished":"@(string.Concat(Model.CreateDate.ToUniversalTime().ToString("s"), "+00:00"))",
-                 "dateModified":"@(string.Concat(Model.UpdateDate.ToUniversalTime().ToString("s"), "+00:00"))"
-              },
-              {
-                 "@@type":"WebSite",
-                 "@@id":"@(currentUrl)/#website",
-                 "url":"@(currentUrl)",
-                 "name":"@(Model.Website.Name)",
-                 "description":"@(Model.Website.CompanyShortDescription)",
-                 "inLanguage":"en-GB",
-                 "publisher":{
-                    "@@id":"@(currentUrl)/#organization"
-                 }
-              }
-           ]
-        }
-    </script>*@
-
+    @if (Post.FeaturedImage != null)
+    {
+        <meta name="twitter:image" content="@FeaturedImageUrl" />
+        <meta property="og:image" content="@FeaturedImageUrl?width=1500&height=623&mode=crop" />
+        <meta property="og:image:width" content="1500" />
+        <meta property="og:image:height" content="623" />   
+    }
+    <meta property="og:url" content="@CurrentUrl" />
+    <meta property="og:site_name" content="@Settings.SiteName" />
+    <meta property="og:type" content="article" />
+    <link rel="canonical" href="@CurrentUrl" />
+    
 </HeadContent>
 
 @if (CanBeFound)
@@ -184,17 +66,29 @@ else
     public ExtensionManager ExtensionManager { get; set; } = default!;
 
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+    public IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+
+    [Inject]
+    public IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
     private string PostViewComponent { get; set; } = "";
     private Post Post { get; set; } = new();
     private bool CanBeFound { get; set; }
     private BlogFodderDbContext DbContext { get; set; } = default!;
+    private string? CurrentDomain { get; set; }
+    private string? CurrentUrl { get; set; }
+    private string? FeaturedImageUrl { get; set; }
+    private SiteSettings Settings { get; set; } = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        DbContext = DbContextFactory.CreateDbContext();
-
+        DbContext = await DbContextFactory.CreateDbContextAsync();
+        Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        CurrentDomain = HttpContextAccessor.HttpContext?.Request.Host.Value;
+        CurrentUrl = $"{CurrentDomain}/p/{Slug}";
         if (!Slug.IsNullOrWhiteSpace())
         {
             var post = DbContext.Posts
@@ -206,12 +100,16 @@ else
                 CanBeFound = true;
                 Post = post;
             }
+            if (Post.FeaturedImage != null)
+            {
+                FeaturedImageUrl = $"{CurrentDomain}/{Post.FeaturedImage.Url}";
+            }
         }
     }
 
     protected override void OnParametersSet()
     {
-        PostViewComponent = Settings.Value.FrontEnd.PostViewComponent!;
+        PostViewComponent = BlogFodderSettings.Value.FrontEnd.PostViewComponent!;
     }
 
     public void Dispose()

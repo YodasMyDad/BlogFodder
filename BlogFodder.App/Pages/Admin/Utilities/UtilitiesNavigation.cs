@@ -4,7 +4,7 @@ using BlogFodder.Core.Plugins.Interfaces;
 
 namespace BlogFodder.App.Pages.Admin.Utilities;
 
-public class UtilitiesNavigation : IBackOfficeNavigationItem
+/*public class UtilitiesNavigation : IBackOfficeNavigationItem
 {
     public Link Link { get; set; } = new()
     {
@@ -17,12 +17,7 @@ public class UtilitiesNavigation : IBackOfficeNavigationItem
             {
                 Route = "/admin/seo/overview",
                 Text = "Overview"
-            },
-            new ()
-            {
-                Route = "/admin/seo/xmlsitemap",
-                Text = "Xml Sitemap"
             }
         }
     };
-}
+}*/

@@ -25,7 +25,7 @@ builder.Services.AddServerSideBlazor();
 #endif
 
 builder.Services.AddDatabase(builder.Configuration);
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddImageSharp();
 
 builder.Services.AddScoped<ExtensionManager>();

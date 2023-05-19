@@ -16,3 +16,129 @@ builder.Services.AddRazorPages().ConfigureApplicationPartManager(manager =>
         }
     }
 });
+
+// Schema to add to post
+
+    @*<script type="application/ld+json">
+        {
+           "@@context":"https://schema.org",
+           "@@graph":[
+              {
+                 "@@type":"Article",
+                 "@@id":"@(currentUrl)@(Model.Url)#article",
+                 "name":"@(blogHeading) - @(Model.Website.Name)",
+                 "headline":"@(blogHeading)",
+                 "author":{
+                    "@@id":"@(currentUrl)/#author"
+                 },
+                 "publisher":{
+                    "@@id":"@(currentUrl)/#organization"
+                 },
+                 "image":{
+                    "@@type":"ImageObject",
+                    "url":"@(currentUrl)@(defaultImage?.Url)?width=1200&height=630&mode=stretch",
+                    "width":1200,
+                    "height":630
+                 },
+                 "datePublished":"@(string.Concat(Model.CreateDate.ToUniversalTime().ToString("s"), "+00:00"))",
+                 "dateModified":"@(string.Concat(Model.UpdateDate.ToUniversalTime().ToString("s"), "+00:00"))",
+                 "inLanguage":"en-GB",
+                 "mainEntityOfPage":{
+                    "@@id":"@(currentUrl)@(Model.Url)#webpage"
+                 },
+                 "isPartOf":{
+                    "@@id":"@(currentUrl)@(Model.Url)#webpage"
+                 }
+              },
+              {
+                 "@@type":"BreadcrumbList",
+                 "@@id":"@(currentUrl)@(Model.Url)#breadcrumblist",
+                 "itemListElement":[
+                    {
+                       "@@type":"ListItem",
+                       "@@id":"@(currentUrl)/#listItem",
+                       "position":1,
+                       "item":{
+                          "@@type":"WebPage",
+                          "@@id":"@(currentUrl)",
+                          "name":"Home",
+                          "description":"@(Model.Website.CompanyShortDescription)",
+                          "url":"@(currentUrl)"
+                       },
+                       "nextItem":"@(currentUrl)@(Model.Url)#listItem"
+                    },
+                    {
+                       "@@type":"ListItem",
+                       "@@id":"@(currentUrl)@(Model.Url)#listItem",
+                       "position":2,
+                       "item":{
+                          "@@type":"WebPage",
+                          "@@id":"@(currentUrl)@(Model.Url)",
+                          "name":"@(blogHeading)",
+                          "description":"@(Model.MetaData.Description)",
+                          "url":"@(currentUrl)@(Model.Url)"
+                       },
+                       "previousItem":"@(currentUrl)/#listItem"
+                    }
+                 ]
+              },
+              {
+                 "@@type":"Organization",
+                 "@@id":"@(currentUrl)/#organization",
+                 "name":"@(Model.Website.Name)",
+                 "url":"@(currentUrl)",
+                 "logo":{
+                    "@@type":"ImageObject",
+                    "url":"@(Model.Website.CompanyLogoHeader.Url)",
+                    "@@id":"@(currentUrl)/#organizationLogo",
+                    "width":512,
+                    "height":512,
+                    "caption":"@(Model.Website.Name) logo"
+                 }
+              },
+              {
+                 "@@type":"WebPage",
+                 "@@id":"@(currentUrl)@(Model.Url)#webpage",
+                 "url":"@(currentUrl)@(Model.Url)",
+                 "name":"@(blogHeading) - @(Model.Website.Name)",
+                 "description":"@(Model.MetaData.Description)",
+                 "inLanguage":"en-GB",
+                 "isPartOf":{
+                    "@@id":"@(currentUrl)/#website"
+                 },
+                 "breadcrumb":{
+                    "@@id":"@(currentUrl)@(Model.Url)#breadcrumblist"
+                 },
+                 "author":{
+                    "@@id":"@(currentUrl)/#author"
+                 },
+                 "creator":{
+                    "@@id":"@(currentUrl)/#author"
+                 },
+                 "image":{
+                    "@@type":"ImageObject",
+                    "url":"@(currentUrl)@(defaultImage?.Url)?width=1200&height=630&mode=stretch",
+                    "width":1200,
+                    "height":630,
+                    "@@id":"@(currentUrl)/#mainImage"
+                 },
+                 "primaryImageOfPage":{
+                    "@@id":"@(currentUrl)@(Model.Url)#mainImage"
+                 },
+                 "datePublished":"@(string.Concat(Model.CreateDate.ToUniversalTime().ToString("s"), "+00:00"))",
+                 "dateModified":"@(string.Concat(Model.UpdateDate.ToUniversalTime().ToString("s"), "+00:00"))"
+              },
+              {
+                 "@@type":"WebSite",
+                 "@@id":"@(currentUrl)/#website",
+                 "url":"@(currentUrl)",
+                 "name":"@(Model.Website.Name)",
+                 "description":"@(Model.Website.CompanyShortDescription)",
+                 "inLanguage":"en-GB",
+                 "publisher":{
+                    "@@id":"@(currentUrl)/#organization"
+                 }
+              }
+           ]
+        }
+    </script>*@
