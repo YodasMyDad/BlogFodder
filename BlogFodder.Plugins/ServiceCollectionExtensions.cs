@@ -3,6 +3,7 @@ using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace BlogFodder.Plugins;
 
@@ -36,7 +37,21 @@ public static class ServiceCollectionExtensions
             }   
         }
 
-        //services.AddAutoMapper(assembliesArray);
+        // Hosted services (IHostedService)
+        var hostedServices = extensionManager?.GetImplementations<IHostedService>();
+        if (hostedServices != null)
+        {
+            foreach (var hs in hostedServices)
+            {
+                var method = typeof(ServiceCollectionHostedServiceExtensions)
+                    .GetMethod("AddHostedService", new[] { typeof(IServiceCollection) });
+                if (method != null)
+                {
+                    var generic = method.MakeGenericMethod(hs);
+                    generic.Invoke(null, new object[] { services });
+                }
+            }   
+        }
         
         /*// Validation
         services.AddFormValidation(config =>
