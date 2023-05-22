@@ -12,5 +12,7 @@ public enum PluginDisplayArea
     HeaderTop,
     HeaderBottom,
     FooterTop,
-    FooterBottom
+    FooterBottom,
+    PostSideBarTop,
+    PostSideBarBottom
 }

@@ -1,0 +1,19 @@
+@using BlogFodder.Core.Plugins.Interfaces
+@using BlogFodder.Core.Plugins.Models
+@implements IPluginContentComponent
+
+Posts to show @PostContentModel.PluginSettings?.LatestPostsAmount
+
+@code {
+    [Parameter] public string? Model { get; set; }
+    [Parameter] public string? Settings { get; set; }
+    [Parameter] public Guid? PostId { get; set; }
+
+    private PluginContentModel<string?, PostSideBarSettingsModel> PostContentModel { get; set; } = new();
+    
+    protected override void OnInitialized()
+    {
+        PostContentModel = new PluginContentModel<string?, PostSideBarSettingsModel>(Model, Settings);
+    }
+
+}

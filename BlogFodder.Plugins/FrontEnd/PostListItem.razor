@@ -2,7 +2,7 @@
 @using Humanizer
 
 <a href="/p/@Post.Url" class="card text-decoration-none h-100">
-    <img src="@Post.FeaturedImage?.Url?width=400" class="card-img-top" alt="@Post.Name">
+    <img src="@Post.FeaturedImage?.Url?width=400&height=215&mode=crop" class="card-img-top" alt="@Post.Name">
     <div class="card-body">
         <h5 class="card-title">@Post.Name</h5>
         <p class="card-text">@Post.Excerpt</p>

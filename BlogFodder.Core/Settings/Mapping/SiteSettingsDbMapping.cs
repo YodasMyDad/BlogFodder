@@ -17,6 +17,12 @@ public class SiteSettingsDbMapping : IEntityTypeConfiguration<SiteSettings>
         builder.Property(x => x.DefaultPageTitle).IsRequired().HasMaxLength(150);
         builder.Property(x => x.DefaultMetaDescription).IsRequired().HasMaxLength(400);
         
+        builder.Property(x => x.Facebook).HasMaxLength(300);
+        builder.Property(x => x.Instagram).HasMaxLength(300);
+        builder.Property(x => x.Twitter).HasMaxLength(300);
+        builder.Property(x => x.Pinterest).HasMaxLength(300);
+        builder.Property(x => x.LinkedIn).HasMaxLength(300);
+        
         builder.Property(x => x.ExtendedData).ToJsonConversion(4000);
     }
 }

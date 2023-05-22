@@ -45,7 +45,6 @@
     <ItemGroup>
       <Folder Include="Data\Migrations\" />
       <Folder Include="Email\" />
-      <Folder Include="Shared\Handlers\" />
     </ItemGroup>
 
 </Project>

@@ -63,23 +63,19 @@
     <ItemGroup>
       <Compile Remove="Components\Inputs\**" />
       <Compile Remove="Components\Form\FileUpload.razor.cs" />
-      <Compile Remove="Testing\**" />
     </ItemGroup>
 
     <ItemGroup>
       <EmbeddedResource Remove="Components\Inputs\**" />
-      <EmbeddedResource Remove="Testing\**" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Remove="Components\Inputs\**" />
       <Content Remove="Components\Form\FileUpload.razor" />
-      <Content Remove="Testing\**" />
     </ItemGroup>
 
     <ItemGroup>
       <None Remove="Components\Inputs\**" />
-      <None Remove="Testing\**" />
     </ItemGroup>
 
 </Project>

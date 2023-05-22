@@ -26,19 +26,22 @@
                     </div>
                 </EditForm>
                 <div class="pt-5">
-                    @foreach (var comment in PostComments.Where(x => x.PostId == PostId))
+                    @if (PostContentModel.PluginModel != null)
                     {
-                        <div class="card mb-2">
-                              <div class="card-header">
-                                Name Here TODO
-                              </div>
-                            <div class="card-body">
-                                @comment.Comment
+                        foreach (var comment in PostContentModel.PluginModel.Where(x => x.PostId == PostId))
+                        {
+                            <div class="card mb-2">
+                                <div class="card-header">
+                                    Name Here TODO
+                                </div>
+                                <div class="card-body">
+                                    @comment.Comment
+                                </div>
+                                <div class="card-footer text-muted">
+                                    @comment.DateCreated.Humanize()
+                                </div>
                             </div>
-                            <div class="card-footer text-muted">
-                                @comment.DateCreated.Humanize()
-                            </div>
-                        </div>
+                        }
                     }
                 </div>
             </div>
@@ -69,25 +72,15 @@
     [Inject]
     public IServiceProvider ServiceProvider { get; set; } = default!;
     
-    private List<PostComment> PostComments { get; set; } = new();
-    private PostCommentSettings PostCommentSettings { get; set; } = new();
     private PostComment Comment { get; set; } = new(){ DateCreated = DateTime.UtcNow};
-
+    private PluginContentModel<List<PostComment>, PostCommentSettings> PostContentModel { get; set; } = new();
 
     protected override void OnInitialized()
     {
         if (PostId != null)
         {
             Comment.PostId = PostId.Value;
-            if (!Model.IsNullOrWhiteSpace())
-            {
-                PostComments = JsonSerializer.Deserialize<List<PostComment>>(Model) ?? new List<PostComment>();
-
-                if (!Settings.IsNullOrWhiteSpace())
-                {
-                    PostCommentSettings = JsonSerializer.Deserialize<PostCommentSettings>(Settings) ?? new PostCommentSettings();
-                }
-            }
+            PostContentModel = new PluginContentModel<List<PostComment>, PostCommentSettings>(Model, Settings);
         }
     }
 
@@ -105,7 +98,7 @@
         // Sanitise comment
         Comment.Comment = sanitizer.Sanitize(Comment.Comment);
 
-        if (PostCommentSettings.EnableAkismetSpamCheck)
+        if (PostContentModel.PluginSettings?.EnableAkismetSpamCheck == true)
         {
             // Has the user added Akismet API
             var akismetSpiKey = Configuration.GetSection("PostCommentsPlugin")["AkismetApiKey"];
@@ -124,7 +117,7 @@
                     var result = await akismetService.CheckCommentAsync(comment);
                     if (result.IsSpam)
                     {
-                        PostCommentSettings.FlaggedComments.Add(Comment);
+                        PostContentModel.PluginSettings.FlaggedComments.Add(Comment);
                         canPostComment = false;
                     }   
                 }
@@ -133,13 +126,13 @@
 
         if (canPostComment)
         {
-            if (PostCommentSettings.ManuallyApproveComments)
+            if (PostContentModel.PluginSettings?.ManuallyApproveComments == true)
             {
-                PostCommentSettings.CommentsToApprove.Add(Comment);
+                PostContentModel.PluginSettings.CommentsToApprove.Add(Comment);
             }
             else
             {
-                PostComments.Add(Comment);
+                PostContentModel.PluginModel?.Add(Comment);
             }
         }
 
@@ -154,8 +147,8 @@
         {
             createUpdateCommand.IsUpdate = true;
         }
-        plugin.PluginData = JsonSerializer.Serialize(PostComments);
-        plugin.PluginSettings = JsonSerializer.Serialize(PostCommentSettings);
+        plugin.PluginData = JsonSerializer.Serialize(PostContentModel.PluginModel);
+        plugin.PluginSettings = JsonSerializer.Serialize(PostContentModel.PluginSettings);
         createUpdateCommand.Plugin = plugin;
         var saveResult = await Mediator.Send(createUpdateCommand).ConfigureAwait(false);
         if (saveResult.Success)

@@ -1,0 +1,24 @@
+@using BlogFodder.Core.Plugins.Models
+@implements BlogFodder.Core.Plugins.Interfaces.IPluginContentComponent
+
+@if (PostContentModel.PluginSettings?.Enabled == true)
+{
+    <div>
+        <p>@PostContentModel.PluginSettings?.AboutBoxTitle</p>
+        <p>@PostContentModel.PluginSettings?.AboutBoxText</p>
+    </div>   
+}
+
+@code {
+    [Parameter] public string? Model { get; set; }
+    [Parameter] public string? Settings { get; set; }
+    [Parameter] public Guid? PostId { get; set; }
+
+    private PluginContentModel<string?, PostSideBarSettingsModel> PostContentModel { get; set; } = new();
+    
+    protected override void OnInitialized()
+    {
+        PostContentModel = new PluginContentModel<string?, PostSideBarSettingsModel>(Model, Settings);
+    }
+
+}
