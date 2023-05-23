@@ -71,7 +71,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
                 }
                 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await request.FeaturedImage.SaveFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
+                var fileResult = await request.FeaturedImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
 
                 // Set the file to the user
                 request.Post.FeaturedImage = fileResult;
@@ -95,7 +95,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
                 }
                 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await request.SocialImage.SaveFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
+                var fileResult = await request.SocialImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
 
                 // Set the file to the user
                 request.Post.SocialImage = fileResult;

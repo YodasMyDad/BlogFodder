@@ -3,7 +3,13 @@
 @using BlogFodder.Core.Plugins.Commands
 @using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Extensions
+@using Microsoft.EntityFrameworkCore
+@using BlogFodder.Core.Data
+@using BlogFodder.Core.Media.Models
+@using BlogFodder.Core.Providers
+@using BlogFodder.Core.Shared.Models
 @layout AdminLayout
+@implements IDisposable
 <PageTitle>Post Side Bar</PageTitle>
 @if (Errors.Length > 0)
 {
@@ -29,6 +35,37 @@
                     <MudSwitch Label="Show about box" Color="Color.Primary"
                                @bind-Checked="Settings.AboutBoxEnabled"
                                For="@(() => Settings.AboutBoxEnabled)"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudField Label="About Image">
+                        @if (AboutImageExisting != null)
+                        {
+                            <MudImage ObjectFit="ObjectFit.Cover" Width="100" Src="@($"{AboutImageExisting?.Url}?width=100")" Class="rounded"/>
+                        }
+                        @if (AboutImage != null)
+                        {
+                            <MudChip Color="Color.Default" OnClose="@(() => { AboutImage = null; })">
+                                @AboutImage?.Name
+                            </MudChip>
+                        }
+                        <MudStack Row="true">
+                            <MudFileUpload T="IBrowserFile" For="@(() => AboutImage)" @bind-Files="AboutImage">
+                                <ButtonTemplate>
+                                    <MudButton HtmlTag="label"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               StartIcon="@Icons.Material.Filled.Image"
+                                               for="@context">
+                                        Upload Image
+                                    </MudButton>
+                                </ButtonTemplate>
+                            </MudFileUpload>
+                            @if (AboutImageExisting != null)
+                            {
+                                <MudButton Variant="Variant.Text" OnClick="@(() => AboutImageExisting = null)">Remove Image</MudButton>
+                            }
+                        </MudStack>
+                    </MudField>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField @bind-Value="Settings.AboutBoxTitle" For="@(() => Settings.AboutBoxTitle)" Label="About Title" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
@@ -59,18 +96,30 @@
 @code
 {
     [Inject]
-    private ISnackbar Snackbar { get; set; } = default!;
+    public ISnackbar Snackbar { get; set; } = default!;
 
     [Inject]
     public IMediator Mediator { get; set; } = default!;
+
+    [Inject]
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
+
+    [Inject]
+    public ProviderService ProviderService { get; set; } = default!;
 
     private MudForm Form { get; set; } = default!;
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private PostSideBarSettingsModel Settings { get; set; } = new();
     private CreateUpdatePluginCommand SavePluginSettingsCommand { get; set; } = new();
+    private BlogFodderDbContext DbContext { get; set; } = default!;
+    private IBrowserFile? AboutImage { get; set; }
+    private BlogFodderFile? AboutImageExisting { get; set; }
+
+        private const string AboutBoxImageId = "AboutBoxImageId";
 
     protected override async Task OnInitializedAsync()
     {
+        DbContext = await DbContextFactory.CreateDbContextAsync();
         var plugin = await Mediator.Send(new GetPluginByAliasCommand {Alias = nameof(PostSideBarPlugin)}).ConfigureAwait(false);
         if (plugin != null)
         {
@@ -84,6 +133,12 @@
             }
 
             Settings.Enabled = SavePluginSettingsCommand.Plugin.Enabled;
+
+    // See if there is an existing image
+            if (Settings.AboutBoxImageId != null)
+            {
+                AboutImageExisting = await DbContext.Files.AsNoTracking().FirstOrDefaultAsync(x => x.Id == Settings.AboutBoxImageId);
+            }
         }
         else
         {
@@ -102,11 +157,38 @@
         await Form.Validate();
         if (Form.IsValid)
         {
+    // Profile Image - Need to save image and then create a file
+            if (AboutImage != null)
+            {
+                // Delete the old one if there is one
+                if (AboutImageExisting != null)
+                {
+                    DbContext.Files.Remove(AboutImageExisting);
+                    await DbContext.SaveChangesAsync();
+                    AboutImageExisting = null;
+                }
+
+                    // Save the file, create a file and attach it to the user
+                var fileResult = await AboutImage.AddFileToDb(AboutBoxImageId, new HandlerResult<BlogFodderFile>(), ProviderService, DbContext);
+                await DbContext.SaveChangesAsync();
+
+                // Set the file to the user
+                AboutImageExisting = fileResult;
+                Settings.AboutBoxImageId = AboutImageExisting?.Id;
+                Settings.AboutBoxImageUrl = AboutImageExisting?.Url;
+            }
+
             SavePluginSettingsCommand = SavePluginSettingsCommand.ReadyToSave(Settings);
 
             var result = await Mediator.Send(SavePluginSettingsCommand).ConfigureAwait(false);
-
+            AboutImage = null;
+            
             Errors = SavePluginSettingsCommand.ProcessResult(result, Snackbar);
         }
+    }
+
+    public void Dispose()
+    {
+        DbContext.Dispose();
     }
 }

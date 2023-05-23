@@ -1,12 +1,19 @@
 @using BlogFodder.Core.Plugins.Models
+@using BlogFodder.Core.Extensions
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginContentComponent
 
 @if (PostContentModel.PluginSettings?.Enabled == true)
 {
-    <div>
-        <p>@PostContentModel.PluginSettings?.AboutBoxTitle</p>
-        <p>@PostContentModel.PluginSettings?.AboutBoxText</p>
-    </div>   
+    <div class="card mb-4">
+        @if (PostContentModel.PluginSettings?.AboutBoxImageUrl.IsNullOrWhiteSpace() == false)
+        {
+            <img src="@PostContentModel.PluginSettings?.AboutBoxImageUrl" class="card-img-top" alt="@PostContentModel.PluginSettings?.AboutBoxTitle">   
+        }
+        <div class="card-body">
+            <h5 class="card-title">@PostContentModel.PluginSettings?.AboutBoxTitle</h5>
+            <p class="card-text">@PostContentModel.PluginSettings?.AboutBoxText</p>
+        </div>
+    </div>
 }
 
 @code {

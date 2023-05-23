@@ -18,12 +18,12 @@ public class PostSideBarPlugin : IPlugin
         new ContentPlugin
         {
             PluginDisplayArea = PluginDisplayArea.PostSideBarTop,
-            Component = typeof(PostSideBarLatestPosts)
+            Component = typeof(PostSideBarAboutBox)
         },
         new ContentPlugin
         {
             PluginDisplayArea = PluginDisplayArea.PostSideBarTop,
-            Component = typeof(PostSideBarAboutBox)
+            Component = typeof(PostSideBarLatestPosts)
         }
     };
 

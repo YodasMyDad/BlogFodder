@@ -68,7 +68,7 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
                 }
 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await request.SocialImage.SaveFileToDb(request.Category.Id, handlerResult, _providerService, _dbContext);
+                var fileResult = await request.SocialImage.AddFileToDb(request.Category.Id, handlerResult, _providerService, _dbContext);
 
                 // Set the file to the user
                 request.Category.SocialImage = fileResult;

@@ -50,7 +50,7 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
 
                 // Save the file, create a file and attach it to the user
                 var fileResult =
-                    await request.Logo.SaveFileToDb(request.SiteSettings.Id, result, _providerService, _dbContext);
+                    await request.Logo.AddFileToDb(request.SiteSettings.Id, result, _providerService, _dbContext);
 
                 // Set the file to the user
                 request.SiteSettings.Logo = fileResult;

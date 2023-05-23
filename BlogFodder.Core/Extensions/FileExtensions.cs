@@ -1,5 +1,4 @@
 using BlogFodder.Core.Data;
-using BlogFodder.Core.Media;
 using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
@@ -9,6 +8,13 @@ namespace BlogFodder.Core.Extensions;
 
     public static class FileExtensions
     {
+        public static async Task<BlogFodderFile?> AddFileToDb<T>(this IBrowserFile browserFile, Guid id,
+            HandlerResult<T> result,
+            ProviderService providerService, BlogFodderDbContext dbContext)
+        {
+            return await browserFile.AddFileToDb(id.ToString(), result, providerService, dbContext);
+        }
+
         /// <summary>
         /// Saves the BrowserFile as a BlogFodderFile using the set StorageProvider
         /// </summary>
@@ -19,10 +25,10 @@ namespace BlogFodder.Core.Extensions;
         /// <param name="dbContext"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static async Task<BlogFodderFile?> SaveFileToDb<T>(this IBrowserFile browserFile, Guid id, HandlerResult<T> result, 
+        public static async Task<BlogFodderFile?> AddFileToDb<T>(this IBrowserFile browserFile, string id, HandlerResult<T> result, 
             ProviderService providerService, BlogFodderDbContext dbContext)
         {
-            var fileSaveResult = await providerService.StorageProvider!.SaveFile(browserFile, id.ToString())
+            var fileSaveResult = await providerService.StorageProvider!.SaveFile(browserFile, id)
                 .ConfigureAwait(false);
             if (!fileSaveResult.Success)
             {
