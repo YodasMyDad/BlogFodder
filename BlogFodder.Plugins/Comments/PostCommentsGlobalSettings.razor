@@ -117,7 +117,7 @@
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private PostCommentSettings Settings { get; set; } = new();
     private List<PostComment> Comments { get; set; } = new();
-    private CreateUpdatePluginCommand SavePluginSettingsCommand { get; set; } = new();
+    private CreateUpdatePluginCommand CreateUpdatePluginCommand { get; set; } = new();
     private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
 
     protected override async Task OnInitializedAsync()
@@ -125,8 +125,8 @@
         var plugin = await Mediator.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
         if (plugin != null)
         {
-            SavePluginSettingsCommand.IsUpdate = true;
-            SavePluginSettingsCommand.Plugin = plugin;
+            CreateUpdatePluginCommand.IsUpdate = true;
+            CreateUpdatePluginCommand.Plugin = plugin;
 
             var postCommentsGlobalSettings = plugin.PluginSettings?.ToType<PostCommentSettings>();
             if (postCommentsGlobalSettings != null)
@@ -139,11 +139,11 @@
                 Comments = postCommentsData;
             }
 
-            Settings.Enabled = SavePluginSettingsCommand.Plugin.Enabled;
+            Settings.Enabled = CreateUpdatePluginCommand.Plugin.Enabled;
         }
         else
         {
-            SavePluginSettingsCommand.Plugin = new Plugin
+            CreateUpdatePluginCommand.Plugin = new Plugin
             {
                 PluginAlias = PostCommentsConstants.PluginAlias
             };
@@ -165,11 +165,11 @@
         await Form.Validate();
         if (Form.IsValid)
         {
-            SavePluginSettingsCommand = SavePluginSettingsCommand.ReadyToSave(Settings, Comments);
+            CreateUpdatePluginCommand = CreateUpdatePluginCommand.ReadyToSave(Settings, Comments);
             
-            var result = await Mediator.Send(SavePluginSettingsCommand).ConfigureAwait(false);
+            var result = await Mediator.Send(CreateUpdatePluginCommand).ConfigureAwait(false);
 
-            Errors = SavePluginSettingsCommand.ProcessResult(result, Snackbar);
+            Errors = CreateUpdatePluginCommand.ProcessResult(result, Snackbar);
         }
     }
 }
