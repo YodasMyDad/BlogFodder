@@ -44,6 +44,8 @@ public class PluginSettings
 {
     // ReSharper disable once InconsistentNaming
     public string? IStorageProvider { get; set; }
+    // ReSharper disable once InconsistentNaming
+    public string? IEmailProvider { get; set; }
 }
 
 public class EmailSettings

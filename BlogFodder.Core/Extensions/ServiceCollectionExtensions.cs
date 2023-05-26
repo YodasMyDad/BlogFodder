@@ -1,5 +1,7 @@
 ﻿using BlogFodder.Core.Data;
-using BlogFodder.Core.Identity.Models;
+using BlogFodder.Core.Membership.Claims;
+using BlogFodder.Core.Membership.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +27,7 @@ public static class ServiceCollectionExtensions
 #endif
                 });
             }
-            
+
             if (databaseProvider.Equals("SqlServer"))
             {
                 services.AddDbContextFactory<BlogFodderDbContext>(opt =>
@@ -36,15 +38,43 @@ public static class ServiceCollectionExtensions
 #endif
                 });
             }
-            
+
             // TODO - Need to test and try other providers like MySql
-            
+
 #if DEBUG
             services.AddDatabaseDeveloperPageExceptionFilter();
 #endif
-            
-            services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<BlogFodderDbContext>();
+
+            var identitySection = configuration.GetSection("BlogFodder:Identity");
+            services.AddIdentity<User, Role>(options =>
+                {
+                    // Password settings.
+                    options.Password.RequireDigit = identitySection.GetValue<bool>("PasswordRequireDigit");
+                    options.Password.RequireLowercase = identitySection.GetValue<bool>("PasswordRequireLowercase");
+                    options.Password.RequireNonAlphanumeric =
+                        identitySection.GetValue<bool>("PasswordRequireNonAlphanumeric");
+                    options.Password.RequireUppercase = identitySection.GetValue<bool>("PasswordRequireUppercase");
+                    options.Password.RequiredLength = identitySection.GetValue<int>("PasswordRequiredLength");
+                    options.Password.RequiredUniqueChars = identitySection.GetValue<int>("PasswordRequiredUniqueChars");
+
+                    // Lockout settings.
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                    options.Lockout.MaxFailedAccessAttempts = 6;
+                    options.Lockout.AllowedForNewUsers = true;
+
+                    // User settings.
+                    //options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                    options.User.RequireUniqueEmail = true;
+
+                    // Email
+                    options.SignIn.RequireConfirmedAccount =
+                        identitySection.GetValue<bool>("SignInRequireConfirmedAccount");
+                })
+                .AddEntityFrameworkStores<BlogFodderDbContext>()
+                .AddUserStore<UserStore<User, Role, BlogFodderDbContext, Guid, UserClaim, UserRole, UserLogin, UserToken
+                    , RoleClaim>>()
+                .AddRoleStore<RoleStore<Role, BlogFodderDbContext, Guid, UserRole, RoleClaim>>()
+                .AddClaimsPrincipalFactory<BlogFodderUserClaimsPrincipalFactory>();
         }
         else
         {

@@ -13,7 +13,6 @@
         <PackageReference Include="MediatR" Version="12.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.5" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.5" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.5" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.5">
@@ -48,6 +47,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Pages\Account\" />
       <Folder Include="Shared\Models\" />
     </ItemGroup>
 

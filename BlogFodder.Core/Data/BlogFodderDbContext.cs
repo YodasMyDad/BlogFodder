@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using BlogFodder.Core.Categories.Models;
-using BlogFodder.Core.Identity.Models;
 using BlogFodder.Core.Media.Models;
+using BlogFodder.Core.Membership.Models;
 using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Posts.Models;
 using BlogFodder.Core.Settings.Models;

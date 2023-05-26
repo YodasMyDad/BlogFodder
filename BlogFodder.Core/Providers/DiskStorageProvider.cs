@@ -19,7 +19,7 @@ namespace BlogFodder.Core.Providers;
         private readonly BlogFodderSettings _settings;
 
         public DiskStorageProvider(IWebHostEnvironment env,
-                                    IOptionsSnapshot<BlogFodderSettings> settings)
+                                    IOptions<BlogFodderSettings> settings)
         {
             _env = env;
             _settings = settings.Value;

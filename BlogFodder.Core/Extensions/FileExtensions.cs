@@ -34,7 +34,7 @@ namespace BlogFodder.Core.Extensions;
             {
                 foreach (var errorMessage in fileSaveResult.ErrorMessages)
                 {
-                    result.AddMessage(errorMessage, HandlerResultMessageType.Warning);
+                    result.AddMessage(errorMessage, ResultMessageType.Warning);
                 }
 
                 return null;

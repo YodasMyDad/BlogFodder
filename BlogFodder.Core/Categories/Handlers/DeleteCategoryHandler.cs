@@ -31,7 +31,7 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Hand
         if (categoryToDelete == null)
         {
             result.Success = false;
-            result.AddMessage("Unable to find a category with that Id", HandlerResultMessageType.Error);
+            result.AddMessage("Unable to find a category with that Id", ResultMessageType.Error);
             return result;
         }
         
@@ -42,7 +42,7 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Hand
         if (postCount > 0)
         {
             result.Success = false;
-            result.AddMessage($"Unable to delete category as its used by {postCount} posts", HandlerResultMessageType.Error);
+            result.AddMessage($"Unable to delete category as its used by {postCount} posts", ResultMessageType.Error);
             return result;            
         }
 

@@ -48,7 +48,7 @@ public static class DbContextExtensions
         else
         {
             crudResult.Success = false;
-            crudResult.AddMessage("Entity to update was null", HandlerResultMessageType.Error);
+            crudResult.AddMessage("Entity to update was null", ResultMessageType.Error);
         }
 
         return crudResult;
@@ -70,7 +70,7 @@ public static class DbContextExtensions
         catch (Exception ex)
         {
             crudResult.Success = false;
-            crudResult.AddMessage($"{ex.Message} - {ex.InnerException?.Message}", HandlerResultMessageType.Error);
+            crudResult.AddMessage($"{ex.Message} - {ex.InnerException?.Message}", ResultMessageType.Error);
             Log.Error(ex, $"{nameof(T)} not saved using SaveChangesAsync");
         }
 

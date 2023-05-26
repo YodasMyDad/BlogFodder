@@ -1,6 +1,6 @@
 namespace BlogFodder.Core.Shared.Models;
 
-public enum HandlerResultMessageType
+public enum ResultMessageType
 {
     Info,
     Success,

@@ -15,7 +15,7 @@ public class EditorPluginJsViewComponent : ViewComponent
 {
     private readonly ExtensionManager _extensionManager;
     private readonly BlogFodderSettings _optionsSnapshot;
-    public EditorPluginJsViewComponent(ExtensionManager extensionManager, IOptionsSnapshot<BlogFodderSettings> optionsSnapshot)
+    public EditorPluginJsViewComponent(ExtensionManager extensionManager, IOptions<BlogFodderSettings> optionsSnapshot)
     {
         _extensionManager = extensionManager;
         _optionsSnapshot = optionsSnapshot.Value;

@@ -31,7 +31,7 @@ public class DeletePostHandler: IRequestHandler<DeletePostCommand, HandlerResult
         if (postToDelete == null)
         {
             result.Success = false;
-            result.AddMessage("Unable to find a post with that Id", HandlerResultMessageType.Error);
+            result.AddMessage("Unable to find a post with that Id", ResultMessageType.Error);
             return result;
         }
 

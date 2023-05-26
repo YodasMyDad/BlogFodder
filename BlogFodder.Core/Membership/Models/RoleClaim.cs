@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace BlogFodder.Core.Identity.Models;
+namespace BlogFodder.Core.Membership.Models;
 
 public class RoleClaim : IdentityRoleClaim<Guid>
 {

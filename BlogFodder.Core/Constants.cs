@@ -9,12 +9,53 @@ public static class Constants
         public const string ProfileImage = "ProfileImage";
     }
     
+    public static class ExtendedDataKeys
+    {
+        public const string PipelineAdditionalModel = "PipelineAdditionalModel";
+        public const string TempUiMessages = "TempUiMessages";
+        public const string IsExternalLogin = "IsExternalLogin";
+        public const string NewEmailAddress = "NewEmailAddress";
+    }
+    
     public static class BackOffice
     {
         public const string NavigationSectionCore = "Core";
         public const string NavigationSectionUtilities = "Utilities";
         public const string NavigationSectionPlugins = "Plugins";
         public const string BackOfficeUrlDenoter = "/admin";
+    }
+    
+    public static class Assets
+    {
+        public const string DefaultEmailTemplate = "default.html";
+    }
+    
+    public static class Identity
+    {
+        // TODO - Would be better if this could be fed from the appSettings
+        public const int MinimumPasswordLength = 8;
+    }
+    
+    public static class Urls
+    {
+        public static class Account
+        {
+            public const string ConfirmEmail = "/account/confirmemail";
+            public const string ConfirmEmailChange = "/account/confirmemailchange";
+            public const string ExternalLogin = "/account/externallogin";
+            public const string ForgotPassword = "/account/forgotpassword";
+            public const string ForgotPasswordConfirmation = "/account/forgotpasswordconfirmation";
+            public const string Login = "/account/login";
+            public const string LoginWith2fa = "/account/loginwith2fa";
+            public const string LoginWithRecoveryCode = "/account/loginwithrecoverycode";
+            public const string Logout = "/account/logout";
+            public const string Register = "/account/register";
+            public const string RegisterConfirmation = "/account/registerconfirmation";
+            public const string ResendEmailConfirmation = "/account/resendemailconfirmation";
+            public const string ResetPassword = "/account/resetpassword";
+            public const string ResetPasswordConfirmation = "/account/resetpasswordconfirmation";
+            public const string RefreshSignIn = "/account/refreshsignin";
+        }
     }
     
     public static class Files
