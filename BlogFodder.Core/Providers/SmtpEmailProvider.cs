@@ -1,5 +1,4 @@
 using System.Text;
-using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Settings;
 using MailKit.Net.Smtp;

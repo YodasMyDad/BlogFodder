@@ -1,25 +1,23 @@
-﻿using Gab.Core.ExtensionMethods;
-using Gab.Core.Membership.Models;
-using Gab.Core.Membership.Models.Identity;
+﻿using System.Security.Claims;
+using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Membership.Commands;
+using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
-using BlogFodder.Core.Membership.Commands;
 
-namespace Gab.Core.Membership.Handlers
+namespace BlogFodder.Core.Membership.Handlers
 {
-    public class ExternalLoginHandler : IRequestHandler<ExternalLoginCommand, GabAuthenticationResult>
+    public class ExternalLoginHandler : IRequestHandler<ExternalLoginCommand, AuthenticationResult>
     {
-        private readonly SignInManager<GabUser> _signInManager;
-        private readonly UserManager<GabUser> _userManager;
-        private readonly IUserStore<GabUser> _userStore;
-        private readonly IUserEmailStore<GabUser> _emailStore;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly IUserStore<User> _userStore;
+        private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<ExternalLoginHandler> _logger;
 
-        public ExternalLoginHandler(SignInManager<GabUser> signInManager, IUserStore<GabUser> userStore, IUserEmailStore<GabUser> emailStore, UserManager<GabUser> userManager, ILogger<ExternalLoginHandler> logger)
+        public ExternalLoginHandler(SignInManager<User> signInManager, IUserStore<User> userStore, IUserEmailStore<User> emailStore, UserManager<User> userManager, ILogger<ExternalLoginHandler> logger)
         {
             _signInManager = signInManager;
             _userStore = userStore;
@@ -28,22 +26,22 @@ namespace Gab.Core.Membership.Handlers
             _logger = logger;
         }
 
-        public async Task<GabAuthenticationResult> Handle(ExternalLoginCommand request, CancellationToken cancellationToken)
+        public async Task<AuthenticationResult> Handle(ExternalLoginCommand request, CancellationToken cancellationToken)
         {
-            var authenticationResult = new GabAuthenticationResult();
+            var authenticationResult = new AuthenticationResult();
 
             // Sign in the user with this external login provider if the user already has a login.
             var externalLoginResult = await _signInManager.ExternalLoginSignInAsync(request.ExternalLoginInfo.LoginProvider, request.ExternalLoginInfo.ProviderKey, isPersistent: true, bypassTwoFactor: true).ConfigureAwait(false);
             if (externalLoginResult.Succeeded)
             {
-                authenticationResult.Succeeded = true;
+                authenticationResult.Success = true;
                 authenticationResult.NavigateToUrl = request.ReturnUrl;
                 return authenticationResult;
             }
             if (externalLoginResult.IsLockedOut)
             {
-                authenticationResult.Succeeded = false;
-                authenticationResult.FailedReasons.Add("Unable to login, your account is locked out");
+                authenticationResult.Success = false;
+                authenticationResult.AddMessage("Unable to login, your account is locked out", ResultMessageType.Error);
                 return authenticationResult;
             }
 
@@ -51,8 +49,8 @@ namespace Gab.Core.Membership.Handlers
             // the external provider must pass an email address or they are not allowed to register
             if (!request.ExternalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
             {
-                authenticationResult.Succeeded = false;
-                authenticationResult.FailedReasons.Add("Unable to login using this provider, it did not provide a valid email address");
+                authenticationResult.Success = false;
+                authenticationResult.AddMessage("Unable to login using this provider, it did not provide a valid email address", ResultMessageType.Error);
                 return authenticationResult;
             }
 
@@ -65,7 +63,7 @@ namespace Gab.Core.Membership.Handlers
             }
 
             // Now we create a new user
-            var user = new GabUser(GuidFactory.NewSequentialGuid);
+            var user = new User{ Id = Guid.NewGuid().NewSequentialGuid()};
 
             // Set a flag so we know this user has logged in with an external account
             user.ExtendedData.Add(Constants.ExtendedDataKeys.IsExternalLogin, true);
@@ -76,11 +74,11 @@ namespace Gab.Core.Membership.Handlers
             var result = await _userManager.CreateAsync(user).ConfigureAwait(false);
             if (result.Succeeded)
             {
-                authenticationResult.Succeeded = true;
+                authenticationResult.Success = true;
                 result = await _userManager.AddLoginAsync(user, request.ExternalLoginInfo).ConfigureAwait(false);
                 if (result.Succeeded)
                 {
-                    authenticationResult.Succeeded = true;
+                    authenticationResult.Success = true;
                     var userId = await _userManager.GetUserIdAsync(user).ConfigureAwait(false);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user).ConfigureAwait(false);
 
@@ -90,11 +88,11 @@ namespace Gab.Core.Membership.Handlers
 
                     if (confirmResult.Succeeded == false)
                     {
-                        authenticationResult.Succeeded = false;
+                        authenticationResult.Success = false;
                         foreach (var error in confirmResult.Errors)
                         {
-                            _logger.LogError($"Failure to confirm email address - {error}");
-                            authenticationResult.FailedReasons.Add(error.Description);
+                            _logger.LogError("Failure to confirm email address - {Error}", error.Description);
+                            authenticationResult.AddMessage(error.Description, ResultMessageType.Error);
                         }
                     }
                     else
@@ -105,21 +103,21 @@ namespace Gab.Core.Membership.Handlers
                 }
                 else
                 {
-                    authenticationResult.Succeeded = false;
+                    authenticationResult.Success = false;
                     foreach (var error in result.Errors)
                     {
-                        _logger.LogError($"Failure to login using external provider - {error}");
-                        authenticationResult.FailedReasons.Add(error.Description);
+                        _logger.LogError("Failure to login using external provider - {Error}", error.Description);
+                        authenticationResult.AddMessage(error.Description, ResultMessageType.Error);
                     }
                 }
             }
             else
             {
-                authenticationResult.Succeeded = false;
+                authenticationResult.Success = false;
                 foreach (var error in result.Errors)
                 {
-                    _logger.LogError($"Failure to login using external provider - {error}");
-                    authenticationResult.FailedReasons.Add(error.Description);
+                    _logger.LogError("Failure to login using external provider - {Error}", error.Description);
+                    authenticationResult.AddMessage(error.Description, ResultMessageType.Error);
                 }
             }
             return authenticationResult;

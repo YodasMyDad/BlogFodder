@@ -1,25 +1,24 @@
-﻿using Gab.Core.Membership.Models;
-using Gab.Core.Membership.Models.Identity;
+﻿using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Membership.Commands;
+using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System.Threading;
-using System.Threading.Tasks;
-using BlogFodder.Core.Membership.Commands;
 
-namespace Gab.Core.Membership.Handlers
+namespace BlogFodder.Core.Membership.Handlers
 {
-    public class ResetPasswordHandler : IRequestHandler<ResetPasswordCommand, GabAuthenticationResult>
+    public class ResetPasswordHandler : IRequestHandler<ResetPasswordCommand, AuthenticationResult>
     {
-        private readonly UserManager<GabUser> _userManager;
+        private readonly UserManager<User> _userManager;
 
-        public ResetPasswordHandler(UserManager<GabUser> userManager)
+        public ResetPasswordHandler(UserManager<User> userManager)
         {
             _userManager = userManager;
         }
 
-        public async Task<GabAuthenticationResult> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+        public async Task<AuthenticationResult> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
-            var result = new GabAuthenticationResult();
+            var result = new AuthenticationResult();
 
             var user = await _userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
             if (user != null)
@@ -27,17 +26,17 @@ namespace Gab.Core.Membership.Handlers
                 var resetResult = await _userManager.ResetPasswordAsync(user, request.Code, request.Password).ConfigureAwait(false);
                 if (resetResult.Succeeded == false)
                 {
-                    result.Succeeded = false;
+                    result.Success = false;
                     foreach (var error in resetResult.Errors)
                     {
-                        result.FailedReasons.Add(error.Description);
+                        result.AddMessage(error.Description, ResultMessageType.Error);
                     }
                     return result;
                 }
             }
 
-            result.Succeeded = true;
-            result.SucceededMessage = $"Your password has been reset, <a class=\"underline\" href=\"{Constants.Urls.Account.Login}\">please login</a>";
+            result.Success = true;
+            result.AddMessage($"Your password has been reset, <a class=\"underline\" href=\"{Constants.Urls.Account.Login}\">please login</a>", ResultMessageType.Success);
             return result;
         }
     }

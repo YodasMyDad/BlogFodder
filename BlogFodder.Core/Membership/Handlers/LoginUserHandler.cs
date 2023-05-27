@@ -1,26 +1,25 @@
-﻿using Gab.Core.Email.Commands;
-using Gab.Core.Membership.Models;
-using Gab.Core.Membership.Models.Identity;
+﻿using BlogFodder.Core.Email.Commands;
+using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Membership.Commands;
+using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System.Threading;
-using System.Threading.Tasks;
-using BlogFodder.Core.Membership.Commands;
 
-namespace Gab.Core.Membership.Handlers
+namespace BlogFodder.Core.Membership.Handlers
 {
     /// <summary>
     /// Responsible for handling a user login
     /// </summary>
-    public class LoginUserHandler : IRequestHandler<LoginUserCommand, GabAuthenticationResult>
+    public class LoginUserHandler : IRequestHandler<LoginUserCommand, AuthenticationResult>
     {
-        private readonly SignInManager<GabUser> _signInManager;
-        private readonly UserManager<GabUser> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
         private readonly ILogger<LoginUserHandler> _logger;
         private readonly IMediator _mediator;
 
-        public LoginUserHandler(SignInManager<GabUser> signInManager, UserManager<GabUser> userManager, ILogger<LoginUserHandler> logger, IMediator mediator)
+        public LoginUserHandler(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<LoginUserHandler> logger, IMediator mediator)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -28,20 +27,20 @@ namespace Gab.Core.Membership.Handlers
             _mediator = mediator;
         }
 
-        public async Task<GabAuthenticationResult> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+        public async Task<AuthenticationResult> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            var loginResult = new GabAuthenticationResult();
+            var loginResult = new AuthenticationResult();
             await _signInManager.SignOutAsync().ConfigureAwait(false);
             var user = await _userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
             if (user != null)
             {
                 var signInResult = await _signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, false)
                     .ConfigureAwait(false);
-                loginResult.Succeeded = signInResult.Succeeded;
+                loginResult.Success = signInResult.Succeeded;
 
-                if (loginResult.Succeeded)
+                if (loginResult.Success)
                 {
                     var userPrincipal = await _signInManager.CreateUserPrincipalAsync(user).ConfigureAwait(false);
                     loginResult.NavigateToUrl = request.ReturnUrl ?? "~/";
@@ -52,10 +51,10 @@ namespace Gab.Core.Membership.Handlers
                     {
                         if (!await _userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false))
                         {
-                            loginResult.FailedReasons.Add("Email isn't confirmed. Check your inbox for a confirmation email");
+                            loginResult.AddMessage("Email isn't confirmed. Check your inbox for a confirmation email", ResultMessageType.Warning);
 
                             // Resend confirmation email
-                            var sendConfirmationEmailCommand = new SendConfirmationEmailCommand
+                            var sendConfirmationEmailCommand = new SendEmailConfirmationCommand
                             {
                                 ReturnUrl = request.ReturnUrl,
                                 User = user
@@ -72,8 +71,8 @@ namespace Gab.Core.Membership.Handlers
                     }
                     else if (signInResult.IsLockedOut)
                     {
-                        _logger.LogWarning($"User {request.Email} account is locked out.");
-                        loginResult.FailedReasons.Add("Account is locked out.");
+                        _logger.LogWarning("User {RequestEmail} account is locked out", request.Email);
+                        loginResult.AddMessage("Account is locked out.", ResultMessageType.Error);
                     }
                     else if (signInResult.RequiresTwoFactor)
                     {
@@ -81,16 +80,13 @@ namespace Gab.Core.Membership.Handlers
                     }
                     else
                     {
-                        if (user != null)
-                        {
-                            loginResult.FailedReasons.Add("Password is incorrect");
-                        }
+                        loginResult.AddMessage("Password is incorrect", ResultMessageType.Error);
                     }
                 }
             }
             else
             {
-                loginResult.FailedReasons.Add("You are do not have an account, please register");
+                loginResult.AddMessage("You are do not have an account, please register", ResultMessageType.Error);
             }
 
             return loginResult;

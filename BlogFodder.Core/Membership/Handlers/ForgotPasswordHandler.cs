@@ -1,50 +1,47 @@
-﻿using Gab.Core.Email.Commands;
-using Gab.Core.Email.Services;
-using Gab.Core.ExtensionMethods;
-using Gab.Core.Membership.Models;
-using Gab.Core.Membership.Models.Identity;
+﻿using System.Text;
+using System.Text.Encodings.Web;
+using BlogFodder.Core.Email.Commands;
+using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Membership.Commands;
+using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Providers;
+using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
-using BlogFodder.Core.Membership.Commands;
 
-namespace Gab.Core.Membership.Handlers
+namespace BlogFodder.Core.Membership.Handlers
 {
-    public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand, GabAuthenticationResult>
+    public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand, AuthenticationResult>
     {
-        private readonly UserManager<GabUser> _userManager;
-        private readonly IEmailSender _emailSender;
+        private readonly UserManager<User> _userManager;
+        private readonly ProviderService _providerService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public ForgotPasswordHandler(UserManager<GabUser> userManager, IEmailSender emailSender, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public ForgotPasswordHandler(UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IMediator mediator, ProviderService providerService)
         {
             _userManager = userManager;
-            _emailSender = emailSender;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
+            _providerService = providerService;
         }
 
-        public async Task<GabAuthenticationResult> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
+        public async Task<AuthenticationResult> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
-            var result = new GabAuthenticationResult();
+            var result = new AuthenticationResult();
 
             var user = await _userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
             if (user != null)
             {
                 if (await _userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false) == false)
                 {
-                    result.Succeeded = false;
-                    result.FailedReasons.Add("Please check your email to confirm your account");
+                    result.Success = false;
+                    result.AddMessage("Please check your email to confirm your account", ResultMessageType.Error);
 
                     // Resend confirmation email
-                    await _mediator.Send(new SendConfirmationEmailCommand { ReturnUrl = "~/", User = user }, cancellationToken).ConfigureAwait(false);
+                    await _mediator.Send(new SendEmailConfirmationCommand { ReturnUrl = "~/", User = user }, cancellationToken).ConfigureAwait(false);
                     return result;
                 }
 
@@ -55,11 +52,11 @@ namespace Gab.Core.Membership.Handlers
                 var callbackUrl = _httpContextAccessor.ToAbsoluteUrl(Constants.Urls.Account.ResetPassword, new { code = code });
 
                 var paragraphs = new List<string> { $"Please reset your password by <a class=\"underline\" href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>." };
-                await _emailSender.SendEmailAsync(request.Email, "Reset Password", paragraphs).ConfigureAwait(false);
+                await _providerService.EmailProvider!.SendEmailWithTemplateAsync(request.Email, "Reset Password", paragraphs).ConfigureAwait(false);
             }
 
-            result.Succeeded = true;
-            result.SucceededMessage = "An email has been sent to you to";
+            result.Success = true;
+            result.AddMessage("An email has been sent to you to", ResultMessageType.Success);
 
             return result;
         }
