@@ -16,11 +16,6 @@ namespace BlogFodder.Core.Membership.Mapping
             builder.Property(x => x.PhoneNumber).HasMaxLength(100);
             builder.Property(x => x.UserName).HasMaxLength(150);
             builder.HasOne(x => x.ProfileImage);
-
-            builder.HasMany(e => e.UserRoles)
-               .WithOne(e => e.User)
-               .HasForeignKey(ur => ur.UserId)
-               .IsRequired();
         }
     }
 }

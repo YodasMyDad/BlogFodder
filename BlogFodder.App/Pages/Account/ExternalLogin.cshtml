@@ -1,0 +1,40 @@
+﻿@page
+@using BlogFodder.Core.Extensions
+@model BlogFodder.App.Pages.Account.ExternalLoginModel
+@{
+    Layout = "Shared/_Layout";
+}
+@section Head {
+    <title>External Login</title>
+    <meta name="description" content="" />
+}
+
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+
+        <component type="typeof(LogoImage)" param-Classes="@("mx-auto h-16 w-16 fill-current text-indigo-600")" render-mode="ServerPrerendered" />
+
+        <h2 class="mt-4 text-center text-2xl font-bold text-gray-900">
+            External Login Issue
+        </h2>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div class="space-y-6">
+
+                @foreach (var error in Model.Result.Messages.ErrorMessages())
+                {
+                    <p class="font-medium text-red-400 text-sm text-center">@Html.Raw(error.Message)</p>
+                }
+
+                <div class="text-sm">
+                    <a asp-page="~/" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Back to home page
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

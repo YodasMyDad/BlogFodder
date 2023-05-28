@@ -3,6 +3,7 @@ using System;
 using BlogFodder.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    partial class BlogFodderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230528110120_FixingUpdatingIdentity")]
+    partial class FixingUpdatingIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
@@ -243,7 +246,7 @@ namespace BlogFodder.Core.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(150)
+                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -314,9 +317,19 @@ namespace BlogFodder.Core.Data.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("RoleId1")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("RoleId1");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("BlogFodderUserRoles", (string)null);
                 });
@@ -615,15 +628,27 @@ namespace BlogFodder.Core.Data.Migrations
 
             modelBuilder.Entity("BlogFodder.Core.Membership.Models.UserRole", b =>
                 {
+                    b.HasOne("BlogFodder.Core.Membership.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BlogFodder.Core.Membership.Models.Role", "Role")
                         .WithMany("UserRoles")
-                        .HasForeignKey("RoleId")
+                        .HasForeignKey("RoleId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogFodder.Core.Membership.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BlogFodder.Core.Membership.Models.User", "User")
                         .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

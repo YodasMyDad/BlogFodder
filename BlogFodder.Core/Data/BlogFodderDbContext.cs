@@ -27,8 +27,9 @@ public class BlogFodderDbContext : IdentityDbContext<User, Role, Guid, UserClaim
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // The apply configurations from assembly isn't working for the identity models
         modelBuilder.Entity<User>().ToTable("BlogFodderUsers");

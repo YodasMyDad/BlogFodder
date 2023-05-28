@@ -37,6 +37,16 @@ public static class ResultExtensions
     }
     
     /// <summary>
+    /// Gets only the warning messages
+    /// </summary>
+    /// <param name="messages"></param>
+    /// <returns></returns>
+    public static IEnumerable<ResultMessage> SuccessMessages(this List<ResultMessage> messages)
+    {
+        return messages.Where(x => x.MessageType == ResultMessageType.Success);
+    }
+    
+    /// <summary>
     /// Adds a handler result message
     /// </summary>
     /// <typeparam name="T"></typeparam>

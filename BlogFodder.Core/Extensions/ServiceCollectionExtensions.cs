@@ -1,6 +1,8 @@
 ﻿using BlogFodder.Core.Data;
 using BlogFodder.Core.Membership.Claims;
 using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Membership.Stores;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -71,10 +73,11 @@ public static class ServiceCollectionExtensions
                         identitySection.GetValue<bool>("SignInRequireConfirmedAccount");
                 })
                 .AddEntityFrameworkStores<BlogFodderDbContext>()
-                .AddUserStore<UserStore<User, Role, BlogFodderDbContext, Guid, UserClaim, UserRole, UserLogin, UserToken
-                    , RoleClaim>>()
+                .AddUserStore<UserStore<User, Role, BlogFodderDbContext, Guid, UserClaim, UserRole, UserLogin, UserToken, RoleClaim>>()
                 .AddRoleStore<RoleStore<Role, BlogFodderDbContext, Guid, UserRole, RoleClaim>>()
                 .AddClaimsPrincipalFactory<BlogFodderUserClaimsPrincipalFactory>();
+            
+            services.AddScoped<IUserEmailStore<User>, UserEmailStore>();
         }
         else
         {

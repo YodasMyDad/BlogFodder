@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @await RenderSectionAsync("Head", false)
+    <link rel="stylesheet" href="~/css/styles.css" />
+    @await RenderSectionAsync("Styles", false)
+    <base href="/" />
+</head>
+<body class="antialiased text-gray-900 bg-gray-100">
+    @RenderBody()
+@await RenderSectionAsync("Scripts", false)
+    @*<script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/forms-interop.js" asp-append-version="true"></script>
+    <script src="~/_framework/blazor.server.js"></script>*@
+</body>
+</html>

@@ -47,7 +47,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Pages\Account\" />
       <Folder Include="Shared\Models\" />
     </ItemGroup>
 
