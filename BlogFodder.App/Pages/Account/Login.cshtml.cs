@@ -1,6 +1,8 @@
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Settings.Commands;
+using BlogFodder.Core.Settings.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,11 +26,13 @@ namespace BlogFodder.App.Pages.Account
 
         [TempData] public string ErrorMessage { get; set; } = string.Empty;
 
-        public async Task<IActionResult> OnGetAsync(string returnUrl)
+        public SiteSettings? Settings { get; set; }
+        
+        public async Task<IActionResult> OnGetAsync(string? returnUrl)
         {
-            LoginUserCommand.ReturnUrl = returnUrl ?? "/";
-
-            if (User.Identity.IsAuthenticated)
+            LoginUserCommand.ReturnUrl = returnUrl ?? Url.Content("~/");
+            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            if (User.Identity?.IsAuthenticated == true)
             {
                 return Redirect("~/");
             }
@@ -40,8 +44,10 @@ namespace BlogFodder.App.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Reset anything after post
             await SetExternalLogins().ConfigureAwait(false);
-
+            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            
             if (ModelState.IsValid)
             {
                 var result = await _mediator.Send(LoginUserCommand).ConfigureAwait(false);

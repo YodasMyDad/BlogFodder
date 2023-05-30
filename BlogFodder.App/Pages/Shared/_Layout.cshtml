@@ -1,6 +1,6 @@
 ﻿@using BlogFodder.Core.Settings
 @using Microsoft.Extensions.Options
-@inject IOptionsSnapshot<BlogFodderSettings> Settings;
+@inject IOptions<BlogFodderSettings> Settings;
 @{
     var mainSettings = Settings.Value;
 }

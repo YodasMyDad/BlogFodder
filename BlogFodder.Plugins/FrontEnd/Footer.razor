@@ -24,7 +24,7 @@
 @code{
 
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+    IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
 
     [Inject]
     public IMediator Mediator { get; set; } = default!;

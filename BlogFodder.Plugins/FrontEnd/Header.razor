@@ -79,7 +79,7 @@
     public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     
     [Inject]
-    public IOptionsSnapshot<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+    public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;

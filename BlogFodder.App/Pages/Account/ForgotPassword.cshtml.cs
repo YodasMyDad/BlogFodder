@@ -1,6 +1,8 @@
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Settings.Commands;
+using BlogFodder.Core.Settings.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,11 +24,18 @@ namespace BlogFodder.App.Pages.Account
         public ForgotPasswordCommand ForgotPasswordCommand { get; set; } = new();
 
         public AuthenticationResult Result { get; set; } = new();
-
+        public SiteSettings? Settings { get; set; }
         public string ValidationSummaryStyles { get; set; } = "font-medium text-red-400 text-sm text-center";
 
+        public async Task<IActionResult> OnGetAsync(string? returnUrl)
+        {
+            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            return Page();
+        }
+        
         public async Task<IActionResult> OnPostAsync()
         {
+            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
             if (ModelState.IsValid)
             {
                 Result = await _mediator.Send(ForgotPasswordCommand).ConfigureAwait(false);

@@ -25,7 +25,7 @@
     public ExtensionManager ExtensionManager { get; set; } = default!;
 
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+    IOptions<BlogFodderSettings> Settings { get; set; } = default!;
 
     [Parameter]
     public PaginatedList<Post> Posts { get; set; } = new();

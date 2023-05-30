@@ -17,6 +17,7 @@ namespace BlogFodder.Core.Membership.Handlers
         private readonly SignInManager<User> _signInManager;
         private readonly IUserStore<User> _userStore;
         private readonly IUserEmailStore<User> _userEmailStore;
+        private readonly RoleManager<Role> _roleManager;
         private readonly ILogger<RegisterUserHandler> _logger;
         private readonly IMediator _mediator;
         private readonly BlogFodderSettings _blogFodderSettings;
@@ -27,7 +28,7 @@ namespace BlogFodder.Core.Membership.Handlers
                                 ILogger<RegisterUserHandler> logger,
                                 SignInManager<User> signInManager,
                                 IOptions<BlogFodderSettings> gabSettings,
-                                IMediator mediator)
+                                IMediator mediator, RoleManager<Role> roleManager)
         {
             _userManager = userManager;
             _userEmailStore = userEmailStore;
@@ -36,6 +37,7 @@ namespace BlogFodder.Core.Membership.Handlers
             _signInManager = signInManager;
             _blogFodderSettings = gabSettings.Value;
             _mediator = mediator;
+            _roleManager = roleManager;
         }
 
         public async Task<AuthenticationResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -50,7 +52,16 @@ namespace BlogFodder.Core.Membership.Handlers
             {
                 _logger.LogInformation("{RequestUsername} created a new account", request.Username);
 
-                var addToRoleResult = await _userManager.AddToRoleAsync(newUser, _blogFodderSettings.NewUserStartingRole).ConfigureAwait(false);
+                var startingRoleName = _blogFodderSettings.NewUserStartingRole ?? Constants.Roles.StandardRoleName;
+                
+                // Check the starting role exists
+                var roleExist = await _roleManager.RoleExistsAsync(startingRoleName);
+                if (!roleExist)
+                {
+                    await _roleManager.CreateAsync(new Role {Name = startingRoleName});
+                }
+                
+                var addToRoleResult = await _userManager.AddToRoleAsync(newUser, startingRoleName).ConfigureAwait(false);
                 if (addToRoleResult.Succeeded == false)
                 {
                     addToRoleResult.LogErrors();

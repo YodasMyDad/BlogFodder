@@ -5,7 +5,7 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @namespace BlogFodder.App.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@inject IOptionsSnapshot<BlogFodderSettings> Settings;
+@inject IOptions<BlogFodderSettings> Settings;
 @{
     var mainSettings = Settings.Value;
 }

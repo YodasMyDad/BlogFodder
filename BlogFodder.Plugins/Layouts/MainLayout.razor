@@ -21,7 +21,7 @@
 @code {
 
     [Inject]
-    IOptionsSnapshot<BlogFodderSettings> Settings { get; set; } = default!;
+    IOptions<BlogFodderSettings> Settings { get; set; } = default!;
     
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;

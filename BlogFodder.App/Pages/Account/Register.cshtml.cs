@@ -1,41 +1,44 @@
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Settings;
+using BlogFodder.Core.Settings.Commands;
+using BlogFodder.Core.Settings.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 
 namespace BlogFodder.App.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly ILogger<RegisterModel> _logger;
         private readonly SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
 
-        public RegisterModel(IMediator mediator, ILogger<RegisterModel> logger,
-                                SignInManager<User> signInManager)
+        public RegisterModel(IMediator mediator, SignInManager<User> signInManager)
         {
             _mediator = mediator;
-            _logger = logger;
             _signInManager = signInManager;
         }
 
         [BindProperty]
         public RegisterUserCommand RegisterUserCommand { get; set; } = new();
 
-        public string ValidationSummaryStyles { get; set; } = "font-medium text-red-400 text-sm text-center";
-
-        public async Task<IActionResult> OnGetAsync(string returnUrl)
+        public string ValidationSummaryStyles { get; set; } = "text-danger fw-bold small";
+        public SiteSettings? Settings { get; set; }
+        public async Task<IActionResult> OnGetAsync(string? returnUrl)
         {
             RegisterUserCommand.ReturnUrl = returnUrl ?? Url.Content("~/");
 
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
             {
                 return Redirect("~/");
             }
 
+            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            
             await SetExternalLogins().ConfigureAwait(false);
 
             return Page();
@@ -43,8 +46,10 @@ namespace BlogFodder.App.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Reset anything after post
             await SetExternalLogins().ConfigureAwait(false);
-
+            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            
             if (ModelState.IsValid)
             {
                 var result = await _mediator.Send(RegisterUserCommand).ConfigureAwait(false);
@@ -57,7 +62,7 @@ namespace BlogFodder.App.Pages.Account
                     }
 
                     // Show success message. Would be nice to change the styles
-                    ValidationSummaryStyles = "font-medium text-green-400 text-base text-center";
+                    ValidationSummaryStyles = "text-success fw-bold small";
                     ModelState.AddModelError("SuccessMessage", result.Messages.SuccessMessages().FirstOrDefault()?.Message!);
                 }
                 else
@@ -66,7 +71,7 @@ namespace BlogFodder.App.Pages.Account
                     {
                         if (identityError.Message != null)
                         {
-                            ModelState.AddModelError("IdentityResultError", identityError.Message);
+                            ModelState.AddModelError("", identityError.Message);
                         }
                     }
                 }
