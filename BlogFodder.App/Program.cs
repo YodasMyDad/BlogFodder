@@ -38,7 +38,7 @@ builder.Services.AddMudServicesWithExtensions();
 builder.Services.AddBlazoredToast();
 
 builder.Services.Configure<BlogFodderSettings>(builder.Configuration.GetSection(Constants.SettingsConfigName));
-
+builder.Services.AddMvc();
 builder.Services.EnableBlogFodderPlugins(builder.Configuration);
 
 var app = builder.Build();
@@ -76,6 +76,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

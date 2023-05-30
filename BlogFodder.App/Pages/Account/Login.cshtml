@@ -8,30 +8,71 @@
     <title>Login</title>
     <meta name="description" content="" />
 }
-<div class="form-signin">
-      <form>
-        <img class="mb-4" src="/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
-        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
-    
-        <div class="form-floating">
-          <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-          <label for="floatingInput">Email address</label>
-        </div>
-        <div class="form-floating">
-          <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-          <label for="floatingPassword">Password</label>
-        </div>
-    
-        <div class="checkbox mb-3">
-          <label>
-            <input type="checkbox" value="remember-me"> Remember me
-          </label>
-        </div>
-        <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-        <p class="mt-5 mb-3 text-muted">&copy; 2017–2021</p>
-      </form>
-</div>
+<div class="d-flex flex-column justify-content-center py-5 bg-light min-vh-100">
+    <div class="container mx-auto text-center">
+        
+        <p>LOGO HERE</p>
 
+        <h2 class="mt-4 text-center text-2xl font-weight-bold">
+            Sign in to your account
+        </h2>
+        <p class="mt-2 text-center text-muted">
+            Or
+            <a asp-page="./Register" asp-route-returnUrl="@Model.LoginUserCommand.ReturnUrl" class="text-primary">
+                register for an account
+            </a>
+        </p>
+    </div>
+
+    <div class="container mt-4 mx-auto">
+        <div class="bg-white p-5 shadow rounded">
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger text-center">
+                    @if (!Model.ErrorMessage.IsNullOrWhiteSpace())
+                    {
+                        @Model.ErrorMessage
+                    }
+                </div>
+                <div class="form-group">
+                    <label asp-for="LoginUserCommand.Email" class="form-label">Email Address</label>
+                    <input asp-for="LoginUserCommand.Email" autocomplete="email" class="form-control" />
+                    <span asp-validation-for="LoginUserCommand.Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="LoginUserCommand.Password" class="form-label">Password</label>
+                    <input asp-for="LoginUserCommand.Password" autocomplete="current-password" class="form-control" />
+                    <span asp-validation-for="LoginUserCommand.Password" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="form-check">
+                        <input asp-for="LoginUserCommand.RememberMe" class="form-check-input" />
+                        <label asp-for="LoginUserCommand.RememberMe" class="form-check-label">
+                            @Html.DisplayNameFor(m => m.LoginUserCommand.RememberMe)
+                        </label>
+                    </div>
+
+                    <div class="text-muted">
+                        <a asp-page="./ForgotPassword" class="text-primary">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+
+                <div class="form-group mt-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Sign in
+                    </button>
+                </div>
+                @Html.HiddenFor(x => x.LoginUserCommand.ReturnUrl)
+            </form>
+
+            <partial name="_externalLogins" model="Model.LoginUserCommand.ExternalLogins" />
+
+        </div>
+    </div>
+</div>
 @*<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
 

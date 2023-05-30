@@ -52,14 +52,7 @@ public static class ServiceCollectionExtensions
                 }
             }   
         }
-        
-        /*// Validation
-        services.AddFormValidation(config =>
-            config
-                .AddDataAnnotationsValidation()
-                .AddFluentValidation(typeof(Constants).Assembly, discoverAssemblies)
-        );*/
-        
+
         // Add external authentication providers
         foreach (var provider in extensionManager?.GetInstances<IExternalAuthenticationProvider>()!)
         {
