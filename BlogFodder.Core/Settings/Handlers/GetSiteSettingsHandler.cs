@@ -21,7 +21,7 @@ public class GetSiteSettingsHandler : IRequestHandler<GetSiteSettingsCommand, Si
     public async Task<SiteSettings> Handle(GetSiteSettingsCommand request, CancellationToken cancellationToken)
     {
         return  await _cacheService.GetSetCachedItemAsync(nameof(SiteSettings), 
-            async () => await _dbContext.SiteSettings.AsNoTracking()
+            async () => await _dbContext.SiteSettings.Include(x => x.Logo).AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken)) ?? new SiteSettings();
     }
 }

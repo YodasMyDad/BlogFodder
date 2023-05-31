@@ -42,6 +42,7 @@ public class SendEmailConfirmationHandler : IRequestHandler<SendEmailConfirmatio
             string email;
 
             // Is this a change of email or a new signup
+            var isChange = "false";
             if (request.NewEmailAddress.IsNullOrWhiteSpace())
             {
                 code = await _userManager.GenerateEmailConfirmationTokenAsync(request.User).ConfigureAwait(false);
@@ -49,13 +50,14 @@ public class SendEmailConfirmationHandler : IRequestHandler<SendEmailConfirmatio
             }
             else
             {
+                isChange = "true";
                 code = await _userManager.GenerateChangeEmailTokenAsync(request.User, request.NewEmailAddress).ConfigureAwait(false);
                 email = request.NewEmailAddress;
             }
   
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-            var callbackUrl = $"{_httpContextAccessor.ToAbsoluteUrl(Constants.Urls.Account.ConfirmEmail)}?userId={userId}&code={code}&change=true&returnUrl={request.ReturnUrl}";
+            var callbackUrl = $"{_httpContextAccessor.ToAbsoluteUrl(Constants.Urls.Account.ConfirmEmail)}?userId={userId}&code={code}&change={isChange}&returnUrl={request.ReturnUrl}";
             
             var paragraphs = new List<string> { $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>." };
 

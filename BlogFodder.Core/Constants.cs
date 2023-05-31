@@ -3,6 +3,7 @@
 public static class Constants
 {
     public const string SettingsConfigName = "BlogFodder";
+    public const string DefaultLogo = "/img/at.svg"; 
     
     public static class Claims
     {

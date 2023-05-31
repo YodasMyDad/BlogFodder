@@ -1,8 +1,11 @@
 using System.Text;
+using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Plugins.Interfaces;
 using BlogFodder.Core.Settings;
+using BlogFodder.Core.Settings.Commands;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -16,20 +19,24 @@ public class SmtpEmailProvider : IEmailProvider
         private readonly BlogFodderSettings _gabSettings;
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMediator _mediator;
 
-        public SmtpEmailProvider(IOptions<BlogFodderSettings> gabSettings, IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor)
+        public SmtpEmailProvider(IOptions<BlogFodderSettings> gabSettings, IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _gabSettings = gabSettings.Value;
             _env = env;
             _httpContextAccessor = httpContextAccessor;
+            _mediator = mediator;
         }
 
         public async Task SendEmailWithTemplateAsync(string toEmail, string subject, List<string> paragraphs)
         {
+            var settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            
             // Get the default email template and the logo
             //string webRootPath = _env.WebRootPath;
             var emailTemplateUrl = $"{_env.WebRootPath}{Path.DirectorySeparatorChar}templates{Path.DirectorySeparatorChar}email{Path.DirectorySeparatorChar}{Constants.Assets.DefaultEmailTemplate}";
-            var logoUrl = string.Empty; //_httpContextAccessor.ToAbsoluteUrl(_gabSettings.LogoPng);
+            var logoUrl = _httpContextAccessor.ToAbsoluteUrl((settings.Logo != null ? settings.Logo.Url : Constants.DefaultLogo) ?? string.Empty);
 
             // Get template html
             using var sourceReader = File.OpenText(emailTemplateUrl);

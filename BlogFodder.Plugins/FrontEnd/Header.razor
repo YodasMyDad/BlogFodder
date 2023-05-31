@@ -3,18 +3,18 @@
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Categories.Models
 @using BlogFodder.Core.Data
-@using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Settings.Commands
 @using BlogFodder.Core.Settings.Models
 @using MediatR
 @using Microsoft.EntityFrameworkCore
+@using BlogFodder.Core
 @implements IDisposable
 <nav class="navbar navbar-expand-lg bg-secondary-subtle">
     <div class="container">
         <a class="navbar-brand" href="/">
             @if (Settings.LogoId == null)
             {
-                <img src="/img/at.svg" class="text-primary" alt="@Settings.SiteName Logo" width="24" height="24">
+                <img src="@Constants.DefaultLogo" class="text-primary" alt="@Settings.SiteName Logo" width="24" height="24">
             }
             else
             {

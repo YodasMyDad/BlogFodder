@@ -1,4 +1,5 @@
 ﻿@page
+@using BlogFodder.Core
 @using BlogFodder.Core.Extensions
 @model BlogFodder.App.Pages.Account.ConfirmEmailModel
 @{
@@ -13,7 +14,7 @@
         <div class="text-center">
             @if (Model.Settings?.LogoId == null)
             {
-                <img src="/img/at.svg" class="text-primary" alt="@Model.Settings?.SiteName Logo" width="50" height="50">
+                <img src="@Constants.DefaultLogo" class="text-primary" alt="@Model.Settings?.SiteName Logo" width="50" height="50">
             }
             else
             {
@@ -30,11 +31,16 @@
             <div>
                 @if (Model.Result.Success)
                 {
-                    <p class="text-success text-base text-center fw-bold">@Html.Raw(Model.Result.Messages)</p>
+                    @foreach (var message in Model.Result.Messages.SuccessMessages())
+                    {
+                        <p class="text-success text-base text-center fw-bold">@Html.Raw(message.Message)</p>
+                    }
+                    
+                    <p>TODO Login button</p>
                 }
                 else
                 {
-                    @foreach (var error in Model.Result.Messages.SuccessMessages())
+                    @foreach (var error in Model.Result.Messages.ErrorMessages())
                     {
                         <p class="text-danger text-base text-center fw-bold">@error.Message</p>
                     }
