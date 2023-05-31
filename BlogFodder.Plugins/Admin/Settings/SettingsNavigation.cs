@@ -2,7 +2,7 @@ using BlogFodder.Core;
 using BlogFodder.Core.Backoffice.Models;
 using BlogFodder.Core.Plugins.Interfaces;
 
-namespace BlogFodder.App.Pages.Admin.Settings;
+namespace BlogFodder.Plugins.Admin.Settings;
 
 public class SettingsNavigation : IBackOfficeNavigationItem
 {

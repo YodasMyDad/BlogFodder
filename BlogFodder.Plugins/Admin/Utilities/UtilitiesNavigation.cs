@@ -1,8 +1,4 @@
-using BlogFodder.Core;
-using BlogFodder.Core.Backoffice.Models;
-using BlogFodder.Core.Plugins.Interfaces;
-
-namespace BlogFodder.App.Pages.Admin.Utilities;
+namespace BlogFodder.Plugins.Admin.Utilities;
 
 /*public class UtilitiesNavigation : IBackOfficeNavigationItem
 {

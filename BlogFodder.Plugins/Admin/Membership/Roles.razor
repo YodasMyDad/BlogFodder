@@ -1,26 +1,24 @@
-@page "/admin/categories"
+@page "/admin/membership/roles"
+@layout AdminLayout
 @using BlogFodder.Core.Data
-@using BlogFodder.Core.Extensions
 @using Humanizer
 @using MediatR
 @using Microsoft.EntityFrameworkCore
-@using BlogFodder.Core.Categories.Models
-@using BlogFodder.Core.Categories.Commands
-@layout AdminLayout
+@using BlogFodder.Core.Membership.Models
 @implements IDisposable
-<PageTitle>View Categories</PageTitle>
+<PageTitle>Manage Roles</PageTitle>
 
-<MudTable Items="@Categories" Hover="true" OnRowClick="RowClickEvent" T="Category">
+<MudTable Items="@AllRoles" Hover="true" OnRowClick="RowClickEvent" T="Role">
     <HeaderContent>
         <MudTh>Name</MudTh>
-        <MudTh>Date Updated</MudTh>
+        <MudTh>Date Created</MudTh>
         <MudTh>Delete</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Name">@context.Name</MudTd>
-        <MudTd DataLabel="Date Updated">@context.DateUpdated.Humanize()</MudTd>
+        <MudTd DataLabel="Date Created">@context.CreateDate.Humanize()</MudTd>
         <MudTd DataLabel="Delete">
-            <MudButton Color="Color.Primary" OnClick="@(() => DeleteCategory(context))">Delete</MudButton>
+            <MudButton Color="Color.Primary" OnClick="@(() => DeleteRole(context))">Delete</MudButton>
         </MudTd>
     </RowTemplate>
     <PagerContent>
@@ -37,21 +35,21 @@
     [Inject] private IDialogService DialogService { get; set; } = default!;
     
     private BlogFodderDbContext DbContext { get; set; } = default!;
-    private List<Category> Categories { get; set; } = new();
+    private List<Role> AllRoles { get; set; } = new();
 
     protected override void OnInitialized()
     {
         DbContext = DbContextFactory.CreateDbContext();
-        SetCategories();
+        SetRoles();
     }
 
-    private async Task DeleteCategory(Category category)
+    private async Task DeleteRole(Role role)
     {
         var dialogResult = await DialogService.ShowMessageBox(
             "Warning", 
-            "Once you click delete the category is gone", 
+            "Once you click delete the role is gone", 
             yesText:"Delete", cancelText:"Cancel");
-        if (dialogResult == true)
+        /*if (dialogResult == true)
         {
             var result = await Mediator.Send(new DeleteCategoryCommand{CategoryId = category.Id}).ConfigureAwait(false);
             if (result is {Success: false})
@@ -63,21 +61,21 @@
             }
             else
             {
-                Snackbar.Add("Category Deleted", Severity.Success);
-                SetCategories();
+                Snackbar.Add("User Deleted", Severity.Success);
+                SetUsers();
                 StateHasChanged();
             }   
-        }
+        }*/
     }
 
-    private void SetCategories()
+    private void SetRoles()
     {
-        Categories = DbContext.Categories.AsNoTracking().OrderByDescending(x => x.SortOrder).ToList();
+        AllRoles = DbContext.Roles.AsNoTracking().OrderByDescending(x => x.CreateDate).ToList();
     }
     
-    private void RowClickEvent(TableRowClickEventArgs<Category> tableRowClickEventArgs)
+    private void RowClickEvent(TableRowClickEventArgs<Role> tableRowClickEventArgs)
     {
-        NavigationManager.NavigateTo($"/admin/createcategory/{tableRowClickEventArgs.Item.Id}");
+        //NavigationManager.NavigateTo($"/admin/createcategory/{tableRowClickEventArgs.Item.Id}");
     }
 
     public void Dispose()

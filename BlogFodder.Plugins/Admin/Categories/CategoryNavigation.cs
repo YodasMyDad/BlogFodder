@@ -2,7 +2,7 @@ using BlogFodder.Core;
 using BlogFodder.Core.Backoffice.Models;
 using BlogFodder.Core.Plugins.Interfaces;
 
-namespace BlogFodder.App.Pages.Admin.Categories;
+namespace BlogFodder.Plugins.Admin.Categories;
 
 public class CategoryNavigation : IBackOfficeNavigationItem
 {

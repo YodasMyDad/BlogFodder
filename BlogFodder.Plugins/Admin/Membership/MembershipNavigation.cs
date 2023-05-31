@@ -2,29 +2,26 @@ using BlogFodder.Core;
 using BlogFodder.Core.Backoffice.Models;
 using BlogFodder.Core.Plugins.Interfaces;
 
-namespace BlogFodder.Plugins.Admin.Posts;
+namespace BlogFodder.Plugins.Admin.Membership;
 
-/// <summary>
-/// The navigation items for the post items
-/// </summary>
-public class PostNavigation : IBackOfficeNavigationItem
+public class MembershipNavigation : IBackOfficeNavigationItem
 {
     public Link Link { get; set; } = new()
     {
-        Text = "Posts",
-        Open = true,
+        Text = "Membership",
+        SortOrder = 6,
         Section = Constants.BackOffice.NavigationSectionCore,
         SubLinks = new List<Link>
         {
             new ()
             {
-                Route = "/admin/posts",
-                Text = "View Posts"
+                Route = "/admin/membership/users",
+                Text = "Users"
             },
             new ()
             {
-                Route = "/admin/createpost",
-                Text = "Create Post"
+                Route = "/admin/membership/roles",
+                Text = "Roles"
             }
         }
     };

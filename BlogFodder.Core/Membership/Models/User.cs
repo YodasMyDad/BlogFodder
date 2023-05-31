@@ -10,6 +10,8 @@ public class User : IdentityUser<Guid>
 
     public List<Post> Posts { get; set; } = new();
     public BlogFodderFile? ProfileImage { get; set; }
+    
+    public DateTime CreateDate { get; set; } = DateTime.UtcNow;
 
     public Dictionary<string, object> ExtendedData { get; set; } = new();
 }
