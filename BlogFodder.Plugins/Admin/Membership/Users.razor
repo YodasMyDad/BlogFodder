@@ -5,10 +5,11 @@
 @using MediatR
 @using Microsoft.EntityFrameworkCore
 @using BlogFodder.Core.Membership.Models
+@using BlogFodder.Plugins.Admin.Membership.Dialogs
 @implements IDisposable
 <PageTitle>Manage Users</PageTitle>
 
-<MudTable Items="@AllUsers" Hover="true" OnRowClick="RowClickEvent" T="User">
+<MudTable Items="@AllUsers" Hover="true" OnRowClick="RowClickEvent" T="User" RowClass="rowpointer">
     <HeaderContent>
         <MudTh>Name</MudTh>
         <MudTh>Date Created</MudTh>
@@ -29,20 +30,30 @@
         </MudTd>
     </RowTemplate>
     <PagerContent>
-        <MudTablePager />
+        <MudTablePager/>
     </PagerContent>
 </MudTable>
 
 @code {
-    
-    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
-    [Inject] public IMediator Mediator { get; set; } = default!;
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
-    [Inject] private IDialogService DialogService { get; set; } = default!;
-    
+
+    [Inject]
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
+
     private BlogFodderDbContext DbContext { get; set; } = default!;
     private List<User> AllUsers { get; set; } = new();
+    private readonly DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
 
     protected override void OnInitialized()
     {
@@ -53,27 +64,35 @@
     private async Task DeleteUser(User user)
     {
         var dialogResult = await DialogService.ShowMessageBox(
-            "Warning", 
-            "Once you click delete the user is gone", 
-            yesText:"Delete", cancelText:"Cancel");
-        /*if (dialogResult == true)
+            "Warning",
+            "Once you delete the user, all associated data will be permanently removed. Are you sure you want to continue?",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (dialogResult == false)
         {
-            var result = await Mediator.Send(new DeleteCategoryCommand{CategoryId = category.Id}).ConfigureAwait(false);
-            if (result is {Success: false})
-            {
-                foreach (var errorMessage in result.Messages.ErrorMessagesToList())
-                {
-                    Snackbar.Add(errorMessage, Severity.Error);
-                }
-            }
-            else
-            {
-                Snackbar.Add("User Deleted", Severity.Success);
-                SetUsers();
-                StateHasChanged();
-            }   
-        }*/
+    // The user clicked "Cancel", so don't do anything.
+            return;
+        }
+
+    // If we reach here, the user clicked "Delete".
+        try
+        {
+            DbContext.Users.Remove(user);
+            await DbContext.SaveChangesAsync();
+
+    // Refresh the users list after successful deletion.
+            SetUsers();
+
+            Snackbar.Add("User deleted successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+    // Handle or log the error.
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
     }
+
 
     private void SetUsers()
     {
@@ -81,14 +100,27 @@
             .Include(x => x.UserRoles)
             .ThenInclude(x => x.Role).AsNoTracking().OrderByDescending(x => x.CreateDate).ToList();
     }
-    
-    private void RowClickEvent(TableRowClickEventArgs<User> tableRowClickEventArgs)
+
+    private async Task RowClickEvent(TableRowClickEventArgs<User> tableRowClickEventArgs)
     {
-        //NavigationManager.NavigateTo($"/admin/createcategory/{tableRowClickEventArgs.Item.Id}");
+    // Open up the user editor
+        var parameters = new DialogParameters
+        {
+            {"User", tableRowClickEventArgs.Item}
+        };
+
+        var dialog = await DialogService.ShowAsync<EditUser>($"Edit {tableRowClickEventArgs.Item.UserName}", parameters, _defaultDialogOptions);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            StateHasChanged();
+        }
     }
 
     public void Dispose()
     {
         DbContext.Dispose();
     }
+
 }

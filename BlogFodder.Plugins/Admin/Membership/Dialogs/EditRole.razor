@@ -1,0 +1,97 @@
+@using BlogFodder.Core.Membership.Models
+@using MediatR
+@using Microsoft.EntityFrameworkCore
+@using BlogFodder.Core.Data
+@implements IDisposable
+
+<MudDialog>
+    <DialogContent>
+        @if (Errors.Length > 0)
+        {
+            <MudAlert Severity="Severity.Error" Class="my-2">
+                @foreach (var error in Errors)
+                {
+                    <MudText>@error</MudText>
+                }
+            </MudAlert>
+        }
+        <MudForm Model="@Role" @ref="@Form" @bind-Errors="@Errors" ValidationDelay="0">
+            <MudGrid Class="pb-4">
+                <MudItem xs="12">
+                    <MudTextField Label="Role Name" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  @bind-Value="@Role.Name" For="@(() => Role.Name)"/>
+                </MudItem>
+            </MudGrid>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton Variant="Variant.Filled" OnClick="@(SubmitForm)" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">Save</MudButton>
+                </MudItem>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [Parameter]
+    public Role? Role { get; set; }
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Inject] public IMediator Mediator { get; set; } = default!;
+    
+    [Inject]
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
+    
+    private MudForm Form { get; set; } = default!;
+    private string?[] Errors { get; set; } = Array.Empty<string>();
+    private BlogFodderDbContext? DbContext { get; set; }
+    private bool IsNew { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        DbContext = await DbContextFactory.CreateDbContextAsync();
+        
+        if (Role == null)
+        {
+            IsNew = true;
+            Role = new Role();
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        try
+        {
+            if (IsNew)
+            {
+                if (await DbContext?.Roles.AnyAsync(r => r.Name == Role!.Name)!)
+                {
+                    Errors = new[] { $"Role with name {Role!.Name} already exists." };
+                    return;
+                }
+
+                DbContext.Roles.Add(Role!);
+            }
+            else
+            {
+                DbContext?.Roles.Update(Role!);
+            }
+
+            await DbContext?.SaveChangesAsync()!;
+        }
+        catch (Exception ex)
+        {
+            // Log the error?
+            Errors = new[] { ex.Message };
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(Role));
+    }
+
+    public void Dispose()
+    {
+        DbContext?.Dispose();
+    }
+
+}

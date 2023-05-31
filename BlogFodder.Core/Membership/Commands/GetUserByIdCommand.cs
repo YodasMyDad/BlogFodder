@@ -1,10 +1,9 @@
 ﻿using BlogFodder.Core.Membership.Models;
 using MediatR;
 
-namespace BlogFodder.Core.Membership.Commands
+namespace BlogFodder.Core.Membership.Commands;
+
+public class GetUserByIdCommand : IRequest<User?>
 {
-    public class GetUserByIdCommand : IRequest<User?>
-    {
-        public Guid Id { get; set; }
-    }
+    public Guid Id { get; set; }
 }

@@ -75,7 +75,8 @@ public static class ServiceCollectionExtensions
                 .AddEntityFrameworkStores<BlogFodderDbContext>()
                 .AddUserStore<UserStore<User, Role, BlogFodderDbContext, Guid, UserClaim, UserRole, UserLogin, UserToken, RoleClaim>>()
                 .AddRoleStore<RoleStore<Role, BlogFodderDbContext, Guid, UserRole, RoleClaim>>()
-                .AddClaimsPrincipalFactory<BlogFodderUserClaimsPrincipalFactory>();
+                .AddClaimsPrincipalFactory<BlogFodderUserClaimsPrincipalFactory>()
+                .AddDefaultTokenProviders();
             
             services.AddScoped<IUserEmailStore<User>, UserEmailStore>();
         }

@@ -1,22 +1,24 @@
 @page "/admin/membership/roles"
 @layout AdminLayout
 @using BlogFodder.Core.Data
-@using Humanizer
 @using MediatR
 @using Microsoft.EntityFrameworkCore
 @using BlogFodder.Core.Membership.Models
+@using BlogFodder.Plugins.Admin.Membership.Dialogs
 @implements IDisposable
 <PageTitle>Manage Roles</PageTitle>
 
-<MudTable Items="@AllRoles" Hover="true" OnRowClick="RowClickEvent" T="Role">
+<div class="d-flex justify-end mb-3">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => OpenEditRoleDialog(null))">Create Role</MudButton>
+</div>
+
+<MudTable Items="@AllRoles" Hover="true" OnRowClick="RowClickEvent" T="Role" RowClass="rowpointer">
     <HeaderContent>
-        <MudTh>Name</MudTh>
-        <MudTh>Date Created</MudTh>
+        <MudTh>Role Name</MudTh>
         <MudTh>Delete</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Name">@context.Name</MudTd>
-        <MudTd DataLabel="Date Created">@context.CreateDate.Humanize()</MudTd>
+        <MudTd DataLabel="Role Name">@context.Name</MudTd>
         <MudTd DataLabel="Delete">
             <MudButton Color="Color.Primary" OnClick="@(() => DeleteRole(context))">Delete</MudButton>
         </MudTd>
@@ -36,6 +38,7 @@
     
     private BlogFodderDbContext DbContext { get; set; } = default!;
     private List<Role> AllRoles { get; set; } = new();
+    private readonly DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
 
     protected override void OnInitialized()
     {
@@ -49,33 +52,61 @@
             "Warning", 
             "Once you click delete the role is gone", 
             yesText:"Delete", cancelText:"Cancel");
-        /*if (dialogResult == true)
+
+        if (dialogResult == false) return; // The user cancelled the action
+
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
+
+        try
         {
-            var result = await Mediator.Send(new DeleteCategoryCommand{CategoryId = category.Id}).ConfigureAwait(false);
-            if (result is {Success: false})
-            {
-                foreach (var errorMessage in result.Messages.ErrorMessagesToList())
-                {
-                    Snackbar.Add(errorMessage, Severity.Error);
-                }
-            }
-            else
-            {
-                Snackbar.Add("User Deleted", Severity.Success);
-                SetUsers();
-                StateHasChanged();
-            }   
-        }*/
+            // Remove the role from all users
+            var userRoles = DbContext.UserRoles.Where(ur => ur.RoleId == role.Id);
+            DbContext.UserRoles.RemoveRange(userRoles);
+            await DbContext.SaveChangesAsync();
+
+            // Delete the role itself
+            DbContext.Roles.Remove(role);
+            await DbContext.SaveChangesAsync();
+
+            await transaction.CommitAsync(); // Commit the transaction if all operations were successful
+
+            Snackbar.Add($"Role {role.Name} deleted successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(); // Rollback the transaction in case of an error
+
+            Snackbar.Add("An error occurred while trying to delete the role: " + ex.Message, Severity.Error);
+        }
+
+        SetRoles(); // Refresh the roles list
     }
 
     private void SetRoles()
     {
-        AllRoles = DbContext.Roles.AsNoTracking().OrderByDescending(x => x.CreateDate).ToList();
+        AllRoles = DbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToList();
     }
     
-    private void RowClickEvent(TableRowClickEventArgs<Role> tableRowClickEventArgs)
+    private async Task RowClickEvent(TableRowClickEventArgs<Role> tableRowClickEventArgs)
     {
-        //NavigationManager.NavigateTo($"/admin/createcategory/{tableRowClickEventArgs.Item.Id}");
+        await OpenEditRoleDialog(tableRowClickEventArgs.Item);
+    }
+
+    private async Task OpenEditRoleDialog(Role? role)
+    {
+        var parameters = new DialogParameters
+        {
+            {"Role", role}
+        };
+        
+        var dialog = await DialogService.ShowAsync<EditRole>($"Edit {role?.Name}", parameters, _defaultDialogOptions);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            SetRoles();
+            //StateHasChanged();
+        }
     }
 
     public void Dispose()

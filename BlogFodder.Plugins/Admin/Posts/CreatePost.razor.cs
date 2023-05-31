@@ -21,10 +21,10 @@ using PostPluginEditor = BlogFodder.Plugins.Admin.Posts.Dialogs.PostPluginEditor
 
 namespace BlogFodder.Plugins.Admin.Posts;
 
-public partial class CreatePost : ComponentBase
+public partial class CreatePost : ComponentBase, IDisposable
 {
     [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
-    [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
+    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] public IDialogService Dialog { get; set; } = default!;
     [Inject] public IMediator Mediator { get; set; } = default!;
@@ -42,13 +42,15 @@ public partial class CreatePost : ComponentBase
     private List<Category> Categories { get; set; } = new();
     private Category? SelectedCategory { get; set; }
     private IEnumerable<Category> SelectedCategories { get; set; } = new HashSet<Category>();
+    private BlogFodderDbContext? DbContext { get; set; }
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private const string DefaultDropZoneSelector = "plugins";
     private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
-    private DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
+    private readonly DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
 
     protected override async Task OnInitializedAsync()
     {
+        DbContext = await DbContextFactory.CreateDbContextAsync();
         Categories = await DbContext.Categories.ToListAsync();
 
         // See if this is an edit or not
@@ -329,5 +331,10 @@ public partial class CreatePost : ComponentBase
                 Errors = result.Messages.ErrorMessagesToList().ToArray();
             }
         }
+    }
+
+    public void Dispose()
+    {
+        DbContext?.Dispose();
     }
 }

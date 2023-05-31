@@ -1,0 +1,113 @@
+@using BlogFodder.Core.Membership.Models
+@using MediatR
+@using Microsoft.EntityFrameworkCore
+@using BlogFodder.Core.Data
+@implements IDisposable
+
+<MudDialog>
+    <DialogContent>
+        @if (Errors.Length > 0)
+        {
+            <MudAlert Severity="Severity.Error" Class="my-2">
+                @foreach (var error in Errors)
+                {
+                    <MudText>@error</MudText>
+                }
+            </MudAlert>
+        }
+        <MudForm Model="@User" @ref="@Form" @bind-Errors="@Errors" ValidationDelay="0">
+            <MudGrid Class="pb-4">
+                <MudItem xs="12">
+                    <MudTextField Label="Username" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  @bind-Value="User!.UserName" For="@(() => User!.UserName)"/>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  @bind-Value="User!.Email" For="@(() => User!.Email)"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSelect MultiSelection="true" @bind-Value="SelectedCategory" ToStringFunc="@_roleToName" @bind-SelectedValues="SelectedRoles" T="Role" Label="Roles" AdornmentIcon="@Icons.Material.Filled.Search" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var role in Roles.OrderBy(x => x.Name))
+                        {
+                            <MudSelectItem T="Role" Value="@role">@role.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton Variant="Variant.Filled" OnClick="@(SubmitForm)" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">Save</MudButton>
+                </MudItem>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [Parameter]
+    public User? User { get; set; } = new();
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Inject] public IMediator Mediator { get; set; } = default!;
+    
+    [Inject]
+    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
+    
+    private Role? SelectedCategory { get; set; }
+    private IEnumerable<Role> SelectedRoles { get; set; } = new HashSet<Role>();
+    private List<Role> Roles { get; set; } = new();
+    private MudForm Form { get; set; } = default!;
+    private string?[] Errors { get; set; } = Array.Empty<string>();
+    private BlogFodderDbContext? DbContext { get; set; }
+    private readonly Func<Role, string> _roleToName = p => p.Name ?? "Missing Category Name";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        DbContext = await DbContextFactory.CreateDbContextAsync();
+        Roles = await DbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToListAsync();
+        if (User != null)
+        {
+            SelectedRoles = User.UserRoles.Select(x => x.Role);
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        // Create a set of the selected role Ids for easier comparison
+        var selectedRoleIds = new HashSet<Guid>(SelectedRoles.Select(role => role.Id));
+
+        // Remove user roles that are not in the selected roles
+        User.UserRoles.RemoveAll(userRole => !selectedRoleIds.Contains(userRole.Role.Id));
+
+        // Add new roles that the user did not previously have
+        foreach (var role in SelectedRoles)
+        {
+            if (User.UserRoles.All(userRole => userRole.Role.Id != role.Id))
+            {
+                User.UserRoles.Add(new UserRole { User = User, Role = role });
+            }
+        }
+
+        try
+        {
+            DbContext?.Users.Update(User);
+            await DbContext?.SaveChangesAsync()!;
+        }
+        catch (Exception ex)
+        {
+            // Log the error
+            Errors = new[] { ex.Message };
+            return;
+        }
+        
+        MudDialog.Close(DialogResult.Ok(User));
+    }
+
+    public void Dispose()
+    {
+        DbContext?.Dispose();
+    }
+
+}

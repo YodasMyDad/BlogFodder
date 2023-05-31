@@ -18,7 +18,7 @@
             }
             else
             {
-                <img src="@Settings.Logo!.Url?width=24" alt="@Settings.SiteName Logo" width="24" height="24">   
+                <img src="@Settings.Logo!.Url?width=24" alt="@Settings.SiteName Logo" width="24" height="24">
             }
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnavigation" aria-controls="mainnavigation" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,15 +38,17 @@
                             <ul class="dropdown-menu">
                                 @foreach (var category in Categories)
                                 {
-                                    <li><a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))">@category.Name</a></li>   
+                                    <li>
+                                        <a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))">@category.Name</a>
+                                    </li>
                                 }
                             </ul>
-                        </li>                        
+                        </li>
                     }
                     else
                     {
                         <li class="nav-item">
-                            <NavLink class="nav-link" href="@topnav.Link" @onclick="@(() => GoTo(topnav))">@topnav.Name</NavLink>   
+                            <NavLink class="nav-link" href="@topnav.Link" @onclick="@(() => GoTo(topnav))">@topnav.Name</NavLink>
                         </li>
                     }
                 }
@@ -55,38 +57,56 @@
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                 <button class="btn btn-primary" type="submit">Search</button>
             </form>
-            @*<ul class="navbar-nav my-3 my-lg-0">
-                <li class="nav-item dropdown">
-                    <a href="#" class="mt-1 ms-lg-4 text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
-                        <span class="d-lg-none">Username</span> 
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">New project...</a></li>
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Sign out</a></li>
+            <AuthorizeView>
+                <Authorized Context="authState">
+                    <ul class="navbar-nav my-3 my-lg-0">
+                        <li class="nav-item dropdown">
+                            <a href="#" class="mt-1 ms-lg-4 text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                                <span class="d-lg-none">Username</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                @if (authState.User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="#">Only Admin</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">Only Admin</a>
+                                    </li>
+                                }
+                                <li>
+                                    <a class="dropdown-item" href="#">Profile</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">Sign out</a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
-                </li>
-            </ul>*@
+                </Authorized>
+            </AuthorizeView>
         </div>
     </div>
 </nav>
 
 @code {
-    [Inject] 
+
+    [Inject]
     public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-    
+
     [Inject]
     public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
-    
+
     [Inject]
     public IMediator Mediator { get; set; } = default!;
-    
+
     private SiteSettings Settings { get; set; } = default!;
     private List<Category> Categories { get; set; } = new();
     private BlogFodderDbContext DbContext { get; set; } = default!;
@@ -95,9 +115,8 @@
     {
         DbContext = await DbContextFactory.CreateDbContextAsync();
         Categories = await DbContext.Categories.AsNoTracking().ToListAsync();
-        
+
         Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
-        
     }
 
     private void GoTo(SiteNavigationItem item)

@@ -12,10 +12,10 @@ using MudBlazor;
 
 namespace BlogFodder.Plugins.Admin.Categories;
 
-public partial class CreateCategory : ComponentBase
+public partial class CreateCategory : ComponentBase, IDisposable
 {
     [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
-    [Inject] public BlogFodderDbContext DbContext { get; set; } = default!;
+    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] public IMediator Mediator { get; set; } = default!;
     [Inject] public ProviderService ProviderService { get; set; } = default!;
@@ -26,12 +26,15 @@ public partial class CreateCategory : ComponentBase
     private MudForm Form { get; set; } = default!;
     private CreateUpdateCategoryCommandValidator CommandValidator { get; set; } = new();
     private string?[] Errors { get; set; } =  Array.Empty<string>();
+    private BlogFodderDbContext? DbContext { get; set; }
     
     protected override void OnInitialized()
     {
         // See if this is an edit or not
         if (Id != null)
         {
+            DbContext = DbContextFactory.CreateDbContext();
+            
             // Yes, should probably be in a service or Mediatr call
             var dbCategory = DbContext.Categories
                 .Include(x => x.SocialImage)
@@ -109,5 +112,10 @@ public partial class CreateCategory : ComponentBase
                 Errors = result.Messages.ErrorMessagesToList().ToArray();
             }
         }
+    }
+
+    public void Dispose()
+    {
+        DbContext?.Dispose();
     }
 }

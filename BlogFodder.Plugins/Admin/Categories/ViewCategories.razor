@@ -10,7 +10,7 @@
 @implements IDisposable
 <PageTitle>View Categories</PageTitle>
 
-<MudTable Items="@Categories" Hover="true" OnRowClick="RowClickEvent" T="Category">
+<MudTable Items="@Categories" Hover="true" OnRowClick="RowClickEvent" T="Category" RowClass="rowpointer">
     <HeaderContent>
         <MudTh>Name</MudTh>
         <MudTh>Date Updated</MudTh>
