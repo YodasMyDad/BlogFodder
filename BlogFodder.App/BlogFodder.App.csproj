@@ -44,6 +44,12 @@
       <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\ICON-LICENSE" />
       <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\README.md" />
       <_ContentIncludedByDefault Remove="Pages\Admin\Dialogs\ContentItemEditor.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Posts\CreatePost.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Posts\Dialogs\ContentItemEditor.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Posts\Dialogs\EditorPluginSelection.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Posts\Dialogs\PostPluginEditor.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Posts\ViewPosts.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Settings\SiteSettings.razor" />
     </ItemGroup>
 
     <ItemGroup>
@@ -51,7 +57,23 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Pages\Admin\Posts\Dialogs\ContentItemEditor.razor" />
+      <Content Remove="Pages\Account\LoginWith2fa.cshtml" />
+      <Content Remove="Pages\Account\LoginWithRecoveryCode.cshtml" />
+      <Content Remove="Pages\Account\Manage\Disable2fa.cshtml" />
+      <Content Remove="Pages\Account\Manage\TwoFactorAuthentication.cshtml" />
+      <Content Remove="Pages\Account\Manage\ShowRecoveryCodes.cshtml" />
+      <Content Remove="Pages\Account\Manage\GenerateRecoveryCodes.cshtml" />
+      <Content Remove="Pages\Account\Manage\EnableAuthenticator.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Pages\Account\LoginWith2fa.cshtml.cs" />
+      <Compile Remove="Pages\Account\LoginWithRecoveryCode.cshtml.cs" />
+      <Compile Remove="Pages\Account\Manage\Disable2fa.cshtml.cs" />
+      <Compile Remove="Pages\Account\Manage\TwoFactorAuthentication.cshtml.cs" />
+      <Compile Remove="Pages\Account\Manage\ShowRecoveryCodes.cshtml.cs" />
+      <Compile Remove="Pages\Account\Manage\GenerateRecoveryCodes.cshtml.cs" />
+      <Compile Remove="Pages\Account\Manage\EnableAuthenticator.cshtml.cs" />
     </ItemGroup>
 
 </Project>

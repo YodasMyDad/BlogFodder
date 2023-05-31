@@ -1,14 +1,12 @@
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
-using BlogFodder.Core.Settings;
 using BlogFodder.Core.Settings.Commands;
 using BlogFodder.Core.Settings.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Options;
 
 namespace BlogFodder.App.Pages.Account
 {

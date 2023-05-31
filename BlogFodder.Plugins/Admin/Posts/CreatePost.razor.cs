@@ -1,5 +1,4 @@
 using System.Text.Json;
-using BlogFodder.App.Pages.Admin.Posts.Dialogs;
 using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
@@ -11,15 +10,16 @@ using BlogFodder.Core.Posts.Commands;
 using BlogFodder.Core.Posts.Models;
 using BlogFodder.Core.Posts.Validation;
 using BlogFodder.Core.Providers;
+using BlogFodder.Plugins.Admin.Posts.Dialogs;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Utilities;
-using PostPluginEditor = BlogFodder.App.Pages.Admin.Posts.Dialogs.PostPluginEditor;
+using PostPluginEditor = BlogFodder.Plugins.Admin.Posts.Dialogs.PostPluginEditor;
 
-namespace BlogFodder.App.Pages.Admin.Posts;
+namespace BlogFodder.Plugins.Admin.Posts;
 
 public partial class CreatePost : ComponentBase
 {

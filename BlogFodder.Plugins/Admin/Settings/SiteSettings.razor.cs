@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 
-namespace BlogFodder.App.Pages.Admin.Settings;
+namespace BlogFodder.Plugins.Admin.Settings;
 
 public partial class SiteSettings : ComponentBase
 {

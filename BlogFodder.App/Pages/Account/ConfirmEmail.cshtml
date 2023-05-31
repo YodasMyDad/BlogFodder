@@ -6,31 +6,37 @@
 }
 @section Head {
     <title>Email Confirmation</title>
-    <meta name="description" content="" />
 }
 
-<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-
-        @*<component type="typeof(LogoImage)" param-Classes="@("mx-auto h-16 w-16 fill-current text-indigo-600")" render-mode="ServerPrerendered" />*@
-
-        <h2 class="mt-4 text-center text-2xl font-bold text-gray-900">
-            Email Confirmation
-        </h2>
+<div class="d-flex flex-column justify-content-center py-5 bg-light min-vh-100">
+    <div class="mx-auto w-100" style="max-width: 28rem;">
+        <div class="text-center">
+            @if (Model.Settings?.LogoId == null)
+            {
+                <img src="/img/at.svg" class="text-primary" alt="@Model.Settings?.SiteName Logo" width="50" height="50">
+            }
+            else
+            {
+                <img src="@Model.Settings.Logo!.Url?width=50" alt="@Model.Settings.SiteName Logo" width="50" height="50">   
+            }
+        </div>
+        <h3 class="mt-4 text-center">
+            Email confirmation
+        </h3>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+    <div class="mt-3 mx-auto w-100" style="max-width: 28rem;">
+        <div class="bg-white p-5 shadow rounded">
             <div>
                 @if (Model.Result.Success)
                 {
-                    <p class="font-medium text-green-400 text-base text-center">@Html.Raw(Model.Result.Messages)</p>
+                    <p class="text-success text-base text-center fw-bold">@Html.Raw(Model.Result.Messages)</p>
                 }
                 else
                 {
                     @foreach (var error in Model.Result.Messages.SuccessMessages())
                     {
-                        <p class="font-medium text-red-400 text-base text-center">@error.Message</p>
+                        <p class="text-danger text-base text-center fw-bold">@error.Message</p>
                     }
                 }
             </div>

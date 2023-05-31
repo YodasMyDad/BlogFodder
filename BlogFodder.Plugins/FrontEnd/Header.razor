@@ -38,7 +38,7 @@
                             <ul class="dropdown-menu">
                                 @foreach (var category in Categories)
                                 {
-                                    <li><a class="dropdown-item" href="/c/@category.Url">@category.Name</a></li>   
+                                    <li><a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))">@category.Name</a></li>   
                                 }
                             </ul>
                         </li>                        

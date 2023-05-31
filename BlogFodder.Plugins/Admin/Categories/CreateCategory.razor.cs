@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 
-namespace BlogFodder.App.Pages.Admin.Categories;
+namespace BlogFodder.Plugins.Admin.Categories;
 
 public partial class CreateCategory : ComponentBase
 {

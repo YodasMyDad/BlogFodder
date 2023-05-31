@@ -25,28 +25,10 @@
 </MudLayout>
 
 @code {
-    RenderFragment AdminNavigation => _adminNavigation?.ChildContent!;
-    RenderFragment AdminTopBar => _adminTopBar?.ChildContent!;
-    AdminNavigation? _adminNavigation;
-    AdminTopBar? _adminTopBar;
     bool _drawerOpen = true;
-
-    public void SetAdminNavigation(AdminNavigation? adminNavigation)
-    {
-        _adminNavigation = adminNavigation;
-        Update();
-    }
-
-    public void SetAdminTopBar(AdminTopBar? adminTopBar)
-    {
-        _adminTopBar = adminTopBar;
-        Update();
-    }
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
     }
-
-    public void Update() => StateHasChanged();
 }

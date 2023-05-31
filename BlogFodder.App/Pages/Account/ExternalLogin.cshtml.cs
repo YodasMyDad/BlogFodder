@@ -41,7 +41,7 @@ namespace BlogFodder.App.Pages.Account
             return new ChallengeResult(provider, properties);
         }
 
-        public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> OnGetCallbackAsync(string? returnUrl = null, string? remoteError = null)
         {
             ExternalLoginCommand.ReturnUrl = returnUrl ?? Url.Content("~/");
             if (remoteError != null)
@@ -60,7 +60,7 @@ namespace BlogFodder.App.Pages.Account
 
             if (Result.Success)
             {
-                return LocalRedirect(Result.NavigateToUrl);
+                return LocalRedirect(Result.NavigateToUrl!);
             }
 
             return Page();

@@ -1,7 +1,8 @@
 @using BlogFodder.Core.Posts.Models
 @using Humanizer
+@using BlogFodder.Core.Extensions
 
-<a href="/p/@Post.Url" class="card text-decoration-none h-100">
+<a href="@Urls.Create(Post.Url, typeof(Post))" class="card text-decoration-none h-100">
     <img src="@Post.FeaturedImage?.Url?width=400&height=215&mode=crop" class="card-img-top" alt="@Post.Name">
     <div class="card-body">
         <h5 class="card-title">@Post.Name</h5>

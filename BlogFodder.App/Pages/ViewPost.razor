@@ -88,7 +88,7 @@ else
         DbContext = await DbContextFactory.CreateDbContextAsync();
         Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
         CurrentDomain = HttpContextAccessor.HttpContext?.Request.Host.Value;
-        CurrentUrl = $"{CurrentDomain}/p/{Slug}";
+        CurrentUrl = $"{CurrentDomain}{Urls.Create(Slug, typeof(Post))}";
         if (!Slug.IsNullOrWhiteSpace())
         {
             var post = DbContext.Posts

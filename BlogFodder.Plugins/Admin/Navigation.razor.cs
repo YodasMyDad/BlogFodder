@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using MudBlazor;
 
-namespace BlogFodder.Plugins.Backoffice;
+namespace BlogFodder.Plugins.Admin;
 
 public partial class Navigation : ComponentBase
 {
