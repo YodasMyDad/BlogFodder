@@ -85,8 +85,14 @@ public class BlogFodderSignInManager : SignInManager<User>
             // If the user successfully signed in, add them to a role.
             if (signInResult.Succeeded)
             {
-                // Check if the role exists, create if not.
+                // Firstly, check to see if this email address is meant to be a default admin
                 var roleName = _settings.Value.NewUserStartingRole;
+                if (_settings.Value.AdminEmailAddresses.Any() && _settings.Value.AdminEmailAddresses.Contains(user.Email!))
+                {
+                    roleName = Constants.Roles.AdminRoleName;
+                }
+
+                // Check if the role exists, create if not.
                 if (roleName != null)
                 {
                     var roleExists = await _roleManager.RoleExistsAsync(roleName);
@@ -101,6 +107,12 @@ public class BlogFodderSignInManager : SignInManager<User>
                     {
                         // Handle failure to add user to role here.
                         _logger.LogError("Unable to add {UserUserName} to the role {RoleName}", user.UserName, roleName);
+                    }
+                    else
+                    {
+                        // Sign in the user again to update their claims.
+                        await base.SignOutAsync();
+                        signInResult = await base.ExternalLoginSignInAsync(loginProvider, providerKey, isPersistent, bypassTwoFactor);
                     }
                 }
                 else

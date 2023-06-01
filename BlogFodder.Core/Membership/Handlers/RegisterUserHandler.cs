@@ -15,6 +15,7 @@ namespace BlogFodder.Core.Membership.Handlers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IOptions<BlogFodderSettings> _settings;
         private readonly IUserStore<User> _userStore;
         private readonly IUserEmailStore<User> _userEmailStore;
         private readonly RoleManager<Role> _roleManager;
@@ -28,7 +29,7 @@ namespace BlogFodder.Core.Membership.Handlers
                                 ILogger<RegisterUserHandler> logger,
                                 SignInManager<User> signInManager,
                                 IOptions<BlogFodderSettings> gabSettings,
-                                IMediator mediator, RoleManager<Role> roleManager)
+                                IMediator mediator, RoleManager<Role> roleManager, IOptions<BlogFodderSettings> settings)
         {
             _userManager = userManager;
             _userEmailStore = userEmailStore;
@@ -38,6 +39,7 @@ namespace BlogFodder.Core.Membership.Handlers
             _blogFodderSettings = gabSettings.Value;
             _mediator = mediator;
             _roleManager = roleManager;
+            _settings = settings;
         }
 
         public async Task<AuthenticationResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -53,6 +55,10 @@ namespace BlogFodder.Core.Membership.Handlers
                 _logger.LogInformation("{RequestUsername} created a new account", request.Username);
 
                 var startingRoleName = _blogFodderSettings.NewUserStartingRole ?? Constants.Roles.StandardRoleName;
+                if (_settings.Value.AdminEmailAddresses.Any() && _settings.Value.AdminEmailAddresses.Contains(newUser.Email!))
+                {
+                    startingRoleName = Constants.Roles.AdminRoleName;
+                }
                 
                 // Check the starting role exists
                 var roleExist = await _roleManager.RoleExistsAsync(startingRoleName);

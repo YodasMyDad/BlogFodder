@@ -3,6 +3,7 @@ namespace BlogFodder.Core.Settings;
 public class BlogFodderSettings
 {
     public string? NewUserStartingRole { get; set; }
+    public List<string> AdminEmailAddresses { get; set; } = new();
     public string? UploadFolderName { get; set; }
     public long MaxUploadFileSizeInBytes { get; set; }
     public int MaxImageSizeInPixels { get; set; }
