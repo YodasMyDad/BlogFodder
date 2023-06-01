@@ -1,5 +1,6 @@
-﻿@*@page "/account/manage/profile"
-@layout Gab.Web.Pages.Shared.EmptyLayout
+﻿@page "/account/manage/profile"
+@layout MainLayout
+<PageTitle>Edit Profile</PageTitle>
 
 <LeftNavAndTopNavPanel>
     <LeftNavigation>
@@ -10,68 +11,62 @@
 
             <EditForm Model="@UpdateProfileCommand" OnValidSubmit="@HandleValidSubmit">
                 <FluentValidationValidator />
-                $1$<ValidationSummary />#1#
+                <ValidationSummary />
 
-                <div class="space-y-8 divide-y divide-gray-200">
-                    <div>
-                        <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="my-4">
+                    <div class="mb-3">
+                        <FormRow Label="Username">
+                            <InputText type="text" @bind-Value="UpdateProfileCommand.User.UserName" class="form-control" />
+                            <ValidationMessage For="@(() => UpdateProfileCommand.User.UserName)" />
+                        </FormRow>
 
-                            <FormRow Label="Username">
-                                <InputText type="text" @bind-Value="UpdateProfileCommand.User.UserName" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
-                                <ValidationMessage For="@(() => UpdateProfileCommand.User.UserName)" />
+                        @if (!UserIsExternalLogin)
+                        {
+                            <FormRow Label="Email Address">
+                                <InputText type="text" @bind-Value="UpdateProfileCommand.User.Email" class="form-control" />
+                                <ValidationMessage For="@(() => UpdateProfileCommand.User.Email)" />
                             </FormRow>
 
-                            @if (!UserIsExternalLogin)
-                            {
-                                <FormRow Label="Email Address">
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.User.Email" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
-                                    <ValidationMessage For="@(() => UpdateProfileCommand.User.Email)" />
-                                </FormRow>
+                        }
 
-                            }
-                            <FormRow Label="Phone Number">
-                                <InputText type="text" @bind-Value="UpdateProfileCommand.User.PhoneNumber" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
-                                <ValidationMessage For="@(() => UpdateProfileCommand.User.PhoneNumber)" />
-                            </FormRow>
-
-                            <FormRow Label="Profile Image">
-                                <div class="flex">
-                                    @if (UpdateProfileCommand.User.ProfileImage != null)
-                                    {
-                                        <div class="mr-2">
-                                            <img src="@UpdateProfileCommand.User.ProfileImage.Url?width=100" alt="Profile Image" />
-                                        </div>
-                                    }
-                                    <div>
-                                        <GabFileUpload @bind-Value="UpdateProfileCommand.ProfileImageUpload" ImagesOnly="true" MaxAllowedFiles="1" />
-                                        <ValidationMessage For="@(() => UpdateProfileCommand.ProfileImageUpload)" />
+                        <FormRow Label="Profile Image">
+                            <div class="d-flex">
+                                @if (UpdateProfileCommand.User.ProfileImage != null)
+                                {
+                                    <div class="me-2">
+                                        <img src="@UpdateProfileCommand.User.ProfileImage.Url?width=100" alt="Profile Image" class="img-thumbnail" />
                                     </div>
+                                }
+                                <div>
+                                    @*<GabFileUpload @bind-Value="UpdateProfileCommand.ProfileImageUpload" ImagesOnly="true" MaxAllowedFiles="1" />*@
+                                    <ValidationMessage For="@(() => UpdateProfileCommand.ProfileImageUpload)" />
                                 </div>
-                            </FormRow>
-                        </div>
+                            </div>
+                        </FormRow>
                     </div>
+
                     @if (!UserIsExternalLogin)
                     {
-                        <div class="pt-8">
+                        <div class="mt-3">
                             <div>
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                <h3 class="h4 fw-normal">
                                     Change Password
                                 </h3>
                             </div>
-                            <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                            <div class="mt-3">
 
                                 <FormRow Label="Current Password">
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.CurrentPassword" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                    <InputText type="text" @bind-Value="UpdateProfileCommand.CurrentPassword" class="form-control" />
                                     <ValidationMessage For="@(() => UpdateProfileCommand.CurrentPassword)" />
                                 </FormRow>
 
                                 <FormRow Label="New Password">
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.NewPassword" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                    <InputText type="text" @bind-Value="UpdateProfileCommand.NewPassword" class="form-control" />
                                     <ValidationMessage For="@(() => UpdateProfileCommand.NewPassword)" />
                                 </FormRow>
 
                                 <FormRow Label="Confirm Password">
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.NewPasswordConfirmation" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                    <InputText type="text" @bind-Value="UpdateProfileCommand.NewPasswordConfirmation" class="form-control" />
                                     <ValidationMessage For="@(() => UpdateProfileCommand.NewPasswordConfirmation)" />
                                 </FormRow>
                             </div>
@@ -79,12 +74,12 @@
                         }
                 </div>
 
-                <div class="pt-5">
-                    <div class="flex justify-end">
+                <div class="pt-3">
+                    <div class="d-flex justify-content-end">
                         <GabSubmitButton Text="Save Profile" Loading="Loading" />
                     </div>
                 </div>
             </EditForm>
         </CenterWhitePanel>
     </MainContentSection>
-</LeftNavAndTopNavPanel>*@
+</LeftNavAndTopNavPanel>

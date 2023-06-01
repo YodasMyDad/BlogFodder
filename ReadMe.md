@@ -8,13 +8,11 @@ The platform is built with Razor Class Libraries and Razor Components and has a 
 
 A fully working blogging engine and ready for production. This is a work in progress and I'm still trying to get it to a beta stage. I'm posting this publicly as I'm looking for other Blazor enthusiasts to get involved and help shape the project further.
 
-### Progress
+### Get It Running
 
-Right now, the plugin system is taking shape, everything you see is 'pluggable'. From the content items on a post, to the post preview, settings the works, the admin section itself. 
+Add your email address (Or a test email address) to the appSettings 'AdminEmailAddresses' list. Any email address in this list, when the user registers they are added to the Admin role so you can access the Admin section.
 
-It's very simple right now, it has no authentication, and is just a simple front end that lists the posts made, and you can view an individual post. A post has content items, each of those is a plugin, and has a ContentPlugin to render on the front end. If you look at the code it should make sense, or read below in the plugin section.
-
-To get it running, just make sure BlogFodder.App is set as the Start Up project, and you have restored all the nuget packages.
+Make sure BlogFodder.App is the starting project, and just run it. Then register a new user, with the email address you added to the appSettings and you will now be able to access the Admin section.
 
 ### Current Plugins
 

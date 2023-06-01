@@ -1,13 +1,15 @@
-﻿/*using BlogFodder.Core;
+﻿using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
+using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 
 namespace BlogFodder.App.Pages.Account.Manage
 {
@@ -15,14 +17,11 @@ namespace BlogFodder.App.Pages.Account.Manage
     public partial class UserProfile : ComponentBase
     {
         [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-        [Inject] public IHeadElementHelper HeadElementHelper { get; set; }
         [Inject] public IMediator Mediator { get; set; }
         [Inject] public IDbContextFactory<BlogFodderDbContext> GabDbContext { get; set; }
-        [Inject] public IMapper Mapper { get; set; }
-        [Inject] public IUiNotificationService NotificationService { get; set; }
+        [Inject] private ISnackbar Snackbar { get; set; } = default!;
         [Inject] public NavigationManager NavigationManager { get; set; }
-
-        [Parameter] public CreateUpdateUserCommand UpdateProfileCommand { get; set; } = new CreateUpdateUserCommand();
+        [Parameter] public CreateUpdateUserCommand UpdateProfileCommand { get; set; } = new();
 
         private User? CurrentUser { get; set; }
         private bool Loading { get; set; }
@@ -32,7 +31,6 @@ namespace BlogFodder.App.Pages.Account.Manage
         {
             Loading = true;
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
-            await HeadElementHelper.SetTitleAsync("Edit Profile").ConfigureAwait(false);
             await using var context = await GabDbContext.CreateDbContextAsync();
             await SetCuUserCommand(authState.User.GetUserId(), context).ConfigureAwait(false);
 
@@ -42,10 +40,14 @@ namespace BlogFodder.App.Pages.Account.Manage
             NavigationManager.TryGetQueryString("refresh", out refresh);
             if (refresh)
             {
-                var tempUimessages = CurrentUser.ExtendedData.GetTempUiMessages();
-                if (tempUimessages?.Any() == true)
+                var tempMessages = CurrentUser?.ExtendedData.GetTempUiMessages();
+                var resultMessages = tempMessages as ResultMessage[] ?? tempMessages?.ToArray();
+                if (resultMessages?.Any() == true)
                 {
-                    NotificationService.ShowNotification(tempUimessages);
+                    foreach (var message in resultMessages)
+                    {
+                        Snackbar.Add(message.Message, Severity.Info);   
+                    }
                 }
             }
 
@@ -57,17 +59,15 @@ namespace BlogFodder.App.Pages.Account.Manage
             CurrentUser = await context.Users.Include(x => x.ProfileImage).FirstOrDefaultAsync(x => x.Id == userId).ConfigureAwait(false);
             if (CurrentUser != null)
             {
-                UpdateProfileCommand = CurrentUser.ToCuCommand(Mapper);
-                UserIsExternalLogin = CurrentUser.ExtendedData.Get<bool>(Constants.ExtendedDataKeys.IsExternalLogin);
+                var logins = context.UserLogins.AsNoTracking().Where(l => l.UserId == userId);
+                UpdateProfileCommand.User = CurrentUser;
+                UserIsExternalLogin = logins.Any();
             }
         }
 
         private async void HandleValidSubmit()
         {
             Loading = true;
-
-            // Set the id as it will be missing and we don't want the user fiddling it via a hidden form field
-            UpdateProfileCommand.User.Id = CurrentUser.Id;
 
             // Set email if external login as it's not shown on the page
             if (UserIsExternalLogin)
@@ -86,28 +86,31 @@ namespace BlogFodder.App.Pages.Account.Manage
             }
             else
             {
-                using var context = GabDbContext.CreateDbContext();
+                await using var context = await GabDbContext.CreateDbContextAsync();
                 await SetCuUserCommand(CurrentUser.Id, context).ConfigureAwait(false);
 
                 if (result.Messages.Count > 0)
                 {
-                    NotificationService.ShowNotification(result.Messages);
+                    foreach (var resultMessage in result.Messages)
+                    {
+                        Snackbar.Add(resultMessage.Message, Severity.Info);   
+                    }
                 }
                 else
                 {
                     if (result.Success)
                     {
-                        NotificationService.ShowSuccess("Updated successfully");
+                        Snackbar.Add("Updated successfully", Severity.Success);
                     }
                     else
                     {
-                        NotificationService.ShowError("There was an issue updating, please check the logs");
+                        Snackbar.Add("There was an issue updating, please check the logs", Severity.Error);
                     }
                 }
             }
 
             Loading = false;
-            await InvokeAsync(() => StateHasChanged()).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
     }
-}*/
+}
