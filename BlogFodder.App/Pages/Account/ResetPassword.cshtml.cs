@@ -27,7 +27,7 @@ namespace BlogFodder.App.Pages.Account
         
         public SiteSettings? Settings { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string? code = null)
+        public async Task<IActionResult> OnGetAsync(string email, string? code = null)
         {
             if (code == null)
             {
@@ -35,6 +35,7 @@ namespace BlogFodder.App.Pages.Account
             }
             Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
             ResetPasswordCommand.Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            ResetPasswordCommand.Email = email;
             return Page();
         }
 

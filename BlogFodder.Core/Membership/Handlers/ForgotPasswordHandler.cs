@@ -38,7 +38,7 @@ namespace BlogFodder.Core.Membership.Handlers
                 if (await _userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false) == false)
                 {
                     result.Success = false;
-                    result.AddMessage("Please check your email to confirm your account", ResultMessageType.Error);
+                    result.AddMessage("Please check your email to confirm your account", ResultMessageType.Success);
 
                     // Resend confirmation email
                     await _mediator.Send(new SendEmailConfirmationCommand { ReturnUrl = "~/", User = user }, cancellationToken).ConfigureAwait(false);
@@ -49,7 +49,7 @@ namespace BlogFodder.Core.Membership.Handlers
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = _httpContextAccessor.ToAbsoluteUrl(Constants.Urls.Account.ResetPassword, new { code = code });
+                var callbackUrl = _httpContextAccessor.ToAbsoluteUrl(Constants.Urls.Account.ResetPassword, new { code = code, email = request.Email });
 
                 var paragraphs = new List<string> { $"Please reset your password by <a class=\"underline\" href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>." };
                 await _providerService.EmailProvider!.SendEmailWithTemplateAsync(request.Email, "Reset Password", paragraphs).ConfigureAwait(false);
