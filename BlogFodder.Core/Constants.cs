@@ -47,7 +47,7 @@ public static class Constants
             public const string ForgotPassword = "/account/forgotpassword";
             public const string ForgotPasswordConfirmation = "/account/forgotpasswordconfirmation";
             public const string Login = "/account/login";
-            public const string LoginWith2fa = "/account/loginwith2fa";
+            public const string LoginWith2Fa = "/account/loginwith2fa";
             public const string LoginWithRecoveryCode = "/account/loginwithrecoverycode";
             public const string Logout = "/account/logout";
             public const string Register = "/account/register";

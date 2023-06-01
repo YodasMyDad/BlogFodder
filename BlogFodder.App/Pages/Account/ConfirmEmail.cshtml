@@ -33,16 +33,18 @@
                 {
                     @foreach (var message in Model.Result.Messages.SuccessMessages())
                     {
-                        <p class="text-success text-base text-center fw-bold">@Html.Raw(message.Message)</p>
+                        <p class="text-success fs-5 text-center fw-bold">@Html.Raw(message.Message)</p>
                     }
                     
-                    <p>TODO Login button</p>
+                    <div class="d-grid">
+                        <a href="@Constants.Urls.Account.Login" class="btn btn-success btn-lg">Log In</a>
+                    </div>
                 }
                 else
                 {
                     @foreach (var error in Model.Result.Messages.ErrorMessages())
                     {
-                        <p class="text-danger text-base text-center fw-bold">@error.Message</p>
+                        <p class="text-danger fs-5 text-center fw-bold">@error.Message</p>
                     }
                 }
             </div>

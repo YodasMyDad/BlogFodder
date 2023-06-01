@@ -2,12 +2,16 @@ using Blazored.Toast;
 using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
+using BlogFodder.Core.Membership;
+using BlogFodder.Core.Membership.Models;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Settings;
 using BlogFodder.Core.Shared.Middleware;
 using BlogFodder.Core.Shared.Services;
 using BlogFodder.Plugins;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Extensions;
 using Serilog;
@@ -25,6 +29,8 @@ builder.Services.AddServerSideBlazor(c => c.DetailedErrors = true);
 builder.Services.AddServerSideBlazor();
 #endif
 
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>();
+
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddImageSharp();
@@ -33,7 +39,7 @@ builder.Services.AddAuthentication();
 builder.Services.AddScoped<ExtensionManager>();
 builder.Services.AddScoped<ProviderService>();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
-
+builder.Services.AddScoped<SignInManager<User>, BlogFodderSignInManager>();
 builder.Services.AddMudServicesWithExtensions();
 builder.Services.AddBlazoredToast();
 

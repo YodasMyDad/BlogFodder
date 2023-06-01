@@ -69,10 +69,7 @@
                                 @if (authState.User.IsInRole("Admin"))
                                 {
                                     <li>
-                                        <a class="dropdown-item" href="#">Only Admin</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">Only Admin</a>
+                                        <a class="dropdown-item" @onclick="@(() => NavigationManager.NavigateTo("/admin", forceLoad: true))">Admin</a>
                                     </li>
                                 }
                                 <li>
@@ -82,7 +79,7 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#">Sign out</a>
+                                    <a class="dropdown-item" href="@Constants.Urls.Account.Logout">Sign out</a>
                                 </li>
                             </ul>
                         </li>

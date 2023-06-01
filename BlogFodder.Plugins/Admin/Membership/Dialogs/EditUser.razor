@@ -67,9 +67,11 @@
     {
         DbContext = await DbContextFactory.CreateDbContextAsync();
         Roles = await DbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToListAsync();
+
         if (User != null)
         {
-            SelectedRoles = User.UserRoles.Select(x => x.Role);
+            var userRoleIds = new HashSet<Guid>(User.UserRoles.Select(x => x.Role.Id));
+            SelectedRoles = Roles.Where(role => userRoleIds.Contains(role.Id));
         }
     }
 
