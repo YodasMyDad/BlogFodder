@@ -1,0 +1,17 @@
+@using BlogFodder.Core
+@inject NavigationManager Navigation
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await AuthenticationStateTask;
+
+        if (authenticationState.User.Identity is null || !authenticationState.User.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo(Constants.Urls.Account.Login, true);
+        }
+    }
+}

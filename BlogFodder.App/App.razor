@@ -1,20 +1,31 @@
 ﻿@using BlogFodder.Core.Plugins
-@using BlogFodder.Plugins.Layouts
+@using BlogFodder.Plugins.Admin
 @using MudBlazor.Extensions.Helper
 @inject IJSRuntime JsRuntime
 
 <CascadingAuthenticationState>
-    <Router 
+    <Router
         AppAssembly="@typeof(App).Assembly"
         AdditionalAssemblies="@ExtensionManager.GetAssemblies(x => x.FullName!.StartsWith("BlogFodder.Plugins", StringComparison.OrdinalIgnoreCase))">
         <Found Context="routeData">
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+            </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
         </Found>
         <NotFound>
-            <PageTitle>Not found</PageTitle>
+            <PageTitle>Page  Not found</PageTitle>
             <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
+                <div class="container">
+                    <div class="px-4 py-5 my-5 text-center">
+                        <h1 class="display-5 fw-bold text-body-emphasis">Oh no!</h1>
+                        <div class="col-lg-6 mx-auto">
+                            <p class="lead mb-4">The page you are looking for does not exist.</p>
+                        </div>
+                    </div>
+                </div>
             </LayoutView>
         </NotFound>
     </Router>
