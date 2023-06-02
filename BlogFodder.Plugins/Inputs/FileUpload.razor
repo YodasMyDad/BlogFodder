@@ -1,0 +1,262 @@
+@using System.Linq.Expressions
+@using BlogFodder.Core.Providers
+@using Microsoft.Extensions.Options
+@using System.Security.Claims
+@using BlogFodder.Core.Settings
+
+@if (User != null)
+{
+    <div class="p-3 my-2 border border-2 rounded" style="border-style: dashed; border-color: #e5e7eb;">
+        <div class="text-center">
+            <div class="position-relative">
+                @if (MaxAllowedFiles > 1)
+                {
+                    <InputFile OnChange="OnChange" id="@InputId" class="cursor-pointer position-absolute w-100 h-100 start-0 opacity-0" style="z-index: 10;" multiple/>
+                }
+                else
+                {
+                    <InputFile OnChange="OnChange" id="@InputId" class="cursor-pointer position-absolute w-100 h-100 start-0 opacity-0" style="z-index: 10;"/>
+                }
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="small text-center">
+                    <label for="@InputId" class="text-primary">
+                        @(MaxAllowedFiles > 1 ? "Upload files" : "Upload a file")
+                    </label>
+                </div>
+                <p class="fs-6 text-muted">
+                    @if (ImagesOnly)
+                    {
+                        <text>Image files only</text>
+                    }
+                    else
+                    {
+                        @string.Join(", ", Settings.Value.AllowedFileTypes)
+                    }
+                </p>
+            </div>
+        </div>
+        @if (ShowSpinner)
+        {
+            <div class="d-flex justify-content-center align-items-center">
+                <AnimatedSpinner Classes="h-8 w-8 text-indigo-400"/>
+            </div>
+        }
+
+        @if (!ShowSpinner)
+        {
+            <div class="mt-2">
+                @if (MaxAllowedFiles > 1 && Values.Any())
+                {
+                    @foreach (var file in Values)
+                    {
+                        <div class="d-flex justify-content-between align-items-center py-1 px-2 rounded text-uppercase bg-light text-primary">
+                            <div class="overflow-hidden">
+                                @file.Name
+                            </div>
+                            <div title="Remove Item"
+                                 @onclick="@(() => RemoveValue(file))"
+                                 class="cursor-pointer flex-shrink-0 ms-1 mb-0.5 rounded-circle d-flex align-items-center justify-content-center text-primary" style="height: 20px; width: 20px;">
+                                <span class="visually-hidden">Remove Item</span>
+                                <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+
+                            </div>
+                        </div>
+                    }
+                }
+
+                @if (MaxAllowedFiles <= 1 && Value != null)
+                {
+                    <div class="d-flex justify-content-between align-items-center py-1 px-2 rounded text-uppercase bg-light text-primary">
+                        <div class="overflow-hidden">
+                            @Value.Name
+                        </div>
+                        <div title="Remove Item"
+                             @onclick="@(() => RemoveValue(Value))"
+                             class="cursor-pointer flex-shrink-0 ms-1 mb-0.5 rounded-circle d-flex align-items-center justify-content-center text-primary" style="height: 20px; width: 20px;">
+                            <span class="visually-hidden">Remove Item</span>
+                            <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+
+
+@code {
+
+    [Parameter]
+    public int MaxAllowedFiles { get; set; } = 1; // Single File Initially
+
+    [Parameter]
+    public bool ImagesOnly { get; set; } = false;
+
+    [Parameter]
+    public string InputId { get; set; } = "input-file";
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> AdditionalAttributes { get; set; } = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    [CascadingParameter]
+    private EditContext? CascadedEditContext { get; set; }
+
+    [Parameter]
+    public IBrowserFile? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<IBrowserFile> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<IBrowserFile>>? ValueExpression { get; set; }
+
+    [Parameter]
+    public List<IBrowserFile> Values { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<List<IBrowserFile>> ValuesChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<List<IBrowserFile>>>? ValuesExpression { get; set; }
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    private ProviderService ProviderService { get; set; } = default!;
+
+    [Inject]
+    public IOptions<BlogFodderSettings> Settings { get; set; } = default!;
+
+    private EditContext? _editContext;
+    private FieldIdentifier _fieldIdentifier;
+
+    private ClaimsPrincipal? User { get; set; }
+    private bool ShowSpinner { get; set; }
+
+    private bool IsMultiselect => ValuesExpression != null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _editContext = CascadedEditContext;
+        _fieldIdentifier = IsMultiselect ? FieldIdentifier.Create(ValuesExpression) : FieldIdentifier.Create(ValueExpression);
+        var authState = await AuthenticationStateTask.ConfigureAwait(false);
+        User = authState.User;
+    }
+
+    private async Task OnChange(InputFileChangeEventArgs e)
+    {
+        ShowSpinner = true;
+        if (e.FileCount > MaxAllowedFiles)
+        {
+            Snackbar.Add($"You can only upload {MaxAllowedFiles} files", Severity.Error);
+        }
+        else
+        {
+            if (MaxAllowedFiles > 1)
+            {
+                var files = e.GetMultipleFiles(MaxAllowedFiles);
+
+                try
+                {
+                    var allowedToUseFiles = new List<IBrowserFile>();
+                    foreach (var file in files)
+                    {
+                        var result = ProviderService.StorageProvider?.CanUseFile(file, ImagesOnly).Result;
+                        if (result?.Success == true)
+                        {
+                            allowedToUseFiles.Add(file);
+                        }
+                        else
+                        {
+                            allowedToUseFiles.Clear();
+                            await ClearFiles().ConfigureAwait(false);
+                            if (result?.ErrorMessages != null)
+                            {
+                                foreach (var errorMessage in result.ErrorMessages)
+                                {
+                                    Snackbar.Add(errorMessage, Severity.Error);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    if (allowedToUseFiles.Any())
+                    {
+                        await ValuesChanged.InvokeAsync(allowedToUseFiles).ConfigureAwait(false);
+                        _editContext?.NotifyFieldChanged(_fieldIdentifier);
+                        StateHasChanged();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ClearFiles().ConfigureAwait(false);
+                    Snackbar.Add(ex.Message, Severity.Error);
+                }
+            }
+            else
+            {
+                var result = ProviderService.StorageProvider?.CanUseFile(e.File, ImagesOnly).Result;
+                if (result?.Success == true)
+                {
+                    await ValueChanged.InvokeAsync(e.File).ConfigureAwait(false);
+                    _editContext?.NotifyFieldChanged(_fieldIdentifier);
+                    StateHasChanged();
+                }
+                else
+                {
+                    await ClearFiles().ConfigureAwait(false);
+                    if (result?.ErrorMessages != null)
+                    {
+                        foreach (var errorMessage in result.ErrorMessages)
+                        {
+                            Snackbar.Add(errorMessage, Severity.Error);
+                        }
+                    }
+                }
+            }
+        }
+        ShowSpinner = false;
+    }
+
+    private async Task ClearFiles()
+    {
+        if (IsMultiselect)
+        {
+            await ValuesChanged.InvokeAsync(new List<IBrowserFile>()).ConfigureAwait(false);
+        }
+        else
+        {
+            await ValueChanged.InvokeAsync(default).ConfigureAwait(false);
+        }
+
+        _editContext?.NotifyFieldChanged(_fieldIdentifier);
+    }
+
+    private async Task RemoveValue(IBrowserFile item)
+    {
+        var valueList = Values ?? new List<IBrowserFile>();
+        if (valueList.Contains(item))
+        {
+            valueList.Remove(item);
+            await ValuesChanged.InvokeAsync(valueList).ConfigureAwait(false);
+        }
+        else if (item.Equals(Value))
+        {
+            await ValueChanged.InvokeAsync(default).ConfigureAwait(false);
+        }
+
+        _editContext?.NotifyFieldChanged(_fieldIdentifier);
+    }
+
+}

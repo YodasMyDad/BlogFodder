@@ -56,6 +56,7 @@ public static class Constants
             public const string ResetPassword = "/account/resetpassword";
             public const string ResetPasswordConfirmation = "/account/resetpasswordconfirmation";
             public const string RefreshSignIn = "/account/refreshsignin";
+            public const string UserProfile = "/account/manage/profile";
         }
     }
     
