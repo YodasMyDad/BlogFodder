@@ -8,7 +8,7 @@ namespace BlogFodder.Core.Membership.Validation;
 
 public class UserValidation : BaseFluentValidator<User>
 {
-    public UserValidation(CreateUpdateUserCommand userCommand)
+    public UserValidation()
     {
         RuleFor(p => p.UserName).NotEmpty().WithMessage("You must enter a username");
         RuleFor(p => p.UserName).MaximumLength(100).WithMessage("Cannot be longer than 100 characters");
