@@ -1,4 +1,5 @@
-﻿using BlogFodder.Core;
+﻿using Blazored.Toast.Services;
+using BlogFodder.Core;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
@@ -9,18 +10,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor;
 
 namespace BlogFodder.App.Pages.Account.Manage
 {
     [Authorize]
     public partial class UserProfile : ComponentBase
     {
-        [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-        [Inject] public IMediator Mediator { get; set; }
-        [Inject] public IDbContextFactory<BlogFodderDbContext> GabDbContext { get; set; }
-        [Inject] private ISnackbar Snackbar { get; set; } = default!;
-        [Inject] public NavigationManager NavigationManager { get; set; }
+        [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+        [Inject] public IMediator Mediator { get; set; } = default!;
+        [Inject] public IDbContextFactory<BlogFodderDbContext> GabDbContext { get; set; } = default!;
+        [Inject] public IToastService ToastService { get; set; } = default!;
+        [Inject] public NavigationManager NavigationManager { get; set; } = default!;
         [Parameter] public CreateUpdateUserCommand UpdateProfileCommand { get; set; } = new();
 
         private User? CurrentUser { get; set; }
@@ -46,7 +46,7 @@ namespace BlogFodder.App.Pages.Account.Manage
                 {
                     foreach (var message in resultMessages)
                     {
-                        Snackbar.Add(message.Message, Severity.Info);   
+                        if (message.Message != null) ToastService.ShowInfo(message.Message);
                     }
                 }
             }
@@ -93,18 +93,18 @@ namespace BlogFodder.App.Pages.Account.Manage
                 {
                     foreach (var resultMessage in result.Messages)
                     {
-                        Snackbar.Add(resultMessage.Message, Severity.Info);   
+                        if (resultMessage.Message != null) ToastService.ShowInfo(resultMessage.Message);
                     }
                 }
                 else
                 {
                     if (result.Success)
                     {
-                        Snackbar.Add("Updated successfully", Severity.Success);
+                        ToastService.ShowSuccess("Updated successfully");
                     }
                     else
                     {
-                        Snackbar.Add("There was an issue updating, please check the logs", Severity.Error);
+                        ToastService.ShowError("There was an issue updating, please check the logs");
                     }
                 }
             }

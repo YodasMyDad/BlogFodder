@@ -3,14 +3,14 @@
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginPreviewComponent
 
 <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
-    <MudIcon Icon="@Iplugin.Icon" Color="Color.Default"/>
+    <MudIcon Icon="@Iplugin?.Icon" Color="Color.Default"/>
     <div class="flex-grow-1">
         <div style="color: @Colors.BlueGrey.Lighten1">
-            <MudText Typo="Typo.subtitle1">@Iplugin.Name</MudText>
-            <MudText Typo="Typo.subtitle2">@Iplugin.Description</MudText>
+            <MudText Typo="Typo.subtitle1">@Iplugin?.Name</MudText>
+            <MudText Typo="Typo.subtitle2">@Iplugin?.Description</MudText>
         </div>
     </div>
-    @if (Plugin.Enabled)
+    @if (Plugin?.Enabled == true)
     {
         <MudIcon Icon="@Icons.Material.Filled.Circle" Color="Color.Success"/>
     }
@@ -23,9 +23,9 @@
 @code {
 
     [Parameter]
-    public Plugin Plugin { get; set; } = default!;
+    public Plugin? Plugin { get; set; } = default!;
 
     [Parameter]
-    public IPlugin Iplugin { get; set; } = default!;
+    public IPlugin? Iplugin { get; set; } = default!;
 
 }

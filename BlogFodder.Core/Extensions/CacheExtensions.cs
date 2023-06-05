@@ -9,13 +9,13 @@ public static class CacheExtensions
 
     public static string ToCacheKey(this Type item, string identifier)
     {
-        return $"{nameof(item)}-{identifier}";
+        return $"{item.Name}-{identifier}";
     }
     
     public static string ToCacheKey(this Type item, List<string> identifier)
     {
         // need to order the items and CSV them to keep them consistent
         var cacheKey = string.Join("-", identifier.OrderBy(x => x));
-        return $"{nameof(item)}-{cacheKey}";
+        return $"{item.Name}-{cacheKey}";
     }
 }

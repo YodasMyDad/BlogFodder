@@ -3,7 +3,7 @@
 @using BlogFodder.Core.Plugins.Models
 @if (Iplugin != null)
 {
-    if (!Plugin.Enabled)
+    if (Plugin == null || Plugin.Enabled == false)
     {
         <MudDialog>
             <DialogContent>
@@ -28,7 +28,7 @@
     MudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
-    public Plugin Plugin { get; set; } = new();
+    public Plugin? Plugin { get; set; }
 
     [Parameter]
     public Guid PostId { get; set; } = new();

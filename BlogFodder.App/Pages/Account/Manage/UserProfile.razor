@@ -6,84 +6,88 @@
     <div class="row my-5 justify-content-md-center">
         <div class="col-sm-8">
             <EditForm Model="@UpdateProfileCommand.User" OnValidSubmit="@HandleValidSubmit">
-                        <FluentValidationValidator/>
-                        <ValidationSummary/>
-            
-                        <fieldset>
-                            <div class="mb-3">
-                                <label class="form-label">Username</label>
-                                <InputText type="text" @bind-Value="UpdateProfileCommand.User.UserName" class="form-control"/>
-                                <ValidationMessage For="@(() => UpdateProfileCommand.User.UserName)"/>
-                            </div>
-                            @if (!UserIsExternalLogin)
+                <div class="text-danger">
+                    <FluentValidationValidator/>
+                    <ValidationSummary />
+                </div>
+
+                <fieldset>
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <InputText type="text" @bind-Value="UpdateProfileCommand.User.UserName" class="form-control"/>
+                        <small>
+                            <ValidationMessage For="@(() => UpdateProfileCommand.User.UserName)" class="text-danger" />
+                        </small>
+                    </div>
+                    @if (!UserIsExternalLogin)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText type="text" @bind-Value="UpdateProfileCommand.User.Email" class="form-control"/>
+                            <ValidationMessage For="@(() => UpdateProfileCommand.User.Email)" class="text-danger"/>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label">Profile Image</label>
+                        <div class="d-flex">
+                            @if (UpdateProfileCommand.User.ProfileImage != null)
                             {
-                                <div class="mb-3">
-                                    <label class="form-label">Email</label>
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.User.Email" class="form-control"/>
-                                    <ValidationMessage For="@(() => UpdateProfileCommand.User.Email)"/>
+                                <div class="me-2">
+                                    <img src="@UpdateProfileCommand.User.ProfileImage.Url?width=100" alt="Profile Image" class="img-thumbnail"/>
                                 </div>
                             }
-            
-                            <div class="mb-3">
-                                <label class="form-label">Profile Image</label>
-                                <div class="d-flex">
-                                    @if (UpdateProfileCommand.User.ProfileImage != null)
-                                    {
-                                        <div class="me-2">
-                                            <img src="@UpdateProfileCommand.User.ProfileImage.Url?width=100" alt="Profile Image" class="img-thumbnail"/>
-                                        </div>
-                                    }
-                                    <div>
-                                        <FileUpload @bind-Value="UpdateProfileCommand.ProfileImageUpload" ImagesOnly="true" MaxAllowedFiles="1"/>
-                                        <ValidationMessage For="@(() => UpdateProfileCommand.ProfileImageUpload)"/>
-                                    </div>
-                                </div>
-                            </div>
-                        </fieldset>
-            
-                        @if (!UserIsExternalLogin)
-                        {
-                            <fieldset class="mt-3">
-                                <legend>
-                                    Change Password
-                                </legend>
-                                <div class="mb-3">
-                                    <label class="form-label">Current Password</label>
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.CurrentPassword" class="form-control"/>
-                                    <ValidationMessage For="@(() => UpdateProfileCommand.CurrentPassword)"/>
-                                </div>
-            
-                                <div class="mb-3">
-                                    <label class="form-label">New Password</label>
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.NewPassword" class="form-control"/>
-                                    <ValidationMessage For="@(() => UpdateProfileCommand.NewPassword)"/>
-                                </div>
-            
-                                <div class="mb-3">
-                                    <label class="form-label">Confirm Password</label>
-                                    <InputText type="text" @bind-Value="UpdateProfileCommand.NewPasswordConfirmation" class="form-control"/>
-                                    <ValidationMessage For="@(() => UpdateProfileCommand.NewPasswordConfirmation)"/>
-                                </div>
-            
-                            </fieldset>
-                        }
-            
-            
-                        <div class="pt-3">
-                            <div class="d-flex justify-content-end">
-                                @if (Loading)
-                                {
-                                    <AnimatedSpinner Classes="h-8 w-8 text-indigo-400" Show="Loading"/>
-                                }
-                                else
-                                {
-                                    <button type="submit" class="ms-3 d-inline-flex justify-content-center py-2 px-4 border-0 shadow-sm text-white bg-primary rounded">
-                                        Save Profile
-                                    </button>
-                                }
+                            <div>
+                                <FileUpload @bind-Value="UpdateProfileCommand.ProfileImageUpload" ImagesOnly="true" MaxAllowedFiles="1"/>
+                                <ValidationMessage For="@(() => UpdateProfileCommand.ProfileImageUpload)" class="text-danger"/>
                             </div>
                         </div>
-                    </EditForm>
+                    </div>
+                </fieldset>
+
+                @if (!UserIsExternalLogin)
+                {
+                    <fieldset class="mt-3">
+                        <legend>
+                            Change Password
+                        </legend>
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <InputText type="text" @bind-Value="UpdateProfileCommand.CurrentPassword" class="form-control"/>
+                            <ValidationMessage For="@(() => UpdateProfileCommand.CurrentPassword)" class="text-danger"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <InputText type="text" @bind-Value="UpdateProfileCommand.NewPassword" class="form-control"/>
+                            <ValidationMessage For="@(() => UpdateProfileCommand.NewPassword)" class="text-danger"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <InputText type="text" @bind-Value="UpdateProfileCommand.NewPasswordConfirmation" class="form-control"/>
+                            <ValidationMessage For="@(() => UpdateProfileCommand.NewPasswordConfirmation)" class="text-danger"/>
+                        </div>
+
+                    </fieldset>
+                }
+
+
+                <div class="pt-3">
+                    <div class="d-flex justify-content-end">
+                        @if (Loading)
+                        {
+                            <AnimatedSpinner Classes="h-8 w-8 text-indigo-400" Show="Loading"/>
+                        }
+                        else
+                        {
+                            <button type="submit" class="ms-3 d-inline-flex justify-content-center py-2 px-4 border-0 shadow-sm text-white bg-primary rounded">
+                                Save Profile
+                            </button>
+                        }
+                    </div>
+                </div>
+            </EditForm>
         </div>
     </div>
 </div>

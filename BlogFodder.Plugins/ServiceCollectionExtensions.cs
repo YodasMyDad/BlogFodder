@@ -1,11 +1,9 @@
 using System.Reflection;
-using BlogFodder.Core;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Morris.Blazor.Validation;
 
 namespace BlogFodder.Plugins;
 
@@ -55,13 +53,6 @@ public static class ServiceCollectionExtensions
             }   
         }
 
-        // Validation
-        services.AddFormValidation(config =>
-            config
-                .AddDataAnnotationsValidation()
-                //.AddFluentValidation(typeof(Constants).Assembly, discoverAssemblies)
-        );
-        
         // Add external authentication providers
         foreach (var provider in extensionManager?.GetInstances<IExternalAuthenticationProvider>()!)
         {

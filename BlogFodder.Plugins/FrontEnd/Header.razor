@@ -31,19 +31,22 @@
                     @*<a class="nav-link active" aria-current="page" href="#">Home</a>*@
                     @if (topnav.Link?.Equals("#catlist#", StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Categories
-                            </a>
-                            <ul class="dropdown-menu">
-                                @foreach (var category in Categories)
-                                {
-                                    <li>
-                                        <a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))">@category.Name</a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+                        if (Categories.Any())
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Categories
+                                </a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var category in Categories)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))">@category.Name</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
                     }
                     else
                     {
@@ -85,6 +88,9 @@
                         </li>
                     </ul>
                 </Authorized>
+                <NotAuthorized>
+                    <a href="@Constants.Urls.Account.Login" class="ms-2 btn btn-primary">Login</a>
+                </NotAuthorized>
             </AuthorizeView>
         </div>
     </div>
