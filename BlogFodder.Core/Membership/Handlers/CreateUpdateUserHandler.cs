@@ -110,7 +110,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                 }
             }
 
-            // Need to use usermanager and then refresh signin. So save other fields first
+            // Need to use user manager and then refresh signin. So save other fields first
             if (request.User.Email != managerUser.Email)
             {
                 // See if email needs to be confirmed
@@ -157,7 +157,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                 }
             }
 
-            // Password. Again need to use usermanager
+            // Password. Again need to use user manager
             if (!request.CurrentPassword.IsNullOrWhiteSpace() && !request.NewPassword.IsNullOrWhiteSpace())
             {
                 var changePasswordResult = await _userManager
@@ -181,7 +181,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             // Messages to TempUiMessages if refresh sign in
             if (handlerResult.RefreshSignIn)
             {
-                managerUser.ExtendedData.RemoveTempUiMessages();
+                    managerUser.ExtendedData.RemoveTempUiMessages();
                 managerUser.ExtendedData.SetTempUiMessage(handlerResult.Messages);
                 var tempUiUpdateResult = await _userManager.UpdateAsync(managerUser).ConfigureAwait(false);
                 if (!tempUiUpdateResult.Succeeded)
