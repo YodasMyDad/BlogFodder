@@ -29,6 +29,11 @@ public static class ClaimsPrincipalExtensions
     {
         return principal.FindFirstValue(Constants.Claims.ProfileImage);
     }
+    
+    public static string? GetMd5(this ClaimsPrincipal principal)
+    {
+        return principal.FindFirstValue(Constants.Claims.Md5Hash);
+    }
 
     public static bool HasProfileImage(this ClaimsPrincipal principal)
     {

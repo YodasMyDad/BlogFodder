@@ -21,7 +21,7 @@ namespace BlogFodder.App.Pages.Account.Manage
         [Inject] public IDbContextFactory<BlogFodderDbContext> GabDbContext { get; set; } = default!;
         [Inject] public IToastService ToastService { get; set; } = default!;
         [Inject] public NavigationManager NavigationManager { get; set; } = default!;
-        [Parameter] public CreateUpdateUserCommand UpdateProfileCommand { get; set; } = new();
+        [Parameter] public CreateUpdateUserCommand CreateUpdateUserCommand { get; set; } = new();
 
         private User? CurrentUser { get; set; }
         private bool Loading { get; set; }
@@ -60,7 +60,7 @@ namespace BlogFodder.App.Pages.Account.Manage
             if (CurrentUser != null)
             {
                 var logins = context.UserLogins.AsNoTracking().Where(l => l.UserId == userId);
-                UpdateProfileCommand.User = CurrentUser;
+                CreateUpdateUserCommand.User = CurrentUser;
                 UserIsExternalLogin = logins.Any();
             }
         }
@@ -72,10 +72,10 @@ namespace BlogFodder.App.Pages.Account.Manage
             // Set email if external login as it's not shown on the page
             if (UserIsExternalLogin)
             {
-                UpdateProfileCommand.User.Email = CurrentUser.Email;
+                CreateUpdateUserCommand.User.Email = CurrentUser.Email;
             }
 
-            var result = await Mediator.Send(UpdateProfileCommand).ConfigureAwait(false);
+            var result = await Mediator.Send(CreateUpdateUserCommand).ConfigureAwait(false);
 
             // Yes this is really shit for
             // Cannot refresh RefreshSignInAsync in Blazor, so have to redirect to a razor page and then 

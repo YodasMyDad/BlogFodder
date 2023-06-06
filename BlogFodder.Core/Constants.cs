@@ -8,6 +8,7 @@ public static class Constants
     public static class Claims
     {
         public const string ProfileImage = "ProfileImage";
+        public const string Md5Hash = "Md5Hash";
     }
     
     public static class ExtendedDataKeys

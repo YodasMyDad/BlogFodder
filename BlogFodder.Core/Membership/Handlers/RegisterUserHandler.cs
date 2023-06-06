@@ -46,8 +46,6 @@ namespace BlogFodder.Core.Membership.Handlers
         {
             var newUser = new User { Id = Guid.NewGuid().NewSequentialGuid(), Email = request.Email, UserName = request.Username };
             var loginResult = new AuthenticationResult();
-            await _userStore.SetUserNameAsync(newUser, request.Email, CancellationToken.None).ConfigureAwait(false);
-            await _userEmailStore.SetEmailAsync(newUser, request.Email, CancellationToken.None).ConfigureAwait(false);
             var createResult = await _userManager.CreateAsync(newUser, request.Password).ConfigureAwait(false);
             loginResult.Success = createResult.Succeeded;
             if (loginResult.Success)

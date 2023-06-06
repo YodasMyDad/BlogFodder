@@ -33,19 +33,19 @@
             <div asp-validation-summary="All" class="@Model.ValidationSummaryStyles"></div>
 
                 <div class="mb-3">
-                    <label asp-for="RegisterUserCommand.Username" class="form-label"></label>
+                    <label asp-for="RegisterUserCommand.Username" class="form-label bf-label"></label>
                     <input asp-for="RegisterUserCommand.Username" class="form-control shadow-sm"/>
                     <span asp-validation-for="RegisterUserCommand.Username" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="RegisterUserCommand.Email" class="form-label"></label>
+                    <label asp-for="RegisterUserCommand.Email" class="form-label bf-label"></label>
                     <input asp-for="RegisterUserCommand.Email" autocomplete="email" class="form-control shadow-sm"/>
                     <span asp-validation-for="RegisterUserCommand.Email" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-4">
-                    <label asp-for="RegisterUserCommand.Password" class="form-label"></label>
+                    <label asp-for="RegisterUserCommand.Password" class="form-label bf-label"></label>
                     <input asp-for="RegisterUserCommand.Password" autocomplete="current-password" class="form-control shadow-sm"/>
                     <span asp-validation-for="RegisterUserCommand.Password" class="text-danger small"></span>
                 </div>

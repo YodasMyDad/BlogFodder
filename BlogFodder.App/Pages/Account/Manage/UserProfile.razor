@@ -5,41 +5,44 @@
 <div class="container">
     <div class="row my-5 justify-content-md-center">
         <div class="col-sm-8">
-            <EditForm Model="@UpdateProfileCommand.User" OnValidSubmit="@HandleValidSubmit">
+            <EditForm Model="@CreateUpdateUserCommand.User" OnValidSubmit="@HandleValidSubmit">
                 <div class="text-danger">
                     <FluentValidationValidator/>
-                    <ValidationSummary />
+                    <ValidationSummary/>
                 </div>
 
-                <fieldset>
+                <fieldset class="border p-4">
+                    <legend class="float-none w-auto p-2">
+                        Profile
+                    </legend>
                     <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <InputText type="text" @bind-Value="UpdateProfileCommand.User.UserName" class="form-control"/>
+                        <label class="form-label bf-label">Username</label>
+                        <InputText type="text" @bind-Value="CreateUpdateUserCommand.User.UserName" class="form-control shadow-sm"/>
                         <small>
-                            <ValidationMessage For="@(() => UpdateProfileCommand.User.UserName)" class="text-danger" />
+                            <ValidationMessage For="@(() => CreateUpdateUserCommand.User.UserName)" class="text-danger"/>
                         </small>
                     </div>
                     @if (!UserIsExternalLogin)
                     {
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <InputText type="text" @bind-Value="UpdateProfileCommand.User.Email" class="form-control"/>
-                            <ValidationMessage For="@(() => UpdateProfileCommand.User.Email)" class="text-danger"/>
+                            <label class="form-label bf-label">Email</label>
+                            <InputText type="text" @bind-Value="CreateUpdateUserCommand.User.Email" class="form-control shadow-sm"/>
+                            <ValidationMessage For="@(() => CreateUpdateUserCommand.User.Email)" class="text-danger"/>
                         </div>
                     }
 
                     <div class="mb-3">
-                        <label class="form-label">Profile Image</label>
+                        <label class="form-label bf-label">Profile Image</label>
                         <div class="d-flex">
-                            @if (UpdateProfileCommand.User.ProfileImage != null)
+                            @if (CreateUpdateUserCommand.User.ProfileImage != null)
                             {
                                 <div class="me-2">
-                                    <img src="@UpdateProfileCommand.User.ProfileImage.Url?width=100" alt="Profile Image" class="img-thumbnail"/>
+                                    <img src="@CreateUpdateUserCommand.User.ProfileImage.Url?width=100" alt="Profile Image" class="img-thumbnail"/>
                                 </div>
                             }
                             <div>
-                                <FileUpload @bind-Value="UpdateProfileCommand.ProfileImageUpload" ImagesOnly="true" MaxAllowedFiles="1"/>
-                                <ValidationMessage For="@(() => UpdateProfileCommand.ProfileImageUpload)" class="text-danger"/>
+                                <FileUpload @bind-Value="CreateUpdateUserCommand.ProfileImageUpload" ImagesOnly="true" MaxAllowedFiles="1"/>
+                                <ValidationMessage For="@(() => CreateUpdateUserCommand.ProfileImageUpload)" class="text-danger"/>
                             </div>
                         </div>
                     </div>
@@ -47,26 +50,26 @@
 
                 @if (!UserIsExternalLogin)
                 {
-                    <fieldset class="mt-3">
-                        <legend>
+                    <fieldset class="mt-3 border p-4">
+                        <legend class="float-none w-auto p-2">
                             Change Password
                         </legend>
                         <div class="mb-3">
-                            <label class="form-label">Current Password</label>
-                            <InputText type="text" @bind-Value="UpdateProfileCommand.CurrentPassword" class="form-control"/>
-                            <ValidationMessage For="@(() => UpdateProfileCommand.CurrentPassword)" class="text-danger"/>
+                            <label class="form-label bf-label">Current Password</label>
+                            <InputText type="text" @bind-Value="CreateUpdateUserCommand.CurrentPassword" class="form-control shadow-sm"/>
+                            <ValidationMessage For="@(() => CreateUpdateUserCommand.CurrentPassword)" class="text-danger"/>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">New Password</label>
-                            <InputText type="text" @bind-Value="UpdateProfileCommand.NewPassword" class="form-control"/>
-                            <ValidationMessage For="@(() => UpdateProfileCommand.NewPassword)" class="text-danger"/>
+                            <label class="form-label bf-label">New Password</label>
+                            <InputText type="text" @bind-Value="CreateUpdateUserCommand.NewPassword" class="form-control shadow-sm"/>
+                            <ValidationMessage For="@(() => CreateUpdateUserCommand.NewPassword)" class="text-danger"/>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Confirm Password</label>
-                            <InputText type="text" @bind-Value="UpdateProfileCommand.NewPasswordConfirmation" class="form-control"/>
-                            <ValidationMessage For="@(() => UpdateProfileCommand.NewPasswordConfirmation)" class="text-danger"/>
+                            <label class="form-label bf-label">Confirm Password</label>
+                            <InputText type="text" @bind-Value="CreateUpdateUserCommand.NewPasswordConfirmation" class="form-control shadow-sm"/>
+                            <ValidationMessage For="@(() => CreateUpdateUserCommand.NewPasswordConfirmation)" class="text-danger"/>
                         </div>
 
                     </fieldset>

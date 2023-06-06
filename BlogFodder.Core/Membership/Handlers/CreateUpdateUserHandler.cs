@@ -41,12 +41,6 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
         var handlerResult = new HandlerResult<User>();
 
-        // Updating the user using UserManager and a EF context is a bit fiddly
-        // Do all the usermanager stuff after the EF context stuff
-        // This does mean there will be duplicate calls from the different contexts
-
-        // -- Start EF Context stuff -- //
-
         var efUser = await _db.Users
             .FirstOrDefaultAsync(x => x.Id == authState.User.GetUserId(), cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -58,18 +52,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             return handlerResult;
         }
 
-        // TODO - Think of a better way?
-        // We store these here as we don't want to map the new ones and do an update via EF because we need to refresh the cookie
-        // and Username, Email and Phonenumber changes need to be done via the UserManager
-        var phoneNumber = request.User.PhoneNumber;
-        var email = request.User.Email;
-        var username = request.User.UserName;
-
-        request.User.PhoneNumber = efUser.PhoneNumber;
-        request.User.Email = efUser.Email;
-        request.User.UserName = efUser.UserName;
-
-        // Profile Image - Need to save image and then create a gabfile
+        // Profile Image - Need to save image and then create a file
         if (request.ProfileImageUpload != null)
         {
             // TODO - What if the user is changing the image and one already exists, need to delete
@@ -87,55 +70,48 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             // Create the gabfile
             var gabFile = await _providerService.StorageProvider.ToBlogFodderFile(fileSaveResult).ConfigureAwait(false);
 
-            // Set the user
-            //gabFile.CreatedBy = efUser;
-
             // Save the file first
             _db.Files.Add(gabFile);
             await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             // Set the file to the user
             efUser.ProfileImage = gabFile;
-        }
 
-        //TODO - Map other standard fields that need updating - What is this?
-        //efUser = request.ToUser(efUser, _mapper);
-
-        // Save the user
-        handlerResult = await _db.CreateOrUpdate(efUser, handlerResult, false, cancellationToken).ConfigureAwait(false);
-        if (!handlerResult.Success)
-        {
-            return handlerResult;
-        }
-
-        // -- Start Usermanager stuff -- //
-
-        // Get user from Usermanager to update all this
-        var managerUser = await _userManager.GetUserAsync(authState.User).ConfigureAwait(false);
-
-        // Need to use usermanager and then refresh signin.
-        if (username != managerUser.UserName)
-        {
-            var userNameResult = await _userManager.SetUserNameAsync(managerUser, username).ConfigureAwait(false);
-            if (userNameResult.Succeeded)
+            // Save the user
+            handlerResult = await _db.CreateOrUpdate(efUser, handlerResult, false, cancellationToken)
+                .ConfigureAwait(false);
+            if (!handlerResult.Success)
             {
-                handlerResult.RefreshSignIn = true;
-                handlerResult.AddMessage("Username updated successfully", ResultMessageType.Success);
-            }
-            else
-            {
-                handlerResult.Success = userNameResult.Succeeded;
-                handlerResult.AddMessage(userNameResult.ToErrorsList(), ResultMessageType.Error);
-                userNameResult.LogErrors(_logger);
                 return handlerResult;
             }
         }
 
-        // Do not allow password or email to be changed if this is an external login
-        if (!managerUser.ExtendedData.Get<bool>(Constants.ExtendedDataKeys.IsExternalLogin))
+        // Get user from user manager to update all this
+        var managerUser = await _userManager.GetUserAsync(authState.User).ConfigureAwait(false);
+
+        if (managerUser != null)
         {
+            // Need to use user manager and then refresh signin.
+            if (request.User.UserName != managerUser.UserName)
+            {
+                var userNameResult = await _userManager.SetUserNameAsync(managerUser, request.User.UserName)
+                    .ConfigureAwait(false);
+                if (userNameResult.Succeeded)
+                {
+                    handlerResult.RefreshSignIn = true;
+                    handlerResult.AddMessage("Username updated successfully", ResultMessageType.Success);
+                }
+                else
+                {
+                    handlerResult.Success = userNameResult.Succeeded;
+                    handlerResult.AddMessage(userNameResult.ToErrorsList(), ResultMessageType.Error);
+                    userNameResult.LogErrors(_logger);
+                    return handlerResult;
+                }
+            }
+
             // Need to use usermanager and then refresh signin. So save other fields first
-            if (email != managerUser.Email)
+            if (request.User.Email != managerUser.Email)
             {
                 // See if email needs to be confirmed
                 if (_userManager.Options.SignIn.RequireConfirmedAccount)
@@ -143,14 +119,14 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                     var sendConfirmationEmailCommand = new SendEmailConfirmationCommand
                     {
                         User = managerUser,
-                        NewEmailAddress = email
+                        NewEmailAddress = request.User.Email
                     };
 
                     // Send the email
                     await _mediator.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
 
                     // Save the new email in the users extended data
-                    managerUser.ExtendedData.Add(Constants.ExtendedDataKeys.NewEmailAddress, email);
+                    managerUser.ExtendedData.Add(Constants.ExtendedDataKeys.NewEmailAddress, request.User.Email!);
 
                     handlerResult.Success = true;
                     handlerResult.RefreshSignIn = true;
@@ -160,12 +136,11 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                 else
                 {
                     // Just generate the code and change the email
-                    var code = await _userManager.GenerateChangeEmailTokenAsync(managerUser, email)
+                    var code = await _userManager.GenerateChangeEmailTokenAsync(managerUser, request.User.Email!)
                         .ConfigureAwait(false);
-                    //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    //code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
                     var emailResult =
-                        await _userManager.ChangeEmailAsync(managerUser, email, code).ConfigureAwait(false);
+                        await _userManager.ChangeEmailAsync(managerUser, request.User.Email!, code)
+                            .ConfigureAwait(false);
                     if (emailResult.Succeeded)
                     {
                         handlerResult.Success = true;
@@ -202,42 +177,25 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                     return handlerResult;
                 }
             }
+
+            // Messages to TempUiMessages if refresh sign in
+            if (handlerResult.RefreshSignIn)
+            {
+                managerUser.ExtendedData.RemoveTempUiMessages();
+                managerUser.ExtendedData.SetTempUiMessage(handlerResult.Messages);
+                var tempUiUpdateResult = await _userManager.UpdateAsync(managerUser).ConfigureAwait(false);
+                if (!tempUiUpdateResult.Succeeded)
+                {
+                    tempUiUpdateResult.LogErrors(_logger);
+                }
+            }
+        }
+        else
+        {
+            handlerResult.Success = false;
+            handlerResult.AddMessage("Unable to get the database user from the logged in user", ResultMessageType.Error);
         }
 
-        // Phonenumber - Need to use usermanager
-        if (!phoneNumber.IsNullOrWhiteSpace() &&
-            phoneNumber != managerUser.PhoneNumber)
-        {
-            // TODO - This will need updating if we add SMS support
-            var code = await _userManager.GenerateChangePhoneNumberTokenAsync(managerUser, phoneNumber)
-                .ConfigureAwait(false);
-            var phoneResult = await _userManager.ChangePhoneNumberAsync(managerUser, phoneNumber, code)
-                .ConfigureAwait(false);
-            if (phoneResult.Succeeded)
-            {
-                handlerResult.Success = true;
-                handlerResult.AddMessage("Phone number updated", ResultMessageType.Success);
-            }
-            else
-            {
-                handlerResult.Success = phoneResult.Succeeded;
-                handlerResult.AddMessage(phoneResult.ToErrorsList(), ResultMessageType.Error);
-                phoneResult.LogErrors(_logger);
-                return handlerResult;
-            }
-        }
-
-        // Messages to TempUiMessages if refresh sign in
-        if (handlerResult.RefreshSignIn)
-        {
-            managerUser.ExtendedData.RemoveTempUiMessages();
-            managerUser.ExtendedData.SetTempUiMessage(handlerResult.Messages);
-            var tempUiUpdateResult = await _userManager.UpdateAsync(managerUser).ConfigureAwait(false);
-            if (!tempUiUpdateResult.Succeeded)
-            {
-                tempUiUpdateResult.LogErrors(_logger);
-            }
-        }
 
         return handlerResult;
     }

@@ -18,8 +18,8 @@
             <div class="col-md-8">
                 <EditForm Model="@Comment" OnSubmit="@HandleSubmit">
                     <div class="mb-3">
-                        <label for="Comment.Comment" class="form-label">Comment</label>
-                        <InputTextArea @bind-Value="@Comment.Comment" id="Comment.Comment" class="form-control" rows="8"/>
+                        <label for="Comment.Comment" class="form-label bf-label">Comment</label>
+                        <InputTextArea @bind-Value="@Comment.Comment" id="Comment.Comment" class="form-control shadow-sm" rows="8"/>
                     </div>
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">Post Comment</button>

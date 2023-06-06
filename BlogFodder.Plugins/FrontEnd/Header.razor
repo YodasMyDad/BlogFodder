@@ -65,11 +65,18 @@
                     <ul class="navbar-nav my-3 my-lg-0">
                         <li class="nav-item dropdown">
                             <a href="#" class="mt-1 ms-lg-4 text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                                @if (authState.User.HasProfileImage())
+                                {
+                                    <img src="/@authState.User.GetProfileImage()?width=32&height=32" alt="@authState.User.GetUserName() Avatar" width="32" height="32" class="rounded-circle">
+                                }
+                                else
+                                {
+                                    <img src="@($"https://www.gravatar.com/avatar/{authState.User.GetMd5()}?d=robohash")" alt="@authState.User.GetUserName() Avatar" width="32" height="32" class="rounded-circle">   
+                                }
                                 <span class="d-lg-none">Username</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                @if (authState.User.IsInRole("Admin"))
+                                @if (authState.User.IsInRole(Constants.Roles.AdminRoleName))
                                 {
                                     <li>
                                         <a class="dropdown-item" @onclick="@(() => NavigationManager.NavigateTo("/admin", forceLoad: true))">Admin</a>

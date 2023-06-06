@@ -44,21 +44,21 @@
                     }
                 </div>
                 <div class="mb-3">
-                    <label asp-for="LoginUserCommand.Email" class="form-label"></label>
-                    <input asp-for="LoginUserCommand.Email" autocomplete="email" class="form-control"/>
+                    <label asp-for="LoginUserCommand.Email" class="form-label bf-label"></label>
+                    <input asp-for="LoginUserCommand.Email" autocomplete="email" class="form-control shadow-sm"/>
                     <span asp-validation-for="LoginUserCommand.Email" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="LoginUserCommand.Password" class="form-label"></label>
-                    <input asp-for="LoginUserCommand.Password" autocomplete="current-password" class="form-control"/>
+                    <label asp-for="LoginUserCommand.Password" class="form-label bf-label"></label>
+                    <input asp-for="LoginUserCommand.Password" autocomplete="current-password" class="form-control shadow-sm"/>
                     <span asp-validation-for="LoginUserCommand.Password" class="text-danger"></span>
                 </div>
 
                   <div class="mb-4 d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
                         <input asp-for="LoginUserCommand.RememberMe" class="form-check-input text-primary"/>
-                        <label asp-for="LoginUserCommand.RememberMe" class="form-check-label ms-2">
+                        <label asp-for="LoginUserCommand.RememberMe" class="form-check-label bf-label ms-2">
                             @Html.DisplayNameFor(m => m.LoginUserCommand.RememberMe)
                         </label>
                     </div>
