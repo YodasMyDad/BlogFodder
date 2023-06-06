@@ -1,17 +1,15 @@
 ﻿@page "/"
-@using BlogFodder.Core.Data
-@using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
 @using BlogFodder.Core.Plugins.Models
+@using BlogFodder.Core.Posts.Commands
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
 @using BlogFodder.Core.Settings.Commands
 @using BlogFodder.Core.Settings.Models
 @using BlogFodder.Core.Shared.Models
 @using MediatR
-@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-@implements IDisposable
+
 <PageTitle>@Settings.DefaultPageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Settings.DefaultMetaDescription">
@@ -44,9 +42,6 @@
 @code
 {
     [Inject]
-    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-
-    [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
     [Inject]
@@ -64,24 +59,21 @@
     private string PaginationComponent { get; set; } = "";
     private SiteSettings Settings { get; set; } = default!;
     private int CurrentPage { get; set; } = 1;
-    private BlogFodderDbContext DbContext { get; set; } = default!;
 
     private async Task GetPosts()
     {
-        Posts = DbContext.Posts
-            .AsQueryable()
-            .Include(x => x.FeaturedImage)
-            .Include(x => x.Categories)
-            .AsNoTracking()
-            .OrderByDescending(x => x.DateUpdated)
-            .ToPaginatedList(CurrentPage, Settings.HomeAmountPerPage);
-
+        var postsQuery = new GetPostsCommand(Settings)
+        {
+            PageIndex = CurrentPage,
+            AmountPerPage = Settings.HomeAmountPerPage,
+            OrderBy = GetPostsOrderBy.DateUpdatedDescending
+        };
+        Posts = await Mediator.Send(postsQuery).ConfigureAwait(false);
         StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        DbContext = await DbContextFactory.CreateDbContextAsync();
         Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
     }
 
@@ -89,11 +81,6 @@
     {
         PostListComponent = BlogFodderSettings.Value.FrontEnd.PostListComponent!;
         PaginationComponent = BlogFodderSettings.Value.FrontEnd.PaginationComponent!;
-        GetPosts();
-    }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
+        _ = Task.Run(async () => await GetPosts());
     }
 }

@@ -64,9 +64,18 @@
         
         if (!PostContentItem.GlobalSettings.IsNullOrWhiteSpace())
         {
-            // Weird but here. The JSON string is escaped, so we need to unescape it before we try and deserialize into the object
-            var firstDeserialize = JsonSerializer.Deserialize<string>(PostContentItem.GlobalSettings) ?? "";
-            GlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(firstDeserialize) ?? new RichTextGlobalSettings();
+            // Weird. Sometimes the JSON string is escaped, so we need to unescape it before we try and deserialize into the object
+            var globalSettingsJson = PostContentItem.GlobalSettings;
+            try
+            {
+                GlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(globalSettingsJson) ?? new RichTextGlobalSettings();
+            }
+            catch (JsonException)
+            {
+                // The JSON string is escaped, so unescape it first
+                var firstDeserialize = JsonSerializer.Deserialize<string>(globalSettingsJson) ?? "";
+                GlobalSettings = JsonSerializer.Deserialize<RichTextGlobalSettings>(firstDeserialize) ?? new RichTextGlobalSettings();
+            }
         }
         
         DefaultEditorSettings = new Dictionary<string, object>

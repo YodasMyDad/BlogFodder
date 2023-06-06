@@ -1,27 +1,17 @@
-@page "/c/{Slug}"
-@using BlogFodder.Core.Extensions
+@page "/s/{Search}"
 @using BlogFodder.Core.Plugins
-@using BlogFodder.Core.Posts.Models
-@using BlogFodder.Core.Categories.Models
 @using BlogFodder.Core.Posts.Commands
+@using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
-@using BlogFodder.Core.Settings.Commands
 @using BlogFodder.Core.Settings.Models
 @using BlogFodder.Core.Shared.Models
 @using MediatR
 @using Microsoft.Extensions.Options
-@using BlogFodder.Core.Categories.Commands
+@using BlogFodder.Core.Extensions
+@using BlogFodder.Core.Settings.Commands
+<PageTitle>Search Results</PageTitle>
 
-<PageTitle>@Category.PageTitle</PageTitle>
-<HeadContent>
-    <meta name="description" content="@Category.MetaDescription">
-    @if (Category.NoIndex)
-    {
-        <meta name="robots" content="noindex">
-    }
-</HeadContent>
-
-@if (CanBeFound)
+@if (!Search.IsNullOrWhiteSpace())
 {
     if (Posts.Items.Any())
     {
@@ -50,20 +40,20 @@
     }
     else
     {
-        <p>There are no posts in this category</p>
+        <p>Unable to find any posts</p>
     }
 }
 else
 {
-    <h1>Unable to find the category by the url</h1>
-    <p>Need to make this return a 404!</p>
+    <h1>Missing Search Term?</h1>
+    <p>Sorry but there is no search term to look for.</p>
 }
 
 @code {
-
+    
     [Parameter]
-    public string? Slug { get; set; }
-
+    public string? Search { get; set; }
+    
     [Inject]
     public ExtensionManager ExtensionManager { get; set; } = default!;
 
@@ -72,51 +62,40 @@ else
 
     [Inject]
     IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
-
-    private Category Category { get; set; } = new();
+    
     private PaginatedList<Post> Posts { get; set; } = new();
-    private bool CanBeFound { get; set; }
     private string PostListComponent { get; set; } = "";
     private string PaginationComponent { get; set; } = "";
     private SiteSettings Settings { get; set; } = default!;
     private int CurrentPage { get; set; } = 1;
     private int PostsPerPage { get; set; } = 10;
-
+    
     private async Task GetPosts()
     {
         var postsQuery = new GetPostsCommand(Settings)
         {
             PageIndex = CurrentPage,
             AmountPerPage = PostsPerPage,
-            OrderBy = GetPostsOrderBy.DateUpdatedDescending
+            OrderBy = GetPostsOrderBy.DateUpdatedDescending,
+            SearchTerm = Search
         };
-        postsQuery.CategoryIds.Add(Category.Id);
-
         Posts = await Mediator.Send(postsQuery).ConfigureAwait(false);
-
         StateHasChanged();
     }
-
+    
     protected override void OnParametersSet()
     {
         PostListComponent = BlogFodderSettings.Value.FrontEnd.PostListComponent!;
         PaginationComponent = BlogFodderSettings.Value.FrontEnd.PaginationComponent!;
         
-        if (!Slug.IsNullOrWhiteSpace())
+        if (!Search.IsNullOrWhiteSpace())
         {
             _ = Task.Run(async () =>
             {
-                var category = await Mediator.Send(new GetCategoryCommand {Url = Slug}).ConfigureAwait(false);
-                if (category != null)
-                {
-                    CanBeFound = true;
-                    Category = category;
-                    PostsPerPage = category.PostsPerPage > 0 ? category.PostsPerPage : 10;
-                    Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
-                    await GetPosts();
-                }
+                PostsPerPage = Settings.HomeAmountPerPage;
+                Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+                await GetPosts();
             });
         }
     }
-
 }
