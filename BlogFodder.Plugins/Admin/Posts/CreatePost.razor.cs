@@ -335,8 +335,12 @@ public partial class CreatePost : ComponentBase
             }
             else
             {
-                Errors = result.Messages.ErrorMessagesToList().ToArray();
+                foreach (var error in result.Messages.ErrorMessagesToList())
+                {
+                    Snackbar.Add(error, Severity.Error);
+                }
             }
+            StateHasChanged();
         }
     }
 }
