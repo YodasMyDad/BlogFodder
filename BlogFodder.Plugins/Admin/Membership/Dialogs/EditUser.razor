@@ -1,20 +1,10 @@
 @using BlogFodder.Core.Membership.Models
-@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using BlogFodder.Core.Data
-@implements IDisposable
+@using Microsoft.Extensions.DependencyInjection
 <MudDialog>
     <DialogContent>
-        @if (Errors.Length > 0)
-        {
-            <MudAlert Severity="Severity.Error" Class="my-2">
-                @foreach (var error in Errors)
-                {
-                    <MudText>@error</MudText>
-                }
-            </MudAlert>
-        }
-        <MudForm Model="@User" @ref="@Form" @bind-Errors="@Errors" ValidationDelay="0">
+        <MudForm Model="@User" @ref="@Form" ValidationDelay="0">
             <MudGrid Class="pb-4">
                 <MudItem xs="12">
                     <MudTextField Label="Username" Variant="Variant.Outlined" Margin="Margin.Dense"
@@ -43,29 +33,25 @@
 
 @code {
 
-    [Parameter]
-    public User? User { get; set; } = new();
+    [Parameter] public User? User { get; set; } = new();
 
-    [CascadingParameter]
-    MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
-    [Inject] public IMediator Mediator { get; set; } = default!;
-    
-    [Inject]
-    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-    
     private Role? SelectedCategory { get; set; }
     private IEnumerable<Role> SelectedRoles { get; set; } = new HashSet<Role>();
     private List<Role> Roles { get; set; } = new();
     private MudForm Form { get; set; } = default!;
-    private string?[] Errors { get; set; } = Array.Empty<string>();
-    private BlogFodderDbContext? DbContext { get; set; }
     private readonly Func<Role, string> _roleToName = p => p.Name ?? "Missing Category Name";
     
     protected override async Task OnInitializedAsync()
     {
-        DbContext = await DbContextFactory.CreateDbContextAsync();
-        Roles = await DbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToListAsync();
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        Roles = await dbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToListAsync();
 
         if (User != null)
         {
@@ -76,6 +62,9 @@
 
     private async Task SubmitForm()
     {
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        
         // Create a set of the selected role Ids for easier comparison
         var selectedRoleIds = new HashSet<Guid>(SelectedRoles.Select(role => role.Id));
 
@@ -93,22 +82,14 @@
 
         try
         {
-            DbContext?.Users.Update(User);
-            await DbContext?.SaveChangesAsync()!;
+            dbContext?.Users.Update(User);
+            await dbContext?.SaveChangesAsync()!;
+            Snackbar.Add("User Saved Successfully", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(User));
         }
         catch (Exception ex)
         {
-            // Log the error
-            Errors = new[] { ex.Message };
-            return;
+            Snackbar.Add(ex.Message, Severity.Error);
         }
-        
-        MudDialog.Close(DialogResult.Ok(User));
     }
-
-    public void Dispose()
-    {
-        DbContext?.Dispose();
-    }
-
 }

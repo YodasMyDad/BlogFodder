@@ -1,6 +1,5 @@
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Shared.Models;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace BlogFodder.Core.Extensions;

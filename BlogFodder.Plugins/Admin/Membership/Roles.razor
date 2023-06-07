@@ -1,11 +1,10 @@
 @page "/admin/membership/roles"
 @layout AdminLayout
 @using BlogFodder.Core.Data
-@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using BlogFodder.Core.Membership.Models
 @using BlogFodder.Plugins.Admin.Membership.Dialogs
-@implements IDisposable
+@using Microsoft.Extensions.DependencyInjection
 <PageTitle>Manage Roles</PageTitle>
 
 <div class="d-flex justify-end mb-3">
@@ -30,61 +29,57 @@
 
 @code {
     
-    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
-    [Inject] public IMediator Mediator { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] private IDialogService DialogService { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
     
-    private BlogFodderDbContext DbContext { get; set; } = default!;
     private List<Role> AllRoles { get; set; } = new();
     private readonly DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
 
     protected override void OnInitialized()
     {
-        DbContext = DbContextFactory.CreateDbContext();
-        SetRoles();
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        SetRoles(dbContext);
     }
 
     private async Task DeleteRole(Role role)
     {
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        
         var dialogResult = await DialogService.ShowMessageBox(
             "Warning", 
             "Once you click delete the role is gone", 
             yesText:"Delete", cancelText:"Cancel");
 
         if (dialogResult == false) return; // The user cancelled the action
-
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-
+        
         try
         {
             // Remove the role from all users
-            var userRoles = DbContext.UserRoles.Where(ur => ur.RoleId == role.Id);
-            DbContext.UserRoles.RemoveRange(userRoles);
-            await DbContext.SaveChangesAsync();
+            var userRoles = dbContext.UserRoles.Where(ur => ur.RoleId == role.Id);
+            dbContext.UserRoles.RemoveRange(userRoles);
+            await dbContext.SaveChangesAsync();
 
             // Delete the role itself
-            DbContext.Roles.Remove(role);
-            await DbContext.SaveChangesAsync();
-
-            await transaction.CommitAsync(); // Commit the transaction if all operations were successful
+            dbContext.Roles.Remove(role);
+            await dbContext.SaveChangesAsync();
 
             Snackbar.Add($"Role {role.Name} deleted successfully", Severity.Success);
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync(); // Rollback the transaction in case of an error
-
             Snackbar.Add("An error occurred while trying to delete the role: " + ex.Message, Severity.Error);
         }
 
-        SetRoles(); // Refresh the roles list
+        SetRoles(dbContext); // Refresh the roles list
     }
 
-    private void SetRoles()
+    private void SetRoles(BlogFodderDbContext dbContext)
     {
-        AllRoles = DbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToList();
+        AllRoles = dbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToList();
     }
     
     private async Task RowClickEvent(TableRowClickEventArgs<Role> tableRowClickEventArgs)
@@ -104,13 +99,10 @@
 
         if (!result.Canceled)
         {
-            SetRoles();
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+            SetRoles(dbContext);
             //StateHasChanged();
         }
-    }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
     }
 }

@@ -11,10 +11,10 @@
         }
     </MudAlert>
 }
-<MudForm Model="@CategoryCommand" @ref="@Form" @bind-Errors="@Errors" Validation="@(CommandValidator.ValidateValue)" ValidationDelay="0">
+<MudForm Model="@CreateUpdateCategoryCommand" @ref="@Form" @bind-Errors="@Errors" Validation="@(CommandValidator.ValidateValue)" ValidationDelay="0">
     <MudTextField Label="Title of this category" Class="my-2"
                   Counter="1000" MaxLength="1000"
-                  @bind-Value="CategoryCommand.Category.Name" For="@(() => CategoryCommand.Category.Name)" Variant="Variant.Outlined">
+                  @bind-Value="CreateUpdateCategoryCommand.Category.Name" For="@(() => CreateUpdateCategoryCommand.Category.Name)" Variant="Variant.Outlined">
     </MudTextField>
 
     <MudTabs Outlined="true" Position="Position.Top" Rounded="true" Border="true" KeepPanelsAlive="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
@@ -22,21 +22,21 @@
         <MudTabPanel Text="Details">
             <MudGrid>
                 <MudItem xs="12">
-                    <MudNumericField @bind-Value="CategoryCommand.Category.PostsPerPage" Label="Posts Per Page" Variant="Variant.Outlined" Margin="Margin.Dense"
+                    <MudNumericField @bind-Value="CreateUpdateCategoryCommand.Category.PostsPerPage" Label="Posts Per Page" Variant="Variant.Outlined" Margin="Margin.Dense"
                                      HelperText="How many posts are displayed"
-                                     Max="100" For="@(() => CategoryCommand.Category.SortOrder)"/>
+                                     Max="100" For="@(() => CreateUpdateCategoryCommand.Category.SortOrder)"/>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudNumericField @bind-Value="CategoryCommand.Category.SortOrder" Label="Sort Order" Variant="Variant.Outlined" Margin="Margin.Dense" Max="500" For="@(() => CategoryCommand.Category.SortOrder)"/>
+                    <MudNumericField @bind-Value="CreateUpdateCategoryCommand.Category.SortOrder" Label="Sort Order" Variant="Variant.Outlined" Margin="Margin.Dense" Max="500" For="@(() => CreateUpdateCategoryCommand.Category.SortOrder)"/>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField @bind-Value="CategoryCommand.Category.Url" Label="Url" Variant="Variant.Outlined" Margin="Margin.Dense" HelperText="Url is generated from the category title if left blank"></MudTextField>
+                    <MudTextField @bind-Value="CreateUpdateCategoryCommand.Category.Url" Label="Url" Variant="Variant.Outlined" Margin="Margin.Dense" HelperText="Url is generated from the category title if left blank"></MudTextField>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudDatePicker Label="Date Created" Variant="Variant.Outlined" Margin="Margin.Dense" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="CategoryCommand.Category.DateCreated"/>
+                    <MudDatePicker Label="Date Created" Variant="Variant.Outlined" Margin="Margin.Dense" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="CreateUpdateCategoryCommand.Category.DateCreated"/>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudDatePicker Label="Date Updated" Variant="Variant.Outlined" Margin="Margin.Dense" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="CategoryCommand.Category.DateUpdated"/>
+                    <MudDatePicker Label="Date Updated" Variant="Variant.Outlined" Margin="Margin.Dense" PickerVariant="PickerVariant.Dialog" DisableToolbar="true" @bind-Date="CreateUpdateCategoryCommand.Category.DateUpdated"/>
                 </MudItem>
             </MudGrid>
         </MudTabPanel>
@@ -46,26 +46,26 @@
             <MudGrid>
                 <MudItem xs="12">
                     <MudTextField Label="Page Title" HelperText="Max. 60 characters" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                  @bind-Value="CategoryCommand.Category.PageTitle" For="@(() => CategoryCommand.Category.PageTitle)"/>
+                                  @bind-Value="CreateUpdateCategoryCommand.Category.PageTitle" For="@(() => CreateUpdateCategoryCommand.Category.PageTitle)"/>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField Lines="4" Label="Meta Description" HelperText="Max. 300 characters" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                  @bind-Value="CategoryCommand.Category.MetaDescription" For="@(() => CategoryCommand.Category.MetaDescription)"/>
+                                  @bind-Value="CreateUpdateCategoryCommand.Category.MetaDescription" For="@(() => CreateUpdateCategoryCommand.Category.MetaDescription)"/>
                 </MudItem>
                 <MudItem xs="12">
                     <MudField Label="Social Image">
-                        @if (CategoryCommand.Category.SocialImage != null)
+                        @if (CreateUpdateCategoryCommand.Category.SocialImage != null)
                         {
-                            <MudImage ObjectFit="ObjectFit.Cover" Width="100" Src="@($"{CategoryCommand.Category.SocialImage.Url}?width=100")" Class="rounded"/>
+                            <MudImage ObjectFit="ObjectFit.Cover" Width="100" Src="@($"{CreateUpdateCategoryCommand.Category.SocialImage.Url}?width=100")" Class="rounded"/>
                         }
-                        @if (CategoryCommand.SocialImage != null)
+                        @if (CreateUpdateCategoryCommand.SocialImage != null)
                         {
                             <MudChip Color="Color.Default" OnClose="RemoveSelectedSocialImage">
-                                @CategoryCommand.SocialImage.Name
+                                @CreateUpdateCategoryCommand.SocialImage.Name
                             </MudChip>
                         }
                         <MudStack Row="true">
-                            <MudFileUpload T="IBrowserFile" For="@(() => CategoryCommand.SocialImage)" @bind-Files="CategoryCommand.SocialImage" OnFilesChanged="CheckImageSize">
+                            <MudFileUpload T="IBrowserFile" For="@(() => CreateUpdateCategoryCommand.SocialImage)" @bind-Files="CreateUpdateCategoryCommand.SocialImage" OnFilesChanged="CheckImageSize">
                                 <ButtonTemplate>
                                     <MudButton HtmlTag="label"
                                                Variant="Variant.Filled"
@@ -76,7 +76,7 @@
                                     </MudButton>
                                 </ButtonTemplate>
                             </MudFileUpload>
-                            @if (CategoryCommand.Category.SocialImage != null)
+                            @if (CreateUpdateCategoryCommand.Category.SocialImage != null)
                             {
                                 <MudButton Variant="Variant.Text" OnClick="RemoveSocialImage">Remove Image</MudButton>
                             }
@@ -84,7 +84,7 @@
                     </MudField>
                 </MudItem>
                 <MudItem xs="12">
-                    <MudSwitch @bind-Checked="@CategoryCommand.Category.NoIndex" Label="No Index" Color="Color.Primary"/>
+                    <MudSwitch @bind-Checked="@CreateUpdateCategoryCommand.Category.NoIndex" Label="No Index" Color="Color.Primary"/>
                 </MudItem>
             </MudGrid>
         </MudTabPanel>

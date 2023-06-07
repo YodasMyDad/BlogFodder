@@ -6,6 +6,7 @@ using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Posts.Handlers;
 
@@ -13,17 +14,20 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
 {
     private readonly SlugHelper _slugHelper;
     private readonly ProviderService _providerService;
-    private readonly BlogFodderDbContext _dbContext;
+    private readonly IServiceProvider _serviceProvider;
 
-    public CreateUpdatePostHandler(ProviderService providerService, BlogFodderDbContext dbContext)
+    public CreateUpdatePostHandler(ProviderService providerService, BlogFodderDbContext dbContext, IServiceProvider serviceProvider)
     {
         _providerService = providerService;
-        _dbContext = dbContext;
+        _serviceProvider = serviceProvider;
         _slugHelper = new SlugHelper();
     }
 
     public async Task<HandlerResult<Post>> Handle(CreateUpdatePostCommand request, CancellationToken cancellationToken)
     {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+
         var handlerResult = new HandlerResult<Post>();
         var fileIdToDelete = new List<Guid>();
         
@@ -56,7 +60,8 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         if (_providerService.StorageProvider != null)
         {
             // See if this post already exists as we will need to remove the images
-            var post = _dbContext.Posts
+            var post = dbContext!.Posts
+                .AsNoTracking()
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
                 .FirstOrDefault(x => x.Id == request.Post.Id);
@@ -71,7 +76,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
                 }
                 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await request.FeaturedImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
+                var fileResult = await request.FeaturedImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, dbContext);
 
                 // Set the file to the user
                 request.Post.FeaturedImage = fileResult;
@@ -95,7 +100,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
                 }
                 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await request.SocialImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, _dbContext);
+                var fileResult = await request.SocialImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, dbContext);
 
                 // Set the file to the user
                 request.Post.SocialImage = fileResult;
@@ -114,36 +119,26 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
             {
                 foreach (var guid in fileIdToDelete)
                 {
-                    var file = _dbContext.Files.FirstOrDefault(x => x.Id == guid);
+                    var file = dbContext.Files.FirstOrDefault(x => x.Id == guid);
                     if (file != null)
                     {
-                        _dbContext.Files.Remove(file);
+                        dbContext.Files.Remove(file);
                     }
                 }
                 
-                await _dbContext.SaveChangesAsync(cancellationToken);
-            }
-        }
-
-        if (request.IsUpdate)
-        {
-            // Add the new content items first
-            foreach (var postContentItem in request.Post.ContentItems)
-            {
-                if (postContentItem.IsNew)
-                {
-                    postContentItem.IsNew = false;
-                    _dbContext.PostContentItems.Add(postContentItem);   
-                }
-                else
-                {
-                    postContentItem.IsNew = false;
-                    _dbContext.PostContentItems.Update(postContentItem);
-                }
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
         }
         
-        return await _dbContext.CreateOrUpdate(request.Post, handlerResult, !request.IsUpdate, cancellationToken)
+        // Deal with Categories
+        if (request.Post.Categories.Any())
+        {
+            // Get the posts from the DB
+            var categoryIds = request.Post.Categories.Select(x => x.Id);
+            request.Post.Categories = dbContext!.Categories.Where(p => categoryIds.Contains(p.Id)).ToList();
+        }
+        
+        return await dbContext.CreateOrUpdate(request.Post, handlerResult, !request.IsUpdate, cancellationToken)
             .ConfigureAwait(false);
     }
 }

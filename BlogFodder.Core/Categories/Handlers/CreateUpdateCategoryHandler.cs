@@ -2,11 +2,9 @@ using BlogFodder.Core.Categories.Commands;
 using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
-using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogFodder.Core.Categories.Handlers;
@@ -54,6 +52,7 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
         {
             // See if this category already exists as we will need to remove the images
             var category = _dbContext.Categories
+                .AsNoTracking()
                 .Include(x => x.SocialImage)
                 .FirstOrDefault(x => x.Id == request.Category.Id);
 

@@ -1,8 +1,7 @@
 @using BlogFodder.Core.Membership.Models
-@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using BlogFodder.Core.Data
-@implements IDisposable
+@using Microsoft.Extensions.DependencyInjection
 <MudDialog>
     <DialogContent>
         @if (Errors.Length > 0)
@@ -35,21 +34,17 @@
 
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; } = default!;
-
-    [Inject] public IMediator Mediator { get; set; } = default!;
     
-    [Inject]
-    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
     
     private MudForm Form { get; set; } = default!;
     private string?[] Errors { get; set; } = Array.Empty<string>();
-    private BlogFodderDbContext? DbContext { get; set; }
     private bool IsNew { get; set; }
     
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        DbContext = await DbContextFactory.CreateDbContextAsync();
-        
         if (Role == null)
         {
             IsNew = true;
@@ -59,38 +54,34 @@
 
     private async Task SubmitForm()
     {
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+
         try
         {
             if (IsNew)
             {
-                if (await DbContext?.Roles.AnyAsync(r => r.Name == Role!.Name)!)
+                if (await dbContext?.Roles.AnyAsync(r => r.Name == Role!.Name)!)
                 {
                     Errors = new[] { $"Role with name {Role!.Name} already exists." };
                     return;
                 }
 
-                DbContext.Roles.Add(Role!);
+                dbContext.Roles.Add(Role!);
             }
             else
             {
-                DbContext?.Roles.Update(Role!);
+                dbContext?.Roles.Update(Role!);
             }
 
-            await DbContext?.SaveChangesAsync()!;
+            await dbContext?.SaveChangesAsync()!;
+            Snackbar.Add("Role Saved Successfully", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(Role));
         }
         catch (Exception ex)
         {
-            // Log the error?
-            Errors = new[] { ex.Message };
-            return;
+            Snackbar.Add(ex.Message, Severity.Error);
         }
 
-        MudDialog.Close(DialogResult.Ok(Role));
     }
-
-    public void Dispose()
-    {
-        DbContext?.Dispose();
-    }
-
 }

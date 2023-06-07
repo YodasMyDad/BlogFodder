@@ -2,11 +2,10 @@
 @layout AdminLayout
 @using BlogFodder.Core.Data
 @using Humanizer
-@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using BlogFodder.Core.Membership.Models
 @using BlogFodder.Plugins.Admin.Membership.Dialogs
-@implements IDisposable
+@using Microsoft.Extensions.DependencyInjection
 <PageTitle>Manage Users</PageTitle>
 
 <MudTable Items="@AllUsers" Hover="true" OnRowClick="RowClickEvent" T="User" RowClass="rowpointer">
@@ -35,34 +34,33 @@
 </MudTable>
 
 @code {
-
-    [Inject]
-    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
     [Inject]
-    public IMediator Mediator { get; set; } = default!;
-
-    [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
 
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    
     [Inject]
     private IDialogService DialogService { get; set; } = default!;
-
-    private BlogFodderDbContext DbContext { get; set; } = default!;
+    
     private List<User> AllUsers { get; set; } = new();
+    
     private readonly DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
 
     protected override void OnInitialized()
     {
-        DbContext = DbContextFactory.CreateDbContext();
-        SetUsers();
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        SetUsers(dbContext!);
     }
 
     private async Task DeleteUser(User user)
     {
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        
         var dialogResult = await DialogService.ShowMessageBox(
             "Warning",
             "Once you delete the user, all associated data will be permanently removed. Are you sure you want to continue?",
@@ -78,11 +76,11 @@
     // If we reach here, the user clicked "Delete".
         try
         {
-            DbContext.Users.Remove(user);
-            await DbContext.SaveChangesAsync();
+            dbContext!.Users.Remove(user);
+            await dbContext.SaveChangesAsync();
 
     // Refresh the users list after successful deletion.
-            SetUsers();
+            SetUsers(dbContext);
 
             Snackbar.Add("User deleted successfully", Severity.Success);
         }
@@ -93,10 +91,9 @@
         }
     }
 
-
-    private void SetUsers()
+    private void SetUsers(BlogFodderDbContext dbContext)
     {
-        AllUsers = DbContext.Users
+        AllUsers = dbContext.Users
             .Include(x => x.UserRoles)
             .ThenInclude(x => x.Role).AsNoTracking().OrderByDescending(x => x.CreateDate).ToList();
     }
@@ -117,10 +114,4 @@
             StateHasChanged();
         }
     }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
-    }
-
 }

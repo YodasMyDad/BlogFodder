@@ -8,42 +8,42 @@ using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 
 namespace BlogFodder.Plugins.Admin.Categories;
 
-public partial class CreateCategory : ComponentBase, IDisposable
+public partial class CreateCategory : ComponentBase
 {
     [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
-    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
-    [Inject] public IMediator Mediator { get; set; } = default!;
     [Inject] public ProviderService ProviderService { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
 
     [Parameter] public Guid? Id { get; set; }
     
-    private CreateUpdateCategoryCommand CategoryCommand { get; set; } = new();
+    private CreateUpdateCategoryCommand CreateUpdateCategoryCommand { get; set; } = new();
     private MudForm Form { get; set; } = default!;
     private CreateUpdateCategoryCommandValidator CommandValidator { get; set; } = new();
     private string?[] Errors { get; set; } =  Array.Empty<string>();
-    private BlogFodderDbContext? DbContext { get; set; }
-    
+
     protected override void OnInitialized()
     {
         // See if this is an edit or not
         if (Id != null)
         {
-            DbContext = DbContextFactory.CreateDbContext();
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
             
             // Yes, should probably be in a service or Mediatr call
-            var dbCategory = DbContext.Categories
+            var dbCategory = dbContext!.Categories
                 .Include(x => x.SocialImage)
                 .FirstOrDefault(x => x.Id == Id.Value);
             
             if (dbCategory != null)
             {
-                CategoryCommand.Category = dbCategory;
-                CategoryCommand.IsUpdate = true;
+                CreateUpdateCategoryCommand.Category = dbCategory;
+                CreateUpdateCategoryCommand.IsUpdate = true;
             }
         }
     }
@@ -53,7 +53,7 @@ public partial class CreateCategory : ComponentBase, IDisposable
     /// </summary>
     private void RemoveSelectedSocialImage()
     {
-        CategoryCommand.SocialImage = null;
+        CreateUpdateCategoryCommand.SocialImage = null;
         StateHasChanged();
     }
     
@@ -62,8 +62,8 @@ public partial class CreateCategory : ComponentBase, IDisposable
     /// </summary>
     private void RemoveSocialImage()
     {
-        CategoryCommand.Category.SocialImageId = null;
-        CategoryCommand.Category.SocialImage = null;
+        CreateUpdateCategoryCommand.Category.SocialImageId = null;
+        CreateUpdateCategoryCommand.Category.SocialImage = null;
         StateHasChanged();
     }
     
@@ -91,20 +91,23 @@ public partial class CreateCategory : ComponentBase, IDisposable
         await Form.Validate();
         if (Form.IsValid)
         {
+            using var scope = ServiceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetService<IMediator>();
+            
             // Call mediatr and return and check for errors
             // Send the email
-            var result = await Mediator.Send(CategoryCommand).ConfigureAwait(false);
+            var result = await mediatr!.Send(CreateUpdateCategoryCommand).ConfigureAwait(false);
             if (result.Success)
             {
-                CategoryCommand.Category = result.Entity;
-                CategoryCommand.SocialImage = null;
+                CreateUpdateCategoryCommand.Category = result.Entity;
+                CreateUpdateCategoryCommand.SocialImage = null;
 
-                var correctText = CategoryCommand.IsUpdate ? "Updated" : "Created";
+                var correctText = CreateUpdateCategoryCommand.IsUpdate ? "Updated" : "Created";
                 Snackbar.Add("Category " + correctText, Severity.Success);
 
-                if (!CategoryCommand.IsUpdate)
+                if (!CreateUpdateCategoryCommand.IsUpdate)
                 {
-                    CategoryCommand.IsUpdate = true;
+                    CreateUpdateCategoryCommand.IsUpdate = true;
                 }
             }
             else
@@ -112,10 +115,5 @@ public partial class CreateCategory : ComponentBase, IDisposable
                 Errors = result.Messages.ErrorMessagesToList().ToArray();
             }
         }
-    }
-
-    public void Dispose()
-    {
-        DbContext?.Dispose();
     }
 }

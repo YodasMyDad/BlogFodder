@@ -15,19 +15,19 @@ using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Utilities;
 using PostPluginEditor = BlogFodder.Plugins.Admin.Posts.Dialogs.PostPluginEditor;
 
 namespace BlogFodder.Plugins.Admin.Posts;
 
-public partial class CreatePost : ComponentBase, IDisposable
+public partial class CreatePost : ComponentBase
 {
     [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
-    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] public IDialogService Dialog { get; set; } = default!;
-    [Inject] public IMediator Mediator { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
     [Inject] public ProviderService ProviderService { get; set; } = default!;
 
     [Parameter] public Guid? Id { get; set; }
@@ -42,7 +42,6 @@ public partial class CreatePost : ComponentBase, IDisposable
     private List<Category> Categories { get; set; } = new();
     private Category? SelectedCategory { get; set; }
     private IEnumerable<Category> SelectedCategories { get; set; } = new HashSet<Category>();
-    private BlogFodderDbContext? DbContext { get; set; }
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private const string DefaultDropZoneSelector = "plugins";
     private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
@@ -50,14 +49,15 @@ public partial class CreatePost : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        DbContext = await DbContextFactory.CreateDbContextAsync();
-        Categories = await DbContext.Categories.ToListAsync();
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        Categories = await dbContext!.Categories.ToListAsync();
 
         // See if this is an edit or not
         if (Id != null)
         {
             // Yes, should probably be in a service or Mediatr call
-            var dbPost = DbContext.Posts
+            var dbPost = dbContext.Posts
                 .Include(x => x.ContentItems)
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
@@ -86,23 +86,23 @@ public partial class CreatePost : ComponentBase, IDisposable
         {
             AvailableEditorPlugins.Add(plugin.Value.Alias, plugin.Value);
         }
-        
+
         // Get all the available plugins that have a editor
         var plugins = ExtensionManager.GetInstances<IPlugin>(true).Where(x => x.Value.Editor != null);
         foreach (var plugin in plugins)
         {
             AvailablePlugins.Add(plugin.Value.Alias, plugin.Value);
         }
-        
+
         // Finally get the db plugin data for this post
-        var pluginData = DbContext.Plugins.ToList();
+        var pluginData = dbContext.Plugins.ToList();
         if (pluginData.Any())
         {
             foreach (var plugin in pluginData)
             {
                 if (AvailablePlugins.ContainsKey(plugin.PluginAlias))
                 {
-                    PluginData.Add(plugin.PluginAlias, plugin);   
+                    PluginData.Add(plugin.PluginAlias, plugin);
                 }
             }
         }
@@ -211,7 +211,7 @@ public partial class CreatePost : ComponentBase, IDisposable
             {"Iplugin", iplugin},
             {"PostId", PostCommand.Post.Id}
         };
-        
+
         var dialog = await Dialog.ShowAsync<PostPluginEditor>(iplugin.Name, parameters, _defaultDialogOptions);
         var result = await dialog.Result;
 
@@ -220,7 +220,7 @@ public partial class CreatePost : ComponentBase, IDisposable
             // TODO - Need to save this data here as it won't be saved with the post
         }
     }
-    
+
     /// <summary>
     /// Shows the popup content editor and renders the Plugin Editor
     /// </summary>
@@ -232,7 +232,8 @@ public partial class CreatePost : ComponentBase, IDisposable
             {"ContentItem", contentItem}
         };
 
-        var dialog = await Dialog.ShowAsync<ContentItemEditor>(AvailableEditorPlugins[contentItem.PluginAlias!].Name, parameters, _defaultDialogOptions);
+        var dialog = await Dialog.ShowAsync<ContentItemEditor>(AvailableEditorPlugins[contentItem.PluginAlias!].Name,
+            parameters, _defaultDialogOptions);
 
         /*var dialog = await Dialog.ShowEx<ContentItemEditor>("", parameters, Options);*/
         var result = await dialog.Result;
@@ -248,7 +249,10 @@ public partial class CreatePost : ComponentBase, IDisposable
 
     private async Task ShowContentEditors()
     {
-        var dialog = await Dialog.ShowAsync<EditorPluginSelection>("Select Content Editor", new DialogParameters(), _defaultDialogOptions);
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetService<IMediator>();
+        var dialog = await Dialog.ShowAsync<EditorPluginSelection>("Select Content Editor", new DialogParameters(),
+            _defaultDialogOptions);
         var result = await dialog.Result;
         if (!result.Canceled)
         {
@@ -272,7 +276,7 @@ public partial class CreatePost : ComponentBase, IDisposable
                     {
                         Alias = plugin.Alias
                     };
-                    var globalSettings = await Mediator.Send(globalSettingsCommand).ConfigureAwait(false);
+                    var globalSettings = await mediatr!.Send(globalSettingsCommand).ConfigureAwait(false);
                     postContentItem.GlobalSettings = globalSettings != null
                         ? JsonSerializer.Serialize(globalSettings.Data,
                             new JsonSerializerOptions {WriteIndented = false})
@@ -294,6 +298,9 @@ public partial class CreatePost : ComponentBase, IDisposable
         await Form.Validate();
         if (Form.IsValid)
         {
+            using var scope = ServiceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetService<IMediator>();
+            
             // Couple of manual checks
             if (PostCommand.FeaturedImage == null && PostCommand.Post.FeaturedImage == null)
             {
@@ -311,7 +318,7 @@ public partial class CreatePost : ComponentBase, IDisposable
 
             // Call mediatr and return and check for errors
             // Send the email
-            var result = await Mediator.Send(PostCommand).ConfigureAwait(false);
+            var result = await mediatr.Send(PostCommand).ConfigureAwait(false);
             if (result.Success)
             {
                 PostCommand.Post = result.Entity;
@@ -331,10 +338,5 @@ public partial class CreatePost : ComponentBase, IDisposable
                 Errors = result.Messages.ErrorMessagesToList().ToArray();
             }
         }
-    }
-
-    public void Dispose()
-    {
-        DbContext?.Dispose();
     }
 }
