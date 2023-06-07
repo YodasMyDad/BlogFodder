@@ -4,26 +4,28 @@ using BlogFodder.Core.Membership.Models;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Membership.Handlers
 {
     public class ResetPasswordHandler : IRequestHandler<ResetPasswordCommand, AuthenticationResult>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ResetPasswordHandler(UserManager<User> userManager)
+        public ResetPasswordHandler(IServiceProvider serviceProvider)
         {
-            _userManager = userManager;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<AuthenticationResult> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
             var result = new AuthenticationResult();
-
-            var user = await _userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
+            using var scope = _serviceProvider.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
             if (user != null)
             {
-                var resetResult = await _userManager.ResetPasswordAsync(user, request.Code, request.Password).ConfigureAwait(false);
+                var resetResult = await userManager.ResetPasswordAsync(user, request.Code, request.Password).ConfigureAwait(false);
                 if (resetResult.Succeeded == false)
                 {
                     result.Success = false;

@@ -5,6 +5,7 @@ using BlogFodder.Core.Membership.Models;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace BlogFodder.Core.Membership.Handlers
@@ -14,42 +15,43 @@ namespace BlogFodder.Core.Membership.Handlers
     /// </summary>
     public class LoginUserHandler : IRequestHandler<LoginUserCommand, AuthenticationResult>
     {
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
         private readonly ILogger<LoginUserHandler> _logger;
-        private readonly IMediator _mediator;
-
-        public LoginUserHandler(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<LoginUserHandler> logger, IMediator mediator)
+        private readonly IServiceProvider _serviceProvider;
+        
+        public LoginUserHandler(ILogger<LoginUserHandler> logger, IServiceProvider serviceProvider)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
             _logger = logger;
-            _mediator = mediator;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<AuthenticationResult> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
+            using var scope = _serviceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<User>>();
+            
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
             var loginResult = new AuthenticationResult();
-            await _signInManager.SignOutAsync().ConfigureAwait(false);
-            var user = await _userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
+            await signInManager.SignOutAsync().ConfigureAwait(false);
+            var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
             if (user != null)
             {
-                var signInResult = await _signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, false)
+                var signInResult = await signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, false)
                     .ConfigureAwait(false);
                 loginResult.Success = signInResult.Succeeded;
 
                 if (loginResult.Success)
                 {
-                    var userPrincipal = await _signInManager.CreateUserPrincipalAsync(user).ConfigureAwait(false);
+                    var userPrincipal = await signInManager.CreateUserPrincipalAsync(user).ConfigureAwait(false);
                     loginResult.NavigateToUrl = request.ReturnUrl ?? "~/";
                 }
                 else
                 {
                     if (signInResult.IsNotAllowed)
                     {
-                        if (!await _userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false))
+                        if (!await userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false))
                         {
                             loginResult.AddMessage("Email isn't confirmed. Check your inbox for a confirmation email", ResultMessageType.Warning);
 
@@ -60,7 +62,7 @@ namespace BlogFodder.Core.Membership.Handlers
                                 User = user
                             };
 
-                            await _mediator.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
+                            await mediatr.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
                         }
 
                         //if (!await _userManager.IsPhoneNumberConfirmedAsync(user).ConfigureAwait(false))

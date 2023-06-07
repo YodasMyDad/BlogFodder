@@ -8,6 +8,7 @@ using MailKit.Security;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
@@ -19,19 +20,21 @@ public class SmtpEmailProvider : IEmailProvider
         private readonly BlogFodderSettings _gabSettings;
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMediator _mediator;
+        private readonly IServiceProvider _serviceProvider;
 
-        public SmtpEmailProvider(IOptions<BlogFodderSettings> gabSettings, IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public SmtpEmailProvider(IOptions<BlogFodderSettings> gabSettings, IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
         {
             _gabSettings = gabSettings.Value;
             _env = env;
             _httpContextAccessor = httpContextAccessor;
-            _mediator = mediator;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task SendEmailWithTemplateAsync(string toEmail, string subject, List<string> paragraphs)
         {
-            var settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            using var scope = _serviceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
             
             // Get the default email template and the logo
             //string webRootPath = _env.WebRootPath;

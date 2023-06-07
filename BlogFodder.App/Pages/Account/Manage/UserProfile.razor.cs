@@ -17,11 +17,11 @@ namespace BlogFodder.App.Pages.Account.Manage
     public partial class UserProfile : ComponentBase
     {
         [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
-        [Inject] public IMediator Mediator { get; set; } = default!;
-        [Inject] public IDbContextFactory<BlogFodderDbContext> GabDbContext { get; set; } = default!;
         [Inject] public IToastService ToastService { get; set; } = default!;
         [Inject] public NavigationManager NavigationManager { get; set; } = default!;
         [Parameter] public CreateUpdateUserCommand CreateUpdateUserCommand { get; set; } = new();
+        
+        [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
 
         private User? CurrentUser { get; set; }
         private bool Loading { get; set; }
@@ -31,8 +31,11 @@ namespace BlogFodder.App.Pages.Account.Manage
         {
             Loading = true;
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
-            await using var context = await GabDbContext.CreateDbContextAsync();
-            await SetCuUserCommand(authState.User.GetUserId(), context).ConfigureAwait(false);
+
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+            
+            await SetCuUserCommand(authState.User.GetUserId(), dbContext).ConfigureAwait(false);
 
             // Check if this is a refresh and look for messages to display
             // This is shite, but it's a hack to get around RefreshSignInAsync
@@ -75,7 +78,11 @@ namespace BlogFodder.App.Pages.Account.Manage
                 CreateUpdateUserCommand.User.Email = CurrentUser.Email;
             }
 
-            var result = await Mediator.Send(CreateUpdateUserCommand).ConfigureAwait(false);
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            
+            var result = await mediatr.Send(CreateUpdateUserCommand).ConfigureAwait(false);
 
             // Yes this is really shit for
             // Cannot refresh RefreshSignInAsync in Blazor, so have to redirect to a razor page and then 
@@ -86,8 +93,7 @@ namespace BlogFodder.App.Pages.Account.Manage
             }
             else
             {
-                await using var context = await GabDbContext.CreateDbContextAsync();
-                await SetCuUserCommand(CurrentUser.Id, context).ConfigureAwait(false);
+                await SetCuUserCommand(CurrentUser.Id, dbContext).ConfigureAwait(false);
 
                 if (result.Messages.Count > 0)
                 {

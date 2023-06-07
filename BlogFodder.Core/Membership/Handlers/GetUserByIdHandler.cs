@@ -2,23 +2,24 @@
 using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Membership.Handlers
 {
     public class GetUserByIdHandler : IRequestHandler<GetUserByIdCommand, User?>
     {
-        private readonly IDbContextFactory<BlogFodderDbContext> _dbFactory;
+        private readonly IServiceProvider _serviceProvider;
 
-        public GetUserByIdHandler(IDbContextFactory<BlogFodderDbContext> db)
+        public GetUserByIdHandler(IServiceProvider serviceProvider)
         {
-            _dbFactory = db;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<User?> Handle(GetUserByIdCommand request, CancellationToken cancellationToken)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-            return await db.FindAsync<User>(new object[] { request.Id }, cancellationToken: cancellationToken)
+            using var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+            return await dbContext.FindAsync<User>(new object[] { request.Id }, cancellationToken: cancellationToken)
                                     .ConfigureAwait(false);
         }
     }

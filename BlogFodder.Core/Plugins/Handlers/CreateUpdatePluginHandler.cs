@@ -5,25 +5,27 @@ using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Shared.Models;
 using BlogFodder.Core.Shared.Services;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Plugins.Handlers;
 
 public class CreateUpdatePluginHandler : IRequestHandler<CreateUpdatePluginCommand, HandlerResult<Plugin>>
 {
-    private readonly BlogFodderDbContext _dbContext;
     private readonly ICacheService _cacheService;
-
-    public CreateUpdatePluginHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
+    private readonly IServiceProvider _serviceProvider;
+    
+    public CreateUpdatePluginHandler(ICacheService cacheService, IServiceProvider serviceProvider)
     {
-        _dbContext = dbContext;
         _cacheService = cacheService;
+        _serviceProvider = serviceProvider;
     }
     
     public async Task<HandlerResult<Plugin>> Handle(CreateUpdatePluginCommand request, CancellationToken cancellationToken)
     {
         var result = new HandlerResult<Plugin>();
-        
-        result = await _dbContext.CreateOrUpdate(request.Plugin, result, !request.IsUpdate, cancellationToken)
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        result = await dbContext.CreateOrUpdate(request.Plugin, result, !request.IsUpdate, cancellationToken)
             .ConfigureAwait(false);
         
         // Clear the cache

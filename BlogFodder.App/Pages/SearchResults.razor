@@ -50,18 +50,11 @@ else
 }
 
 @code {
+    [Parameter] public string? Search { get; set; }
     
-    [Parameter]
-    public string? Search { get; set; }
-    
-    [Inject]
-    public ExtensionManager ExtensionManager { get; set; } = default!;
-
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
-
-    [Inject]
-    IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+    [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    [Inject] IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
     
     private PaginatedList<Post> Posts { get; set; } = new();
     private string PostListComponent { get; set; } = "";
@@ -70,7 +63,7 @@ else
     private int CurrentPage { get; set; } = 1;
     private int PostsPerPage { get; set; } = 10;
     
-    private async Task GetPosts()
+    private async Task GetPosts(IMediator? mediatr = null)
     {
         var postsQuery = new GetPostsCommand(Settings)
         {
@@ -79,7 +72,12 @@ else
             OrderBy = GetPostsOrderBy.DateUpdatedDescending,
             SearchTerm = Search
         };
-        Posts = await Mediator.Send(postsQuery).ConfigureAwait(false);
+        if (mediatr == null)
+        {
+            using var scope = ServiceProvider.CreateScope();
+            mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();   
+        }
+        Posts = await mediatr.Send(postsQuery).ConfigureAwait(false);
         StateHasChanged();
     }
     
@@ -92,9 +90,11 @@ else
         {
             _ = Task.Run(async () =>
             {
+                using var scope = ServiceProvider.CreateScope();
+                var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
                 PostsPerPage = Settings.HomeAmountPerPage;
-                Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
-                await GetPosts();
+                Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+                await GetPosts(mediatr);
             });
         }
     }

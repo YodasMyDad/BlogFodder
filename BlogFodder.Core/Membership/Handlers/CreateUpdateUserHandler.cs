@@ -9,39 +9,40 @@ using MediatR;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace BlogFodder.Core.Membership.Handlers;
 
 public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, HandlerResult<User>>
 {
-    private readonly IMediator _mediator;
-    private readonly BlogFodderDbContext _db;
     private readonly ProviderService _providerService;
     private readonly ILogger<CreateUpdateUserHandler> _logger;
     private readonly AuthenticationStateProvider _authenticationStateProvider;
-    private readonly UserManager<User> _userManager;
+    private readonly IServiceProvider _serviceProvider;
 
-    public CreateUpdateUserHandler(IMediator mediator, BlogFodderDbContext blogFodderDbContext,
+    public CreateUpdateUserHandler(
         ProviderService providerService,
-        ILogger<CreateUpdateUserHandler> logger, AuthenticationStateProvider authenticationStateProvider,
-        UserManager<User> userManager)
+        ILogger<CreateUpdateUserHandler> logger, AuthenticationStateProvider authenticationStateProvider, IServiceProvider serviceProvider)
     {
-        _mediator = mediator;
-        _db = blogFodderDbContext;
         _providerService = providerService;
         _logger = logger;
         _authenticationStateProvider = authenticationStateProvider;
-        _userManager = userManager;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<HandlerResult<User>> Handle(CreateUpdateUserCommand request, CancellationToken cancellationToken)
     {
+        using var scope = _serviceProvider.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var db = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
         // Get the current user first via the authstate
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
         var handlerResult = new HandlerResult<User>();
 
-        var efUser = await _db.Users
+        var efUser = await db.Users
             .FirstOrDefaultAsync(x => x.Id == authState.User.GetUserId(), cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         if (efUser == null)
@@ -71,14 +72,14 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             var gabFile = await _providerService.StorageProvider.ToBlogFodderFile(fileSaveResult).ConfigureAwait(false);
 
             // Save the file first
-            _db.Files.Add(gabFile);
-            await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            db.Files.Add(gabFile);
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             // Set the file to the user
             efUser.ProfileImage = gabFile;
 
             // Save the user
-            handlerResult = await _db.CreateOrUpdate(efUser, handlerResult, false, cancellationToken)
+            handlerResult = await db.CreateOrUpdate(efUser, handlerResult, false, cancellationToken)
                 .ConfigureAwait(false);
             if (!handlerResult.Success)
             {
@@ -87,14 +88,14 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
         }
 
         // Get user from user manager to update all this
-        var managerUser = await _userManager.GetUserAsync(authState.User).ConfigureAwait(false);
+        var managerUser = await userManager.GetUserAsync(authState.User).ConfigureAwait(false);
 
         if (managerUser != null)
         {
             // Need to use user manager and then refresh signin.
             if (request.User.UserName != managerUser.UserName)
             {
-                var userNameResult = await _userManager.SetUserNameAsync(managerUser, request.User.UserName)
+                var userNameResult = await userManager.SetUserNameAsync(managerUser, request.User.UserName)
                     .ConfigureAwait(false);
                 if (userNameResult.Succeeded)
                 {
@@ -114,7 +115,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             if (request.User.Email != managerUser.Email)
             {
                 // See if email needs to be confirmed
-                if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                if (userManager.Options.SignIn.RequireConfirmedAccount)
                 {
                     var sendConfirmationEmailCommand = new SendEmailConfirmationCommand
                     {
@@ -123,7 +124,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                     };
 
                     // Send the email
-                    await _mediator.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
+                    await mediator.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
 
                     // Save the new email in the users extended data
                     managerUser.ExtendedData.Add(Constants.ExtendedDataKeys.NewEmailAddress, request.User.Email!);
@@ -136,10 +137,10 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                 else
                 {
                     // Just generate the code and change the email
-                    var code = await _userManager.GenerateChangeEmailTokenAsync(managerUser, request.User.Email!)
+                    var code = await userManager.GenerateChangeEmailTokenAsync(managerUser, request.User.Email!)
                         .ConfigureAwait(false);
                     var emailResult =
-                        await _userManager.ChangeEmailAsync(managerUser, request.User.Email!, code)
+                        await userManager.ChangeEmailAsync(managerUser, request.User.Email!, code)
                             .ConfigureAwait(false);
                     if (emailResult.Succeeded)
                     {
@@ -160,7 +161,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             // Password. Again need to use user manager
             if (!request.CurrentPassword.IsNullOrWhiteSpace() && !request.NewPassword.IsNullOrWhiteSpace())
             {
-                var changePasswordResult = await _userManager
+                var changePasswordResult = await userManager
                     .ChangePasswordAsync(managerUser, request.CurrentPassword, request.NewPassword)
                     .ConfigureAwait(false);
                 if (changePasswordResult.Succeeded)
@@ -183,7 +184,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             {
                     managerUser.ExtendedData.RemoveTempUiMessages();
                 managerUser.ExtendedData.SetTempUiMessage(handlerResult.Messages);
-                var tempUiUpdateResult = await _userManager.UpdateAsync(managerUser).ConfigureAwait(false);
+                var tempUiUpdateResult = await userManager.UpdateAsync(managerUser).ConfigureAwait(false);
                 if (!tempUiUpdateResult.Succeeded)
                 {
                     tempUiUpdateResult.LogErrors(_logger);

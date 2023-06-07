@@ -41,7 +41,7 @@
                                     @foreach (var category in Categories)
                                     {
                                         <li>
-                                            <a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))">@category.Name</a>
+                                            <a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))" @onclick="@(() => NavigationManager.NavigateTo(Urls.Create(category.Url, typeof(Category))!, forceLoad: true))">@category.Name</a>
                                         </li>
                                     }
                                 </ul>
@@ -51,7 +51,7 @@
                     else
                     {
                         <li class="nav-item">
-                            <NavLink class="nav-link" href="@topnav.Link" @onclick="@(() => GoTo(topnav))">@topnav.Name</NavLink>
+                            <NavLink class="nav-link" href="@topnav.Link" @onclick="@(() => NavigationManager.NavigateTo(topnav.Link, forceLoad: true))">@topnav.Name</NavLink>
                         </li>
                     }
                 }
@@ -83,7 +83,7 @@
                                     </li>
                                 }
                                 <li>
-                                    <a class="dropdown-item" href="@Constants.Urls.Account.UserProfile">Profile</a>
+                                    <a class="dropdown-item" @onclick="@(() => NavigationManager.NavigateTo(@Constants.Urls.Account.UserProfile, forceLoad: true))">Profile</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -124,7 +124,7 @@
     {
         if (!item.Link.IsNullOrWhiteSpace())
         {
-            NavigationManager.NavigateTo(item.Link, item.ForceReload);
+            NavigationManager.NavigateTo(item.Link, true);
         }
     }
 }

@@ -8,21 +8,22 @@ using BlogFodder.Core.Shared.Models;
 using BlogFodder.Core.Shared.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Settings.Handlers;
 
 public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteSettingsCommand, HandlerResult<SiteSettings>>
 {
     private readonly ProviderService _providerService;
-    private readonly BlogFodderDbContext _dbContext;
     private readonly ICacheService _cacheService;
+    private readonly IServiceProvider _serviceProvider;
 
-    public CreateUpdateSiteSettingsHandler(ProviderService providerService, BlogFodderDbContext dbContext,
-        ICacheService cacheService)
+    public CreateUpdateSiteSettingsHandler(ProviderService providerService,
+        ICacheService cacheService, IServiceProvider serviceProvider)
     {
         _providerService = providerService;
-        _dbContext = dbContext;
         _cacheService = cacheService;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<HandlerResult<SiteSettings>> Handle(CreateUpdateSiteSettingsCommand request,
@@ -32,10 +33,13 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
 
         request.SiteSettings.DateUpdated = DateTime.UtcNow;
 
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+
         if (_providerService.StorageProvider != null)
         {
             // See if this site settings already exists as we will need to remove the images
-            var siteSettings = _dbContext.SiteSettings
+            var siteSettings = dbContext.SiteSettings
                 .Include(x => x.Logo)
                 .FirstOrDefault();
 
@@ -50,7 +54,7 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
 
                 // Save the file, create a file and attach it to the user
                 var fileResult =
-                    await request.Logo.AddFileToDb(request.SiteSettings.Id, result, _providerService, _dbContext);
+                    await request.Logo.AddFileToDb(request.SiteSettings.Id, result, _providerService, dbContext);
 
                 // Set the file to the user
                 request.SiteSettings.Logo = fileResult;
@@ -66,17 +70,17 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
 
             if (siteSettings != null && fileIdToDelete != null)
             {
-                var file = _dbContext.Files.FirstOrDefault(x => x.Id == fileIdToDelete);
+                var file = dbContext.Files.FirstOrDefault(x => x.Id == fileIdToDelete);
                 if (file != null)
                 {
-                    _dbContext.Files.Remove(file);
+                    dbContext.Files.Remove(file);
                 }
 
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
         }
 
-        result = await _dbContext.CreateOrUpdate(request.SiteSettings, result, !request.IsUpdate, cancellationToken)
+        result = await dbContext.CreateOrUpdate(request.SiteSettings, result, !request.IsUpdate, cancellationToken)
             .ConfigureAwait(false);
 
         // Clear the cache

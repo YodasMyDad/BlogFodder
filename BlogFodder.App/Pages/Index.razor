@@ -41,17 +41,10 @@
 
 @code
 {
-    [Inject]
-    public NavigationManager NavigationManager { get; set; } = default!;
-
-    [Inject]
-    public ExtensionManager ExtensionManager { get; set; } = default!;
-
-    [Inject]
-    public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
-
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
+    [Inject] public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
 
     private PaginatedList<Post> Posts { get; set; } = new();
 
@@ -68,19 +61,23 @@
             AmountPerPage = Settings.HomeAmountPerPage,
             OrderBy = GetPostsOrderBy.DateUpdatedDescending
         };
-        Posts = await Mediator.Send(postsQuery).ConfigureAwait(false);
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        Posts = await mediatr.Send(postsQuery).ConfigureAwait(false);
         StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        await GetPosts();
     }
 
     protected override void OnParametersSet()
     {
         PostListComponent = BlogFodderSettings.Value.FrontEnd.PostListComponent!;
         PaginationComponent = BlogFodderSettings.Value.FrontEnd.PaginationComponent!;
-        _ = Task.Run(async () => await GetPosts());
     }
 }

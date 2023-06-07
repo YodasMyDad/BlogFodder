@@ -5,20 +5,24 @@ using BlogFodder.Core.Posts.Models;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Posts.Handlers;
 
 public class GetPostsHandler : IRequestHandler<GetPostsCommand, PaginatedList<Post>>
 {
-    private readonly BlogFodderDbContext _context;
-    public GetPostsHandler(BlogFodderDbContext context)
+    private readonly IServiceProvider _serviceProvider;
+
+    public GetPostsHandler(IServiceProvider serviceProvider)
     {
-        _context = context;
+        _serviceProvider = serviceProvider;
     }
-    
+
     public Task<PaginatedList<Post>> Handle(GetPostsCommand request, CancellationToken cancellationToken)
     {
-        var query = _context.Posts.AsQueryable();
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        var query = dbContext.Posts.AsQueryable();
 
         if (request.IncludeCategories)
         {
@@ -53,15 +57,7 @@ public class GetPostsHandler : IRequestHandler<GetPostsCommand, PaginatedList<Po
             GetPostsOrderBy.DateCreatedDescending => query.OrderByDescending(p => p.DateCreated),
             _ => query.OrderByDescending(p => p.DateUpdated)
         };
-
-        /*Posts = DbContext.Posts
-            .AsQueryable()
-            .Include(x => x.FeaturedImage)
-            .Include(x => x.Categories)
-            .AsNoTracking()
-            .OrderByDescending(x => x.DateUpdated)
-            .ToPaginatedList(CurrentPage, Settings.HomeAmountPerPage);*/
-
+        
         return Task.FromResult(query.ToPaginatedList(request.PageIndex, request.AmountPerPage));
     }
 }

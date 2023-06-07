@@ -4,24 +4,29 @@ using BlogFodder.Core.Settings.Models;
 using BlogFodder.Core.Shared.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Settings.Handlers;
 
 public class GetSiteSettingsHandler : IRequestHandler<GetSiteSettingsCommand, SiteSettings>
 {
-    private readonly BlogFodderDbContext _dbContext;
     private readonly ICacheService _cacheService;
-    
-    public GetSiteSettingsHandler(BlogFodderDbContext dbContext, ICacheService cacheService)
+    private readonly IServiceProvider _serviceProvider;
+    public GetSiteSettingsHandler(ICacheService cacheService, IServiceProvider serviceProvider)
     {
-        _dbContext = dbContext;
         _cacheService = cacheService;
+        _serviceProvider = serviceProvider;
     }
     
     public async Task<SiteSettings> Handle(GetSiteSettingsCommand request, CancellationToken cancellationToken)
     {
         return  await _cacheService.GetSetCachedItemAsync(nameof(SiteSettings), 
-            async () => await _dbContext.SiteSettings.Include(x => x.Logo).AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken: cancellationToken)) ?? new SiteSettings();
+            async () =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+                return await dbContext.SiteSettings.Include(x => x.Logo).AsNoTracking()
+                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            }) ?? new SiteSettings();
     }
 }

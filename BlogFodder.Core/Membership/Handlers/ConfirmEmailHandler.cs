@@ -6,31 +6,34 @@ using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Membership.Handlers
 {
     public class ConfirmEmailHandler : IRequestHandler<ConfirmEmailCommand, AuthenticationResult>
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ConfirmEmailHandler(UserManager<User> userManager, SignInManager<User> signInManager)
+        public ConfirmEmailHandler(IServiceProvider serviceProvider)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<AuthenticationResult> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
         {
-            var result = new AuthenticationResult { Success = true };
+            using var scope = _serviceProvider.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<User>>();
+
+            var result = new AuthenticationResult {Success = true};
             if (request.UserId.IsNullOrWhiteSpace())
             {
                 result.Success = false;
                 result.AddMessage("The user id is null", ResultMessageType.Error);
                 return result;
             }
-            
-            var user = await _userManager.FindByIdAsync(request.UserId).ConfigureAwait(false);
+
+            var user = await userManager.FindByIdAsync(request.UserId).ConfigureAwait(false);
             if (user == null)
             {
                 result.Success = false;
@@ -46,7 +49,8 @@ namespace BlogFodder.Core.Membership.Handlers
                 var newEmail = user!.ExtendedData.Get(Constants.ExtendedDataKeys.NewEmailAddress);
                 if (!newEmail.IsNullOrWhiteSpace())
                 {
-                    var changeResult = await _userManager.ChangeEmailAsync(user, newEmail, request.Code).ConfigureAwait(false);
+                    var changeResult = await userManager.ChangeEmailAsync(user, newEmail, request.Code)
+                        .ConfigureAwait(false);
                     if (!changeResult.Succeeded)
                     {
                         result.Success = false;
@@ -57,14 +61,14 @@ namespace BlogFodder.Core.Membership.Handlers
 
                     // lear new email from user
                     user.ExtendedData.Remove(Constants.ExtendedDataKeys.NewEmailAddress);
-                    var updateResult = await _userManager.UpdateAsync(user).ConfigureAwait(false);
+                    var updateResult = await userManager.UpdateAsync(user).ConfigureAwait(false);
                     if (!updateResult.Succeeded)
                     {
                         updateResult.LogErrors();
                         return result;
                     }
 
-                    await _signInManager.RefreshSignInAsync(user).ConfigureAwait(false);
+                    await signInManager.RefreshSignInAsync(user).ConfigureAwait(false);
 
                     // return success message
                     result.AddMessage("Email address changed", ResultMessageType.Success);
@@ -79,7 +83,7 @@ namespace BlogFodder.Core.Membership.Handlers
             }
             else
             {
-                var confirmResult = await _userManager.ConfirmEmailAsync(user!, request.Code).ConfigureAwait(false);
+                var confirmResult = await userManager.ConfirmEmailAsync(user!, request.Code).ConfigureAwait(false);
                 if (confirmResult.Succeeded)
                 {
                     result.AddMessage("Email confirmed, you can now login", ResultMessageType.Success);
@@ -90,6 +94,7 @@ namespace BlogFodder.Core.Membership.Handlers
                     result.AddMessage("There was an error confirming your email", ResultMessageType.Error);
                 }
             }
+
             return result;
         }
     }

@@ -51,10 +51,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Shared\Models\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Remove="Pages\Account\LoginWith2fa.cshtml" />
       <Content Remove="Pages\Account\LoginWithRecoveryCode.cshtml" />
       <Content Remove="Pages\Account\Manage\Disable2fa.cshtml" />

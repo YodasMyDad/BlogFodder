@@ -10,44 +10,47 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Membership.Handlers
 {
     public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand, AuthenticationResult>
     {
-        private readonly UserManager<User> _userManager;
         private readonly ProviderService _providerService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMediator _mediator;
-
-        public ForgotPasswordHandler(UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IMediator mediator, ProviderService providerService)
+        private readonly IServiceProvider _serviceProvider;
+        
+        public ForgotPasswordHandler(IHttpContextAccessor httpContextAccessor, ProviderService providerService, IServiceProvider serviceProvider)
         {
-            _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
-            _mediator = mediator;
             _providerService = providerService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<AuthenticationResult> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
             var result = new AuthenticationResult();
 
-            var user = await _userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
+            using var scope = _serviceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+            var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
             if (user != null)
             {
-                if (await _userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false) == false)
+                if (await userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false) == false)
                 {
                     result.Success = false;
                     result.AddMessage("Please check your email to confirm your account", ResultMessageType.Success);
 
                     // Resend confirmation email
-                    await _mediator.Send(new SendEmailConfirmationCommand { ReturnUrl = "~/", User = user }, cancellationToken).ConfigureAwait(false);
+                    await mediatr.Send(new SendEmailConfirmationCommand { ReturnUrl = "~/", User = user }, cancellationToken).ConfigureAwait(false);
                     return result;
                 }
 
                 // For more information on how to enable account confirmation and password reset please
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
-                var code = await _userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
+                var code = await userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = _httpContextAccessor.ToAbsoluteUrl(Constants.Urls.Account.ResetPassword, new { code = code, email = request.Email });
 

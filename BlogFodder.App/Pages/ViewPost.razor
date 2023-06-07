@@ -1,7 +1,6 @@
 @page "/p/{Slug}"
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Plugins
-@using BlogFodder.Core.Data
 @using BlogFodder.Core.Plugins.Models
 @using BlogFodder.Core.Posts.Models
 @using BlogFodder.Core.Settings
@@ -10,7 +9,8 @@
 @using MediatR
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-@implements IDisposable
+@using BlogFodder.Core.Data
+
 <PageTitle>@Post.PageTitle</PageTitle>
 <HeadContent>
     <meta name="description" content="@Post.MetaDescription">
@@ -55,29 +55,16 @@ else
 }
 
 @code {
+    [Parameter] public string? Slug { get; set; }
 
-    [Parameter]
-    public string? Slug { get; set; }
-
-    [Inject]
-    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-
-    [Inject]
-    public ExtensionManager ExtensionManager { get; set; } = default!;
-
-    [Inject]
-    public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
-
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
-
-    [Inject]
-    public IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
+    [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
+    [Inject] public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+    [Inject] public IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
 
     private string PostViewComponent { get; set; } = "";
     private Post Post { get; set; } = new();
     private bool CanBeFound { get; set; }
-    private BlogFodderDbContext DbContext { get; set; } = default!;
     private string? CurrentDomain { get; set; }
     private string? CurrentUrl { get; set; }
     private string? FeaturedImageUrl { get; set; }
@@ -85,13 +72,16 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        DbContext = await DbContextFactory.CreateDbContextAsync();
-        Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        
+        Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
         CurrentDomain = HttpContextAccessor.HttpContext?.Request.Host.Value;
         CurrentUrl = $"{CurrentDomain}{Urls.Create(Slug, typeof(Post))}";
         if (!Slug.IsNullOrWhiteSpace())
         {
-            var post = DbContext.Posts
+            var post = dbContext.Posts
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
                 .Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
@@ -111,10 +101,4 @@ else
     {
         PostViewComponent = BlogFodderSettings.Value.FrontEnd.PostViewComponent!;
     }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
-    }
-
 }

@@ -6,6 +6,7 @@ using BlogFodder.Core.Settings;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -13,40 +14,35 @@ namespace BlogFodder.Core.Membership.Handlers
 {
     public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthenticationResult>
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
         private readonly IOptions<BlogFodderSettings> _settings;
-        private readonly IUserStore<User> _userStore;
-        private readonly IUserEmailStore<User> _userEmailStore;
-        private readonly RoleManager<Role> _roleManager;
         private readonly ILogger<RegisterUserHandler> _logger;
-        private readonly IMediator _mediator;
         private readonly BlogFodderSettings _blogFodderSettings;
+        private readonly IServiceProvider _serviceProvider;
 
-        public RegisterUserHandler(UserManager<User> userManager,
-                                IUserEmailStore<User> userEmailStore,
-                                IUserStore<User> userStore,
-                                ILogger<RegisterUserHandler> logger,
-                                SignInManager<User> signInManager,
-                                IOptions<BlogFodderSettings> gabSettings,
-                                IMediator mediator, RoleManager<Role> roleManager, IOptions<BlogFodderSettings> settings)
+        public RegisterUserHandler(
+            ILogger<RegisterUserHandler> logger,
+            IOptions<BlogFodderSettings> gabSettings,
+            IOptions<BlogFodderSettings> settings, 
+            IServiceProvider serviceProvider)
         {
-            _userManager = userManager;
-            _userEmailStore = userEmailStore;
-            _userStore = userStore;
             _logger = logger;
-            _signInManager = signInManager;
             _blogFodderSettings = gabSettings.Value;
-            _mediator = mediator;
-            _roleManager = roleManager;
             _settings = settings;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<AuthenticationResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
+            using var scope = _serviceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<User>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+        
+            
             var newUser = new User { Id = Guid.NewGuid().NewSequentialGuid(), Email = request.Email, UserName = request.Username };
             var loginResult = new AuthenticationResult();
-            var createResult = await _userManager.CreateAsync(newUser, request.Password).ConfigureAwait(false);
+            var createResult = await userManager.CreateAsync(newUser, request.Password).ConfigureAwait(false);
             loginResult.Success = createResult.Succeeded;
             if (loginResult.Success)
             {
@@ -59,13 +55,13 @@ namespace BlogFodder.Core.Membership.Handlers
                 }
                 
                 // Check the starting role exists
-                var roleExist = await _roleManager.RoleExistsAsync(startingRoleName);
+                var roleExist = await roleManager.RoleExistsAsync(startingRoleName);
                 if (!roleExist)
                 {
-                    await _roleManager.CreateAsync(new Role {Name = startingRoleName});
+                    await roleManager.CreateAsync(new Role {Name = startingRoleName});
                 }
                 
-                var addToRoleResult = await _userManager.AddToRoleAsync(newUser, startingRoleName).ConfigureAwait(false);
+                var addToRoleResult = await userManager.AddToRoleAsync(newUser, startingRoleName).ConfigureAwait(false);
                 if (addToRoleResult.Succeeded == false)
                 {
                     addToRoleResult.LogErrors();
@@ -74,9 +70,9 @@ namespace BlogFodder.Core.Membership.Handlers
                     return loginResult;
                 }
 
-                var user = await _userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
+                var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
 
-                if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                if (userManager.Options.SignIn.RequireConfirmedAccount)
                 {
                     var sendConfirmationEmailCommand = new SendEmailConfirmationCommand
                     {
@@ -84,13 +80,13 @@ namespace BlogFodder.Core.Membership.Handlers
                         User = user
                     };
 
-                    await _mediator.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
+                    await mediatr.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
 
                     loginResult.AddMessage("Please check your email and click the link to confirm your account", ResultMessageType.Success);
                 }
                 else
                 {
-                    await _signInManager.SignInAsync(user, request.RememberMe).ConfigureAwait(false);
+                    await signInManager.SignInAsync(user, request.RememberMe).ConfigureAwait(false);
 
                     loginResult.NavigateToUrl = request.ReturnUrl ?? "~/";
                 }
