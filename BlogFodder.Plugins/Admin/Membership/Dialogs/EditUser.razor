@@ -50,7 +50,7 @@
     protected override async Task OnInitializedAsync()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         Roles = await dbContext.Roles.AsNoTracking().OrderBy(x => x.Name).ToListAsync();
 
         if (User != null)
@@ -63,7 +63,7 @@
     private async Task SubmitForm()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         
         // Create a set of the selected role Ids for easier comparison
         var selectedRoleIds = new HashSet<Guid>(SelectedRoles.Select(role => role.Id));

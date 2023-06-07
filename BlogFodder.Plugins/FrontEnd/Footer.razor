@@ -3,6 +3,7 @@
 @using MediatR
 @using Microsoft.Extensions.Options
 @using BlogFodder.Core.Settings.Commands
+@using Microsoft.Extensions.DependencyInjection
 
 <footer class="bg-secondary-subtle mt-6">
     <div class="container">
@@ -23,17 +24,15 @@
 
 @code{
 
-    [Inject]
-    IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
-
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
-    
+    [Inject] IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
     private SiteSettings Settings { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        Settings = await Mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
     }
 
 }

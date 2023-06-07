@@ -4,20 +4,25 @@ using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Categories.Handlers;
 
 public class GetCategoryHandler : IRequestHandler<GetCategoryCommand, Category?>
 {
-    private readonly BlogFodderDbContext _context;
-    public GetCategoryHandler(BlogFodderDbContext context)
+    private readonly IServiceProvider _serviceProvider;
+
+    public GetCategoryHandler(IServiceProvider serviceProvider)
     {
-        _context = context;
+        _serviceProvider = serviceProvider;
     }
-    
+
     public async Task<Category?> Handle(GetCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = _context.Categories.AsQueryable();
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        
+        var category = dbContext.Categories.AsQueryable();
 
         if (request.IncludeSocialImage)
         {

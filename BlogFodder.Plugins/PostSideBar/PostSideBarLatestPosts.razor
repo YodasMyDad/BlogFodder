@@ -5,8 +5,8 @@
 @using Microsoft.EntityFrameworkCore
 @using BlogFodder.Core.Data
 @using BlogFodder.Core.Extensions
+@using Microsoft.Extensions.DependencyInjection
 @implements IPluginContentComponent
-@implements IDisposable
 
 <div>
     <h5>Latest Posts</h5>
@@ -22,33 +22,20 @@
 </div>
 
 @code {
-
-    [Parameter]
-    public string? Model { get; set; }
-
-    [Parameter]
-    public string? Settings { get; set; }
-
-    [Parameter]
-    public Guid? PostId { get; set; }
-
-    [Inject]
-    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-
+    [Parameter] public string? Model { get; set; }
+    [Parameter] public string? Settings { get; set; }
+    [Parameter] public Guid? PostId { get; set; }
+    
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    
     private List<Post> LatestPosts { get; set; } = new();
     private PluginContentModel<string?, PostSideBarSettingsModel> PostContentModel { get; set; } = new();
-    private BlogFodderDbContext DbContext { get; set; } = default!;
 
     protected override void OnInitialized()
     {
-        DbContext = DbContextFactory.CreateDbContext();
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         PostContentModel = new PluginContentModel<string?, PostSideBarSettingsModel>(Model, Settings);
-        LatestPosts = DbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateUpdated).Take(PostContentModel.PluginSettings?.LatestPostsAmount ?? 4).ToList();
+        LatestPosts = dbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateUpdated).Take(PostContentModel.PluginSettings?.LatestPostsAmount ?? 4).ToList();
     }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
-    }
-
 }

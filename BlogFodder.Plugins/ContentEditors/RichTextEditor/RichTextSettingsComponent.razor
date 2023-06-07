@@ -4,6 +4,7 @@
 @using BlogFodder.Core.Extensions
 @using System.Text.Json
 @using BlogFodder.Core.Plugins.Models
+@using Microsoft.Extensions.DependencyInjection
 @layout AdminLayout
 <PageTitle>RTE Editor Settings</PageTitle>
 @if (Errors.Length > 0)
@@ -49,12 +50,9 @@
 
 @code
 {
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = default!;
-
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
-
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    
     private MudForm Form { get; set; } = default!;
     private string?[] Errors { get; set; } = Array.Empty<string>();
     private RichTextGlobalSettings RichTextGlobalSettings { get; set; } = new();
@@ -62,7 +60,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var globalSettings = await Mediator.Send(new GetGlobalPluginSettingsCommand {Alias = RichTextEditorConstants.PluginAlias}).ConfigureAwait(false);
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var globalSettings = await mediatr.Send(new GetGlobalPluginSettingsCommand {Alias = RichTextEditorConstants.PluginAlias}).ConfigureAwait(false);
         if (globalSettings != null)
         {
             SavePluginSettingsCommand.IsUpdate = true;
@@ -91,8 +91,10 @@
         await Form.Validate();
         if (Form.IsValid)
         {
+            using var scope = ServiceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
             SavePluginSettingsCommand.Settings!.Data = JsonSerializer.Serialize(RichTextGlobalSettings, new JsonSerializerOptions {WriteIndented = false}); // Is this compact JSON?
-            var result = await Mediator.Send(SavePluginSettingsCommand).ConfigureAwait(false);
+            var result = await mediatr.Send(SavePluginSettingsCommand).ConfigureAwait(false);
             if (result.Success)
             {
                 var correctText = SavePluginSettingsCommand.IsUpdate ? "Updated" : "Created";

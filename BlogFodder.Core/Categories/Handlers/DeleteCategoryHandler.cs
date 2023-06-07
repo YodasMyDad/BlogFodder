@@ -6,26 +6,30 @@ using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Categories.Handlers;
 
 public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, HandlerResult<Category>>
 {
-    private readonly BlogFodderDbContext _dbContext;
     private readonly ProviderService _providerService;
-
-    public DeleteCategoryHandler(BlogFodderDbContext dbContext, ProviderService providerService)
+    private readonly IServiceProvider _serviceProvider;
+    
+    public DeleteCategoryHandler(ProviderService providerService, IServiceProvider serviceProvider)
     {
-        _dbContext = dbContext;
         _providerService = providerService;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<HandlerResult<Category>> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
         var result = new HandlerResult<Category>();
         
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        
         // get the category
-        var categoryToDelete = await _dbContext.Categories
+        var categoryToDelete = await dbContext.Categories
             .FirstOrDefaultAsync(x => x.Id == request.CategoryId, cancellationToken: cancellationToken);
 
         if (categoryToDelete == null)
@@ -36,7 +40,7 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Hand
         }
         
         // First things first, are any posts using this category, if so return error
-        var postCount = _dbContext.Categories
+        var postCount = dbContext.Categories
             .Include(x => x.Posts)
             .FirstOrDefault(x => x.Id == request.CategoryId)?.Posts.Count;
         if (postCount > 0)
@@ -47,18 +51,18 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Hand
         }
 
         // Get the files
-        var socialImage = await _dbContext.Files.FirstOrDefaultAsync(x => x.Id == categoryToDelete.SocialImageId, cancellationToken: cancellationToken);
+        var socialImage = await dbContext.Files.FirstOrDefaultAsync(x => x.Id == categoryToDelete.SocialImageId, cancellationToken: cancellationToken);
         if (socialImage != null)
         {
-            _dbContext.Remove(socialImage);
+            dbContext.Remove(socialImage);
             _providerService.StorageProvider?.DeleteFile(socialImage.Url);
         }
     
         // TODO - Do I need to clear the posts many to many? or will that delete the posts?    
 
         // Delete the post
-        _dbContext.Categories.Remove(categoryToDelete);
+        dbContext.Categories.Remove(categoryToDelete);
 
-        return await _dbContext.SaveChangesAndLog(result, cancellationToken);
+        return await dbContext.SaveChangesAndLog(result, cancellationToken);
     }
 }

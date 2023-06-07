@@ -7,23 +7,16 @@ using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 
 namespace BlogFodder.Plugins.Admin.Settings;
 
 public partial class SiteSettings : ComponentBase
 {
-        [Inject]
-    public BlogFodderDbContext DbContext { get; set; } = default!;
-
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = default!;
-
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
-
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] public ProviderService ProviderService { get; set; } = default!;
-
     
     private MudForm Form { get; set; } = default!;
     private bool IsUpdate { get; set; }
@@ -34,7 +27,9 @@ public partial class SiteSettings : ComponentBase
     
     protected override async Task OnInitializedAsync()
     {
-        var settings = await DbContext.SiteSettings.FirstOrDefaultAsync();
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        var settings = await dbContext!.SiteSettings.FirstOrDefaultAsync();
         if (settings != null)
         {
             SiteSettingsCommand.IsUpdate = true;
@@ -82,7 +77,10 @@ public partial class SiteSettings : ComponentBase
         await Form.Validate();
         if (Form.IsValid)
         {
-            var result = await Mediator.Send(SiteSettingsCommand);
+            using var scope = ServiceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            
+            var result = await mediatr!.Send(SiteSettingsCommand);
             if (result.Success)
             {
                 var correctText = IsUpdate ? "Updated" : "Created";

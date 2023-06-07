@@ -65,14 +65,11 @@
 
     [Inject]
     public IConfiguration Configuration { get; set; } = default!;
-    
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
 
     [Inject]
     public IServiceProvider ServiceProvider { get; set; } = default!;
-    
-    private PostComment Comment { get; set; } = new(){ DateCreated = DateTime.UtcNow};
+
+    private PostComment Comment { get; set; } = new() {DateCreated = DateTime.UtcNow};
     private PluginContentModel<List<PostComment>, PostCommentSettings> PostContentModel { get; set; } = new();
 
     protected override void OnInitialized()
@@ -86,40 +83,41 @@
 
     private async Task HandleSubmit()
     {
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+
         var sanitizer = new HtmlSanitizer();
         if (Comment.Comment.IsNullOrWhiteSpace())
         {
             ToastService.ShowError("You need to enter a comment");
             return;
         }
-        
+
         var canPostComment = true;
-        
-        // Sanitise comment
+
+    // Sanitise comment
         Comment.Comment = sanitizer.Sanitize(Comment.Comment);
 
         if (PostContentModel.PluginSettings?.EnableAkismetSpamCheck == true)
         {
-            // Has the user added Akismet API
+    // Has the user added Akismet API
             var akismetSpiKey = Configuration.GetSection("PostCommentsPlugin")["AkismetApiKey"];
             if (!akismetSpiKey.IsNullOrWhiteSpace())
             {
-                // Get the akisment service
-                var akismetService = ServiceProvider.GetService<AkismetClient>();
-                if (akismetService != null)
+    // Get the akisment service
+                var akismetService = scope.ServiceProvider.GetRequiredService<AkismetClient>();
+
+                var comment = new AkismetComment
                 {
-                    var comment = new AkismetComment
-                    {
-                        Blog = Configuration.GetSection("PostCommentsPlugin")["Url"],
-                        CommentAuthorEmail = Comment.Name, // TODO - This needs to be the email!
-                        CommentContent = Comment.Comment,
-                    };
-                    var result = await akismetService.CheckCommentAsync(comment);
-                    if (result.IsSpam)
-                    {
-                        PostContentModel.PluginSettings.FlaggedComments.Add(Comment);
-                        canPostComment = false;
-                    }   
+                    Blog = Configuration.GetSection("PostCommentsPlugin")["Url"],
+                    CommentAuthorEmail = Comment.Name, // TODO - This needs to be the email!
+                    CommentContent = Comment.Comment,
+                };
+                var result = await akismetService.CheckCommentAsync(comment);
+                if (result.IsSpam)
+                {
+                    PostContentModel.PluginSettings.FlaggedComments.Add(Comment);
+                    canPostComment = false;
                 }
             }
         }
@@ -137,11 +135,11 @@
         }
 
         var createUpdateCommand = new CreateUpdatePluginCommand();
-        var plugin = await Mediator.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
+        var plugin = await mediatr!.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
         if (plugin == null)
         {
-            // This should not happen, but just in case
-            plugin = new Plugin { PluginAlias = PostCommentsConstants.PluginAlias};
+    // This should not happen, but just in case
+            plugin = new Plugin {PluginAlias = PostCommentsConstants.PluginAlias};
         }
         else
         {
@@ -150,10 +148,10 @@
         plugin.PluginData = JsonSerializer.Serialize(PostContentModel.PluginModel);
         plugin.PluginSettings = JsonSerializer.Serialize(PostContentModel.PluginSettings);
         createUpdateCommand.Plugin = plugin;
-        var saveResult = await Mediator.Send(createUpdateCommand).ConfigureAwait(false);
+        var saveResult = await mediatr.Send(createUpdateCommand).ConfigureAwait(false);
         if (saveResult.Success)
         {
-            Comment = new PostComment { PostId = PostId!.Value, DateCreated = DateTime.UtcNow};
+            Comment = new PostComment {PostId = PostId!.Value, DateCreated = DateTime.UtcNow};
             ToastService.ShowSuccess("Comment added");
         }
         else

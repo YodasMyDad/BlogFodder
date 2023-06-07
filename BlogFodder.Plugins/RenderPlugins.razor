@@ -7,8 +7,8 @@
 @using BlogFodder.Plugins.ContentEditors.RichTextEditor
 @using MediatR
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.DependencyInjection
 @using PluginSettings = BlogFodder.Core.Settings.PluginSettings
-@implements IDisposable
 
 @foreach (var plugin in Plugins)
 {
@@ -29,30 +29,18 @@
 
 @code
 {
-    [Parameter]
-    public PluginDisplayArea? PluginDisplayArea { get; set; }
-
-    [Parameter]
-    public Guid? PostId { get; set; }
-
-    [Inject] 
-    public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
-
-    [Inject]
-    public ExtensionManager ExtensionManager { get; set; } = default!;
-
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
+    [Parameter] public PluginDisplayArea? PluginDisplayArea { get; set; }
+    [Parameter] public Guid? PostId { get; set; }
+    
+    [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
 
     private Dictionary<string, Plugin> PluginData { get; set; } = new();
     private Dictionary<string, IPlugin> Plugins { get; set; } = new();
     private Dictionary<string, string?> PluginSettingData { get; set; } = new();
-    private BlogFodderDbContext DbContext { get; set; } = default!;
 
     protected override void OnInitialized()
     {
-        DbContext = DbContextFactory.CreateDbContext();
-        
         if (PluginDisplayArea != null)
         {
             // Get the actual plugins that have a content ContentPlugin
@@ -68,14 +56,11 @@
                 // Now get the PluginData that matches this data (If a PostId then also include this in the query)
                 // TODO - This needs to be cached, maybe a get all that is cached per request
                 // TODO - Does EF cache this anyway if same query is called multiple times?
-                var pluginData = DbContext.Plugins.AsNoTracking().Where(x => pluginAliases.Contains(x.PluginAlias));
+                using var scope = ServiceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+                var pluginData = dbContext.Plugins.AsNoTracking().Where(x => pluginAliases.Contains(x.PluginAlias));
                 PluginData = pluginData.ToDictionary(x => x.PluginAlias ?? "", x => x);
             }
         }
-    }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
     }
 }

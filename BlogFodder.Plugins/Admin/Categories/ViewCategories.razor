@@ -40,15 +40,15 @@
     protected override void OnInitialized()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         SetCategories(dbContext);
     }
 
     private async Task DeleteCategory(Category category)
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
-        var mediatr = scope.ServiceProvider.GetService<IMediator>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         var dialogResult = await DialogService.ShowMessageBox(
             "Warning", 
             "Once you click delete the category is gone", 

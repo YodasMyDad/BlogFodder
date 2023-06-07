@@ -6,10 +6,9 @@
 @using Humanizer
 @using MediatR
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.DependencyInjection
 @layout AdminLayout
-@implements IDisposable
 <PageTitle>View Posts</PageTitle>
-
 
 <MudTable Items="@Posts" Hover="true" OnRowClick="RowClickEvent" T="Post" RowClass="rowpointer">
     <HeaderContent>
@@ -29,33 +28,35 @@
     </PagerContent>
 </MudTable>
 
-
 @code {
-
-    [Inject] public IDbContextFactory<BlogFodderDbContext> DbContextFactory { get; set; } = default!;
+    
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
-    [Inject] public IMediator Mediator { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] private IDialogService DialogService { get; set; } = default!;
-    private BlogFodderDbContext DbContext { get; set; } = default!;
-    
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+
     public List<Post> Posts { get; set; } = new();
 
     protected override void OnInitialized()
     {
-        DbContext = DbContextFactory.CreateDbContext();
-        Posts = DbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        Posts = dbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
     }
 
     private async Task DeletePost(Post post)
     {
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        
         var dialogResult = await DialogService.ShowMessageBox(
             "Warning", 
             "Once you click delete the post is gone", 
             yesText:"Delete", cancelText:"Cancel");
         if (dialogResult == true)
         {
-            var result = await Mediator.Send(new DeletePostCommand{PostId = post.Id}).ConfigureAwait(false);
+            var result = await mediatr.Send(new DeletePostCommand{PostId = post.Id}).ConfigureAwait(false);
             if (result is {Success: false})
             {
                 foreach (var errorMessage in result.Messages.ErrorMessagesToList())
@@ -66,7 +67,7 @@
             else
             {
                 Snackbar.Add("Post Deleted", Severity.Success);
-                Posts = DbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
+                Posts = dbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
                 StateHasChanged();
             }   
         }
@@ -76,10 +77,4 @@
     {
         NavigationManager.NavigateTo($"/admin/createpost/{tableRowClickEventArgs.Item.Id}");
     }
-
-    public void Dispose()
-    {
-        DbContext.Dispose();
-    }
-
 }

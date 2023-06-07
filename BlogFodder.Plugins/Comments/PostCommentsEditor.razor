@@ -2,9 +2,11 @@
 @using BlogFodder.Plugins.Comments.Models
 @using BlogFodder.Core.Extensions
 @using System.Text.Json
+@using BlogFodder.Core.Data
 @using BlogFodder.Core.Plugins.Commands
 @using Humanizer
 @using MediatR
+@using Microsoft.Extensions.DependencyInjection
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginEditorComponent
 
 <MudDialog>
@@ -39,20 +41,11 @@
 
 @code {
 
-    [Parameter]
-    public Plugin? Plugin { get; set; }
-
-    [Parameter]
-    public EventCallback<Plugin> SaveAndClose { get; set; }
-
-    [Parameter]
-    public Guid PostId { get; set; }
-    
-    [Inject]
-    public IMediator Mediator { get; set; } = default!;
-    
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = default!;
+    [Parameter] public Plugin? Plugin { get; set; }
+    [Parameter] public EventCallback<Plugin> SaveAndClose { get; set; }
+    [Parameter] public Guid PostId { get; set; }
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
     
     private CreateUpdatePluginCommand CreateUpdatePluginCommand { get; set; } = new()
     {
@@ -80,8 +73,10 @@
     {
         if (Plugin != null)
         {
+            using var scope = ServiceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
             CreateUpdatePluginCommand = CreateUpdatePluginCommand.ReadyToSave(PostCommentSettings, PostComments);
-            var result = await Mediator.Send(CreateUpdatePluginCommand).ConfigureAwait(false);
+            var result = await mediatr.Send(CreateUpdatePluginCommand).ConfigureAwait(false);
             if (!result.Success)
             {
                 foreach (var error in result.Messages.ErrorMessages())

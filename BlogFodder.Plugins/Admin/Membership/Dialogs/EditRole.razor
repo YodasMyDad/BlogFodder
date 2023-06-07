@@ -55,7 +55,7 @@
     private async Task SubmitForm()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
 
         try
         {

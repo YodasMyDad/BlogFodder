@@ -40,14 +40,14 @@
     protected override void OnInitialized()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         SetRoles(dbContext);
     }
 
     private async Task DeleteRole(Role role)
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         
         var dialogResult = await DialogService.ShowMessageBox(
             "Warning", 
@@ -100,7 +100,7 @@
         if (!result.Canceled)
         {
             using var scope = ServiceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
             SetRoles(dbContext);
             //StateHasChanged();
         }

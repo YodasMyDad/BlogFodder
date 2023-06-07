@@ -52,14 +52,14 @@
     protected override void OnInitialized()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         SetUsers(dbContext!);
     }
 
     private async Task DeleteUser(User user)
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         
         var dialogResult = await DialogService.ShowMessageBox(
             "Warning",

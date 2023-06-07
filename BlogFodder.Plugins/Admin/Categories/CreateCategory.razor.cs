@@ -33,7 +33,7 @@ public partial class CreateCategory : ComponentBase
         if (Id != null)
         {
             using var scope = ServiceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
             
             // Yes, should probably be in a service or Mediatr call
             var dbCategory = dbContext!.Categories
@@ -92,7 +92,7 @@ public partial class CreateCategory : ComponentBase
         if (Form.IsValid)
         {
             using var scope = ServiceProvider.CreateScope();
-            var mediatr = scope.ServiceProvider.GetService<IMediator>();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
             
             // Call mediatr and return and check for errors
             // Send the email

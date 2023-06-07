@@ -6,6 +6,7 @@ using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogFodder.Core.Categories.Handlers;
 
@@ -13,12 +14,11 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
 {
     private readonly SlugHelper _slugHelper;
     private readonly ProviderService _providerService;
-    private readonly BlogFodderDbContext _dbContext;
-
-    public CreateUpdateCategoryHandler(ProviderService providerService, BlogFodderDbContext dbContext)
+    private readonly IServiceProvider _serviceProvider;
+    public CreateUpdateCategoryHandler(ProviderService providerService, IServiceProvider serviceProvider)
     {
         _providerService = providerService;
-        _dbContext = dbContext;
+        _serviceProvider = serviceProvider;
         _slugHelper = new SlugHelper();
     }
 
@@ -47,11 +47,14 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
         {
             request.Category.DateUpdated = DateTime.UtcNow;
         }
+        
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
 
         if (_providerService.StorageProvider != null)
         {
             // See if this category already exists as we will need to remove the images
-            var category = _dbContext.Categories
+            var category = dbContext.Categories
                 .AsNoTracking()
                 .Include(x => x.SocialImage)
                 .FirstOrDefault(x => x.Id == request.Category.Id);
@@ -67,7 +70,7 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
                 }
 
                 // Save the file, create a file and attach it to the user
-                var fileResult = await request.SocialImage.AddFileToDb(request.Category.Id, handlerResult, _providerService, _dbContext);
+                var fileResult = await request.SocialImage.AddFileToDb(request.Category.Id, handlerResult, _providerService, dbContext);
 
                 // Set the file to the user
                 request.Category.SocialImage = fileResult;
@@ -83,17 +86,17 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
 
             if (category != null && fileIdToDelete != null)
             {
-                var file = _dbContext.Files.FirstOrDefault(x => x.Id == fileIdToDelete);
+                var file = dbContext.Files.FirstOrDefault(x => x.Id == fileIdToDelete);
                 if (file != null)
                 {
-                    _dbContext.Files.Remove(file);
+                    dbContext.Files.Remove(file);
                 }
 
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
         }
         
-        return await _dbContext.CreateOrUpdate(request.Category, handlerResult, !request.IsUpdate, cancellationToken)
+        return await dbContext.CreateOrUpdate(request.Category, handlerResult, !request.IsUpdate, cancellationToken)
             .ConfigureAwait(false);
     }
     

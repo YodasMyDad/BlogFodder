@@ -50,7 +50,7 @@ public partial class CreatePost : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         Categories = await dbContext!.Categories.ToListAsync();
 
         // See if this is an edit or not
@@ -250,7 +250,7 @@ public partial class CreatePost : ComponentBase
     private async Task ShowContentEditors()
     {
         using var scope = ServiceProvider.CreateScope();
-        var mediatr = scope.ServiceProvider.GetService<IMediator>();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         var dialog = await Dialog.ShowAsync<EditorPluginSelection>("Select Content Editor", new DialogParameters(),
             _defaultDialogOptions);
         var result = await dialog.Result;
@@ -299,7 +299,7 @@ public partial class CreatePost : ComponentBase
         if (Form.IsValid)
         {
             using var scope = ServiceProvider.CreateScope();
-            var mediatr = scope.ServiceProvider.GetService<IMediator>();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
             
             // Couple of manual checks
             if (PostCommand.FeaturedImage == null && PostCommand.Post.FeaturedImage == null)
