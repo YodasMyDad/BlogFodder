@@ -3,7 +3,6 @@ using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Plugins.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace BlogFodder.Plugins;
 
@@ -16,7 +15,7 @@ public static class ServiceCollectionExtensions
         
         // Build the service provider and get the extension manager
         var serviceProvider = services.BuildServiceProvider();
-        var extensionManager = serviceProvider.GetService<ExtensionManager>();
+        var extensionManager = serviceProvider.GetRequiredService<ExtensionManager>();
         
         // Plugins
         var assemblyProvider = new DefaultAssemblyProvider(serviceProvider);
@@ -27,6 +26,9 @@ public static class ServiceCollectionExtensions
         // Mediatr
         services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(discoverAssemblies));
 
+        // Automapper
+        services.AddAutoMapper(discoverAssemblies);
+        
         // Start up items
         var startUpItems = extensionManager?.GetInstances<IStartupPlugin>();
         if (startUpItems != null)
@@ -34,22 +36,6 @@ public static class ServiceCollectionExtensions
             foreach (var startUpItem in startUpItems)
             {
                 startUpItem.Value.Register(services, configuration);
-            }   
-        }
-
-        // Hosted services (IHostedService)
-        var hostedServices = extensionManager?.GetImplementations<IHostedService>();
-        if (hostedServices != null)
-        {
-            foreach (var hs in hostedServices)
-            {
-                var method = typeof(ServiceCollectionHostedServiceExtensions)
-                    .GetMethod("AddHostedService", new[] { typeof(IServiceCollection) });
-                if (method != null)
-                {
-                    var generic = method.MakeGenericMethod(hs);
-                    generic.Invoke(null, new object[] { services });
-                }
             }   
         }
 

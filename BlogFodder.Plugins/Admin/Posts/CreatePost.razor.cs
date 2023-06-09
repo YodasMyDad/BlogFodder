@@ -51,13 +51,15 @@ public partial class CreatePost : ComponentBase
     {
         using var scope = ServiceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
-        Categories = await dbContext!.Categories.ToListAsync();
+        
+        Categories = await dbContext.Categories.AsNoTracking().ToListAsync();
 
         // See if this is an edit or not
         if (Id != null)
         {
             // Yes, should probably be in a service or Mediatr call
             var dbPost = dbContext.Posts
+                .AsNoTracking()
                 .Include(x => x.ContentItems)
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
