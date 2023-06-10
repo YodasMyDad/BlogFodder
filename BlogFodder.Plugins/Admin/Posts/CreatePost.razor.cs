@@ -52,7 +52,7 @@ public partial class CreatePost : ComponentBase
         using var scope = ServiceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         
-        Categories = await dbContext.Categories.AsNoTracking().ToListAsync();
+        Categories = await dbContext.Categories.ToListAsync();
 
         // See if this is an edit or not
         if (Id != null)
@@ -76,7 +76,8 @@ public partial class CreatePost : ComponentBase
                     postContentItem.Selector = DefaultDropZoneSelector;
                 }
 
-                SelectedCategories = dbPost.Categories;
+                var categoryIds = dbPost.Categories.Select(x => x.Id);
+                SelectedCategories = Categories.Where(x => categoryIds.Contains(x.Id));
 
                 PostCommand.IsUpdate = true;
             }

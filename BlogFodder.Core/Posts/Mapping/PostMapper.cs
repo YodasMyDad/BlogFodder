@@ -9,6 +9,8 @@ public class PostMapper : Profile
     {
         CreateMap<Post, Post>()
             .ForMember(x => x.Categories, opt => opt.Ignore())
-            .ForMember(x => x.ContentItems, opt => opt.Ignore());
+            .ForMember(x => x.ContentItems, opt => opt.Ignore())
+            .ForMember(x => x.FeaturedImage, opt => opt.Ignore())
+            .ForMember(x => x.SocialImage, opt => opt.Ignore());
     }
 }

@@ -20,7 +20,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
     private readonly IMapper _mapper;
     private readonly IServiceProvider _serviceProvider;
 
-    public CreateUpdatePostHandler(ProviderService providerService, BlogFodderDbContext dbContext,
+    public CreateUpdatePostHandler(ProviderService providerService, 
         IServiceProvider serviceProvider, IMapper mapper)
     {
         _providerService = providerService;
@@ -64,7 +64,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
 
         // See if this post already exists as we will need to remove the images
         var post = dbContext!.Posts
-            .Include(x => x.Categories) // TODO - Not sure if I need to remove this part
+            .Include(x => x.Categories)
             .Include(x => x.ContentItems)
             .Include(x => x.FeaturedImage)
             .Include(x => x.SocialImage)
@@ -214,93 +214,3 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         }
     }
 }
-
-
-/*if (_providerService.StorageProvider != null)
-{
-    // Profile Image - Need to save image and then create a file
-    if (request.FeaturedImage != null)
-    {
-        // Delete the old one if there is one
-        if (post?.FeaturedImage != null)
-        {
-            fileIdToDelete.Add(post.FeaturedImage.Id);
-        }
-        
-        // Save the file, create a file and attach it to the user
-        var fileResult = await request.FeaturedImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, dbContext);
-
-        // Set the file to the user
-        request.Post.FeaturedImage = fileResult;
-        
-    }
-    else if(post?.FeaturedImage != null 
-            && request.Post.FeaturedImageId == null)
-    {
-        // Delete the image
-        fileIdToDelete.Add(post.FeaturedImage.Id);
-        post.FeaturedImageId = null;
-        post.FeaturedImage = null;
-    }
-
-    if (request.SocialImage != null)
-    {
-        // Delete the old one if there is one
-        if (post?.SocialImage != null)
-        {
-            fileIdToDelete.Add(post.SocialImage.Id);
-        }
-        
-        // Save the file, create a file and attach it to the user
-        var fileResult = await request.SocialImage.AddFileToDb(request.Post.Id, handlerResult, _providerService, dbContext);
-
-        // Set the file to the user
-        request.Post.SocialImage = fileResult;
-        
-    }
-    else if(post?.SocialImage != null 
-            && request.Post.SocialImageId == null)
-    {
-        // Delete the image
-        fileIdToDelete.Add(post.SocialImage.Id);
-        post.SocialImageId = null;
-        post.SocialImage = null;
-    }
-
-    if (post != null && fileIdToDelete.Any())
-    {
-        foreach (var guid in fileIdToDelete)
-        {
-            var file = dbContext.Files.FirstOrDefault(x => x.Id == guid);
-            if (file != null)
-            {
-                dbContext.Files.Remove(file);
-            }
-        }
-        
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
-}
-
-// Handle categories
-var updatedCategories = request.Post.Categories;
-var existingCategories = post.Categories;
-
-// Add new categories
-foreach (var category in updatedCategories)
-{
-    if (!existingCategories.Any(c => c.Id == category.Id))
-    {
-        post.Categories.Add(category);
-    }
-}
-
-// Remove unselected categories
-for (var i = existingCategories.Count - 1; i >= 0; i--)
-{
-    var category = existingCategories[i];
-    if (updatedCategories.All(c => c.Id != category.Id))
-    {
-        post.Categories.Remove(category);
-    }
-}*/
