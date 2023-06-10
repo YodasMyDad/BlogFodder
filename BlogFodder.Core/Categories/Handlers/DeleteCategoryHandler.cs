@@ -63,6 +63,6 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Hand
         // Delete the post
         dbContext.Categories.Remove(categoryToDelete);
 
-        return await dbContext.SaveChangesAndLog(result, cancellationToken);
+        return await dbContext.SaveChangesAndLog(categoryToDelete, result, cancellationToken);
     }
 }

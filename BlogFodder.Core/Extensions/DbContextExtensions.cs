@@ -40,9 +40,7 @@ public static class DbContextExtensions
                 context.Update(entity);
             }
         
-            crudResult = await context.SaveChangesAndLog(crudResult, cancellationToken);
-
-            crudResult.Entity = entity;
+            crudResult = await context.SaveChangesAndLog(entity, crudResult, cancellationToken);
         }
         else
         {
@@ -53,14 +51,17 @@ public static class DbContextExtensions
         return crudResult;
     }
 
-    public static async Task<HandlerResult<T>> SaveChangesAndLog<T>(this BlogFodderDbContext context,
+    public static async Task<HandlerResult<T>> SaveChangesAndLog<T>(this BlogFodderDbContext context, T? entity,
         HandlerResult<T> crudResult, CancellationToken cancellationToken)
     {
         try
         {
             var isSaved = await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             crudResult.Success = true;
-
+            if (entity != null)
+            {
+                crudResult.Entity = entity;   
+            }
             if (isSaved <= 0)
             {
                 Log.Warning($"{nameof(T)} returned 0 items saved when creating or updating");

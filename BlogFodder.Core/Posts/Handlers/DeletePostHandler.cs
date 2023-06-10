@@ -66,6 +66,6 @@ public class DeletePostHandler: IRequestHandler<DeletePostCommand, HandlerResult
         // Delete the post
         dbContext.Posts.Remove(postToDelete);
 
-        return await dbContext.SaveChangesAndLog(result, cancellationToken);
+        return await dbContext.SaveChangesAndLog(postToDelete, result, cancellationToken);
     }
 }

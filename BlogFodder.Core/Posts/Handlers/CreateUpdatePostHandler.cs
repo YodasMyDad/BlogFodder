@@ -179,7 +179,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
             }
         }
         
-        return await dbContext.SaveChangesAndLog(handlerResult, cancellationToken)
+        return await dbContext.SaveChangesAndLog(post, handlerResult, cancellationToken)
             .ConfigureAwait(false);
     }
 

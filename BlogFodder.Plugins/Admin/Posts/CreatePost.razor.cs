@@ -323,26 +323,35 @@ public partial class CreatePost : ComponentBase
             var result = await mediatr.Send(PostCommand).ConfigureAwait(false);
             if (result.Success)
             {
-                PostCommand.Post = result.Entity;
+                //PostCommand.Post = result.Entity;
                 PostCommand.SocialImage = null;
                 PostCommand.FeaturedImage = null;
 
-                var correctText = PostCommand.IsUpdate ? "Updated" : "Created";
-                Snackbar.Add("Post " + correctText, Severity.Success);
-
-                if (!PostCommand.IsUpdate)
+                await InvokeAsync(() =>
                 {
-                    PostCommand.IsUpdate = true;
-                }
+                    var correctText = PostCommand.IsUpdate ? "Updated" : "Created";
+                    Snackbar.Add("Post " + correctText, Severity.Success);
+
+                    if (!PostCommand.IsUpdate)
+                    {
+                        PostCommand.IsUpdate = true;
+                    }
+
+                    StateHasChanged();
+                });
             }
             else
             {
-                foreach (var error in result.Messages.ErrorMessagesToList())
+                await InvokeAsync(() =>
                 {
-                    Snackbar.Add(error, Severity.Error);
-                }
+                    foreach (var error in result.Messages.ErrorMessagesToList())
+                    {
+                        Snackbar.Add(error, Severity.Error);
+                    }
+            
+                    StateHasChanged();
+                });
             }
-            StateHasChanged();
         }
     }
 }
