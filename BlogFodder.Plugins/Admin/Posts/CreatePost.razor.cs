@@ -324,7 +324,7 @@ public partial class CreatePost : ComponentBase
             var result = await mediatr.Send(PostCommand).ConfigureAwait(false);
             if (result.Success)
             {
-                //PostCommand.Post = result.Entity;
+                PostCommand.Post = result.Entity;
                 PostCommand.SocialImage = null;
                 PostCommand.FeaturedImage = null;
 

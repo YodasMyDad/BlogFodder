@@ -1,6 +1,6 @@
+using AutoMapper;
 using BlogFodder.Core.Data;
 using BlogFodder.Core.Extensions;
-using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Settings.Commands;
 using BlogFodder.Core.Settings.Models;
@@ -16,14 +16,16 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
 {
     private readonly ProviderService _providerService;
     private readonly ICacheService _cacheService;
+    private readonly IMapper _mapper;
     private readonly IServiceProvider _serviceProvider;
 
     public CreateUpdateSiteSettingsHandler(ProviderService providerService,
-        ICacheService cacheService, IServiceProvider serviceProvider)
+        ICacheService cacheService, IServiceProvider serviceProvider, IMapper mapper)
     {
         _providerService = providerService;
         _cacheService = cacheService;
         _serviceProvider = serviceProvider;
+        _mapper = mapper;
     }
 
     public async Task<HandlerResult<SiteSettings>> Handle(CreateUpdateSiteSettingsCommand request,
@@ -36,51 +38,46 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
 
+        // See if this site settings already exists as we will need to remove the images
+        var siteSettings = dbContext.SiteSettings
+            .Include(x => x.Logo)
+            .FirstOrDefault();
+
+        var oldLogoId = siteSettings?.LogoId;
+            
+        siteSettings ??= new SiteSettings();
+
+        _mapper.Map(request.SiteSettings, siteSettings);
+            
+        if (!request.IsUpdate)
+        {
+            dbContext.SiteSettings.Add(siteSettings);
+        }
+        
         if (_providerService.StorageProvider != null)
         {
-            // See if this site settings already exists as we will need to remove the images
-            var siteSettings = dbContext.SiteSettings
-                .Include(x => x.Logo)
-                .FirstOrDefault();
-
-            Guid? fileIdToDelete = null;
+            // If new images are provided, save them and update the post properties
             if (request.Logo != null)
             {
-                // Delete the old one if there is one
-                if (siteSettings?.Logo != null)
-                {
-                    fileIdToDelete = siteSettings.Logo.Id;
-                }
-
-                // Save the file, create a file and attach it to the user
-                var fileResult =
+                var logo =
                     await request.Logo.AddFileToDb(request.SiteSettings.Id, result, _providerService, dbContext);
+                siteSettings.Logo = logo;
+                siteSettings.LogoId = logo?.Id;
 
-                // Set the file to the user
-                request.SiteSettings.Logo = fileResult;
-            }
-            else if (siteSettings?.Logo != null
-                     && request.SiteSettings.LogoId == null)
-            {
-                // Delete the image
-                fileIdToDelete = siteSettings.Logo.Id;
-                siteSettings.LogoId = null;
-                siteSettings.Logo = null;
-            }
-
-            if (siteSettings != null && fileIdToDelete != null)
-            {
-                var file = dbContext.Files.FirstOrDefault(x => x.Id == fileIdToDelete);
-                if (file != null)
+                // If an old image existed, delete it
+                if (oldLogoId != null)
                 {
-                    dbContext.Files.Remove(file);
+                    var oldLogo = await dbContext.Files.FindAsync(new object?[] {oldLogoId},
+                        cancellationToken: cancellationToken);
+                    if (oldLogo != null)
+                    {
+                        dbContext.Files.Remove(oldLogo);
+                    }
                 }
-
-                await dbContext.SaveChangesAsync(cancellationToken);
             }
         }
 
-        result = await dbContext.CreateOrUpdate(request.SiteSettings, result, !request.IsUpdate, cancellationToken)
+        result = await dbContext.SaveChangesAndLog(siteSettings, result, cancellationToken)
             .ConfigureAwait(false);
 
         // Clear the cache
