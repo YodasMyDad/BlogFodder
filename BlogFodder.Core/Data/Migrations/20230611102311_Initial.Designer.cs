@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    [Migration("20230601132930_Initial")]
+    [Migration("20230611102311_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
