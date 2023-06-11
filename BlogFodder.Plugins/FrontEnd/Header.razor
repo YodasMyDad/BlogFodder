@@ -41,7 +41,7 @@
                                     @foreach (var category in Categories)
                                     {
                                         <li>
-                                            <a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))" @onclick="@(() => NavigationManager.NavigateTo(Urls.Create(category.Url, typeof(Category))!, forceLoad: true))">@category.Name</a>
+                                            <a class="dropdown-item" href="@Urls.Create(category.Url, typeof(Category))">@category.Name</a>
                                         </li>
                                     }
                                 </ul>
@@ -51,7 +51,7 @@
                     else
                     {
                         <li class="nav-item">
-                            <NavLink class="nav-link" href="@topnav.Link" @onclick="@(() => NavigationManager.NavigateTo(topnav.Link, forceLoad: true))">@topnav.Name</NavLink>
+                            <NavLink class="nav-link" href="@topnav.Link">@topnav.Name</NavLink>
                         </li>
                     }
                 }
@@ -118,13 +118,5 @@
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         Categories = await dbContext.Categories.AsNoTracking().ToListAsync();
         Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
-    }
-
-    private void GoTo(SiteNavigationItem item)
-    {
-        if (!item.Link.IsNullOrWhiteSpace())
-        {
-            NavigationManager.NavigateTo(item.Link, true);
-        }
     }
 }

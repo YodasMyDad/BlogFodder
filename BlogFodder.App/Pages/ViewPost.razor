@@ -69,8 +69,9 @@ else
     private string? CurrentUrl { get; set; }
     private string? FeaturedImageUrl { get; set; }
     private SiteSettings Settings { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
+    private string? _currentSlug;
+    
+    private async Task InitializeAsync()
     {
         using var scope = ServiceProvider.CreateScope();
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -100,5 +101,10 @@ else
     protected override void OnParametersSet()
     {
         PostViewComponent = BlogFodderSettings.Value.FrontEnd.PostViewComponent!;
+        if (_currentSlug != Slug && !Slug.IsNullOrWhiteSpace())
+        {
+            _currentSlug = Slug;
+            _ = InitializeAsync();
+        }
     }
 }
