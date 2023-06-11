@@ -1,4 +1,5 @@
-﻿using BlogFodder.Core.Data;
+﻿using AutoMapper;
+using BlogFodder.Core.Data;
 using BlogFodder.Core.Email.Commands;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
@@ -20,32 +21,35 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
     private readonly ILogger<CreateUpdateUserHandler> _logger;
     private readonly AuthenticationStateProvider _authenticationStateProvider;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IMapper _mapper;
 
     public CreateUpdateUserHandler(
         ProviderService providerService,
-        ILogger<CreateUpdateUserHandler> logger, AuthenticationStateProvider authenticationStateProvider, IServiceProvider serviceProvider)
+        ILogger<CreateUpdateUserHandler> logger, AuthenticationStateProvider authenticationStateProvider, IServiceProvider serviceProvider, IMapper mapper)
     {
         _providerService = providerService;
         _logger = logger;
         _authenticationStateProvider = authenticationStateProvider;
         _serviceProvider = serviceProvider;
+        _mapper = mapper;
     }
 
     public async Task<HandlerResult<User>> Handle(CreateUpdateUserCommand request, CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var db = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
         // Get the current user first via the authstate
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
         var handlerResult = new HandlerResult<User>();
 
-        var efUser = await db.Users
+        var user = await dbContext.Users
+            .Include(x => x.ProfileImage)
             .FirstOrDefaultAsync(x => x.Id == authState.User.GetUserId(), cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-        if (efUser == null)
+        if (user == null)
         {
             // new users should only be created by the register page
             handlerResult.Success = false;
@@ -53,38 +57,34 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             return handlerResult;
         }
 
-        // Profile Image - Need to save image and then create a file
+        var oldProfileImageId = user.ProfileImageId;
+        
+        _mapper.Map(request.User, user);
+        
         if (request.ProfileImageUpload != null)
         {
-            // TODO - What if the user is changing the image and one already exists, need to delete
+            var socialImageFile =
+                await request.ProfileImageUpload.AddFileToDb(request.User.Id, handlerResult, _providerService, dbContext);
+            user.ProfileImage = socialImageFile;
+            user.ProfileImageId = socialImageFile?.Id;
 
-            // Save the file, create a gab file and attach it to the user
-            var fileSaveResult = await _providerService.StorageProvider!
-                .SaveFile(request.ProfileImageUpload, efUser.Id.ToString()).ConfigureAwait(false);
-            if (!fileSaveResult.Success)
+            // If an old image existed, delete it
+            if (oldProfileImageId != null)
             {
-                handlerResult.Success = fileSaveResult.Success;
-                handlerResult.AddMessage(fileSaveResult.ErrorMessages, ResultMessageType.Error);
-                return handlerResult;
+                var oldSocialImage = await dbContext.Files.FindAsync(new object?[] {oldProfileImageId},
+                    cancellationToken: cancellationToken);
+                if (oldSocialImage != null)
+                {
+                    dbContext.Files.Remove(oldSocialImage);
+                }
             }
-
-            // Create the gabfile
-            var gabFile = await _providerService.StorageProvider.ToBlogFodderFile(fileSaveResult).ConfigureAwait(false);
-
-            // Save the file first
-            db.Files.Add(gabFile);
-            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            // Set the file to the user
-            efUser.ProfileImage = gabFile;
-
-            // Save the user
-            handlerResult = await db.CreateOrUpdate(efUser, handlerResult, false, cancellationToken)
-                .ConfigureAwait(false);
-            if (!handlerResult.Success)
-            {
-                return handlerResult;
-            }
+        }
+        
+        handlerResult = await dbContext.SaveChangesAndLog(user, handlerResult, cancellationToken)
+            .ConfigureAwait(false);
+        if (!handlerResult.Success)
+        {
+            return handlerResult;
         }
 
         // Get user from user manager to update all this

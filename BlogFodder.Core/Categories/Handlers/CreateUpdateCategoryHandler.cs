@@ -1,3 +1,4 @@
+using AutoMapper;
 using BlogFodder.Core.Categories.Commands;
 using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Data;
@@ -15,10 +16,13 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
     private readonly SlugHelper _slugHelper;
     private readonly ProviderService _providerService;
     private readonly IServiceProvider _serviceProvider;
-    public CreateUpdateCategoryHandler(ProviderService providerService, IServiceProvider serviceProvider)
+    private readonly IMapper _mapper;
+    
+    public CreateUpdateCategoryHandler(ProviderService providerService, IServiceProvider serviceProvider, IMapper mapper)
     {
         _providerService = providerService;
         _serviceProvider = serviceProvider;
+        _mapper = mapper;
         _slugHelper = new SlugHelper();
     }
 
@@ -50,53 +54,42 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
         
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        
+        var category = dbContext.Categories
+            .Include(x => x.SocialImage)
+            .FirstOrDefault(x => x.Id == request.Category.Id);
+        
+        var oldSocialImageId = category?.SocialImageId;
+        
+        category ??= new Category();
 
-        if (_providerService.StorageProvider != null)
+        _mapper.Map(request.Category, category);
+        
+        if (!request.IsUpdate)
         {
-            // See if this category already exists as we will need to remove the images
-            var category = dbContext.Categories
-                .AsNoTracking()
-                .Include(x => x.SocialImage)
-                .FirstOrDefault(x => x.Id == request.Category.Id);
+            dbContext.Categories.Add(category);
+        }
+        
+        if (request.SocialImage != null)
+        {
+            var socialImageFile =
+                await request.SocialImage.AddFileToDb(request.Category.Id, handlerResult, _providerService, dbContext);
+            category.SocialImage = socialImageFile;
+            category.SocialImageId = socialImageFile?.Id;
 
-            Guid? fileIdToDelete = null;
-
-            if (request.SocialImage != null)
+            // If an old image existed, delete it
+            if (oldSocialImageId != null)
             {
-                // Delete the old one if there is one
-                if (category?.SocialImage != null)
+                var oldSocialImage = await dbContext.Files.FindAsync(new object?[] {oldSocialImageId},
+                    cancellationToken: cancellationToken);
+                if (oldSocialImage != null)
                 {
-                    fileIdToDelete = category.SocialImage.Id;
+                    dbContext.Files.Remove(oldSocialImage);
                 }
-
-                // Save the file, create a file and attach it to the user
-                var fileResult = await request.SocialImage.AddFileToDb(request.Category.Id, handlerResult, _providerService, dbContext);
-
-                // Set the file to the user
-                request.Category.SocialImage = fileResult;
-            }
-            else if (category?.SocialImage != null
-                     && request.Category.SocialImageId == null)
-            {
-                // Delete the image
-                fileIdToDelete = category.SocialImage.Id;
-                category.SocialImageId = null;
-                category.SocialImage = null;
-            }
-
-            if (category != null && fileIdToDelete != null)
-            {
-                var file = dbContext.Files.FirstOrDefault(x => x.Id == fileIdToDelete);
-                if (file != null)
-                {
-                    dbContext.Files.Remove(file);
-                }
-
-                await dbContext.SaveChangesAsync(cancellationToken);
             }
         }
         
-        return await dbContext.CreateOrUpdate(request.Category, handlerResult, !request.IsUpdate, cancellationToken)
+        return await dbContext.SaveChangesAndLog(category, handlerResult, cancellationToken)
             .ConfigureAwait(false);
     }
     

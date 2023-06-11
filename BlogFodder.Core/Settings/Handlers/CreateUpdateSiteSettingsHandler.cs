@@ -53,29 +53,27 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
         {
             dbContext.SiteSettings.Add(siteSettings);
         }
-        
-        if (_providerService.StorageProvider != null)
-        {
-            // If new images are provided, save them and update the post properties
-            if (request.Logo != null)
-            {
-                var logo =
-                    await request.Logo.AddFileToDb(request.SiteSettings.Id, result, _providerService, dbContext);
-                siteSettings.Logo = logo;
-                siteSettings.LogoId = logo?.Id;
 
-                // If an old image existed, delete it
-                if (oldLogoId != null)
+        // If new images are provided, save them and update the post properties
+        if (request.Logo != null)
+        {
+            var logo =
+                await request.Logo.AddFileToDb(request.SiteSettings.Id, result, _providerService, dbContext);
+            siteSettings.Logo = logo;
+            siteSettings.LogoId = logo?.Id;
+
+            // If an old image existed, delete it
+            if (oldLogoId != null)
+            {
+                var oldLogo = await dbContext.Files.FindAsync(new object?[] {oldLogoId},
+                    cancellationToken: cancellationToken);
+                if (oldLogo != null)
                 {
-                    var oldLogo = await dbContext.Files.FindAsync(new object?[] {oldLogoId},
-                        cancellationToken: cancellationToken);
-                    if (oldLogo != null)
-                    {
-                        dbContext.Files.Remove(oldLogo);
-                    }
+                    dbContext.Files.Remove(oldLogo);
                 }
             }
         }
+  
 
         result = await dbContext.SaveChangesAndLog(siteSettings, result, cancellationToken)
             .ConfigureAwait(false);

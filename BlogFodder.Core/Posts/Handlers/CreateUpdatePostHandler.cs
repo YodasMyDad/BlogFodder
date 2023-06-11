@@ -61,8 +61,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         {
             request.Post.DateUpdated = DateTime.UtcNow;
         }
-
-        // See if this post already exists as we will need to remove the images
+        
         var post = dbContext!.Posts
             .Include(x => x.Categories)
             .Include(x => x.ContentItems)
@@ -72,8 +71,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         
         var oldFeaturedImageId = post?.FeaturedImageId;
         var oldSocialImageId = post?.SocialImageId;
-
-        // Map if update
+        
         post ??= new Post();
 
         _mapper.Map(request.Post, post);
@@ -181,36 +179,5 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         
         return await dbContext.SaveChangesAndLog(post, handlerResult, cancellationToken)
             .ConfigureAwait(false);
-    }
-
-    private async Task HandleImageUpdate(
-        IBrowserFile? newImage,
-        Guid? oldImageId,
-        Action<Post, BlogFodderFile> setImage,
-        Action<Post, Guid?> setImageId,
-        Post post,
-        BlogFodderDbContext dbContext,
-        HandlerResult<Post> handlerResult,
-        CancellationToken cancellationToken)
-    {
-        if (newImage != null)
-        {
-            var imageFile = await newImage.AddFileToDb(post.Id, handlerResult, _providerService, dbContext);
-
-            // Update the post properties
-            setImage(post, imageFile);
-            setImageId(post, imageFile.Id);
-
-            // If an old image existed, delete it
-            if (oldImageId != null)
-            {
-                var oldImage =
-                    await dbContext.Files.FindAsync(new object?[] {oldImageId}, cancellationToken: cancellationToken);
-                if (oldImage != null)
-                {
-                    dbContext.Files.Remove(oldImage);
-                }
-            }
-        }
     }
 }

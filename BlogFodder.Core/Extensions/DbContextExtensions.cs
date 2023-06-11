@@ -21,36 +21,6 @@ public static class DbContextExtensions
         return null;
     }
     
-    public static async Task<HandlerResult<T>> CreateOrUpdate<T>(this BlogFodderDbContext context, T entity, bool isNew, CancellationToken cancellationToken)
-    {
-        var crudResult = new HandlerResult<T>();
-        return await CreateOrUpdate(context, entity, crudResult, isNew, cancellationToken);
-    }
-
-    public static async Task<HandlerResult<T>> CreateOrUpdate<T>(this BlogFodderDbContext context, T entity, HandlerResult<T> crudResult, bool isNew, CancellationToken cancellationToken)
-    {
-        if (entity != null)
-        {
-            if (isNew)
-            {
-                await context.AddAsync(entity, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                context.Update(entity);
-            }
-        
-            crudResult = await context.SaveChangesAndLog(entity, crudResult, cancellationToken);
-        }
-        else
-        {
-            crudResult.Success = false;
-            crudResult.AddMessage("Entity to update was null", ResultMessageType.Error);
-        }
-
-        return crudResult;
-    }
-
     public static async Task<HandlerResult<T>> SaveChangesAndLog<T>(this BlogFodderDbContext context, T? entity,
         HandlerResult<T> crudResult, CancellationToken cancellationToken)
     {
