@@ -18,23 +18,23 @@
     {
         <meta name="robots" content="noindex">
     }
-    <meta name="twitter:description" content="@Post.Excerpt" />
-    <meta property="og:description" content="@Post.Excerpt" />
-    <meta name="twitter:title" content="@Post.PageTitle" />
-    <meta property="og:title" content="@Post.PageTitle" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:description" content="@Post.Excerpt"/>
+    <meta property="og:description" content="@Post.Excerpt"/>
+    <meta name="twitter:title" content="@Post.PageTitle"/>
+    <meta property="og:title" content="@Post.PageTitle"/>
+    <meta name="twitter:card" content="summary_large_image"/>
     @if (Post.FeaturedImage != null)
     {
-        <meta name="twitter:image" content="@FeaturedImageUrl" />
-        <meta property="og:image" content="@FeaturedImageUrl?width=1500&height=623&mode=crop" />
-        <meta property="og:image:width" content="1500" />
-        <meta property="og:image:height" content="623" />   
+        <meta name="twitter:image" content="@FeaturedImageUrl"/>
+        <meta property="og:image" content="@FeaturedImageUrl?width=1500&height=623&mode=crop"/>
+        <meta property="og:image:width" content="1500"/>
+        <meta property="og:image:height" content="623"/>
     }
-    <meta property="og:url" content="@CurrentUrl" />
-    <meta property="og:site_name" content="@Settings.SiteName" />
-    <meta property="og:type" content="article" />
-    <link rel="canonical" href="@CurrentUrl" />
-    
+    <meta property="og:url" content="@CurrentUrl"/>
+    <meta property="og:site_name" content="@Settings.SiteName"/>
+    <meta property="og:type" content="article"/>
+    <link rel="canonical" href="@CurrentUrl"/>
+
 </HeadContent>
 
 @if (CanBeFound)
@@ -55,12 +55,21 @@ else
 }
 
 @code {
-    [Parameter] public string? Slug { get; set; }
 
-    [Inject] public ExtensionManager ExtensionManager { get; set; } = default!;
-    [Inject] public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
-    [Inject] public IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
-    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    [Parameter]
+    public string? Slug { get; set; }
+
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+
+    [Inject]
+    public IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
+
+    [Inject]
+    public IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
+
+    [Inject]
+    public IServiceProvider ServiceProvider { get; set; } = default!;
 
     private string PostViewComponent { get; set; } = "";
     private Post Post { get; set; } = new();
@@ -70,31 +79,29 @@ else
     private string? FeaturedImageUrl { get; set; }
     private SiteSettings Settings { get; set; } = new();
     private string? _currentSlug;
-    
+
     private async Task InitializeAsync()
     {
         using var scope = ServiceProvider.CreateScope();
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
-        
+
         Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
         CurrentDomain = HttpContextAccessor.HttpContext?.Request.Host.Value;
         CurrentUrl = $"{CurrentDomain}{Urls.Create(Slug, typeof(Post))}";
-        if (!Slug.IsNullOrWhiteSpace())
+
+        var post = dbContext.Posts
+            .Include(x => x.FeaturedImage)
+            .Include(x => x.SocialImage)
+            .Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
+        if (post != null)
         {
-            var post = dbContext.Posts
-                .Include(x => x.FeaturedImage)
-                .Include(x => x.SocialImage)
-                .Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
-            if (post != null)
-            {
-                CanBeFound = true;
-                Post = post;
-            }
-            if (Post.FeaturedImage != null)
-            {
-                FeaturedImageUrl = $"{CurrentDomain}/{Post.FeaturedImage.Url}";
-            }
+            CanBeFound = true;
+            Post = post;
+        }
+        if (Post.FeaturedImage != null)
+        {
+            FeaturedImageUrl = $"{CurrentDomain}/{Post.FeaturedImage.Url}";
         }
     }
 
@@ -107,4 +114,5 @@ else
             _ = InitializeAsync();
         }
     }
+
 }
