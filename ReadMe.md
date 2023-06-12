@@ -8,6 +8,8 @@ The platform is built with Razor Class Libraries and Razor Components and has a 
 
 A fully working blogging engine and ready for production. This is a work in progress and I'm still trying to get it to a beta stage. I'm posting this publicly as I'm looking for other Blazor enthusiasts to get involved and help shape the project further.
 
+**I am waiting for .Net 8 and the new Blazor (United) before this will be fully released, as I intend to port it all over to that and make use of their new SSR.**
+
 ### Get It Running
 
 Add your email address (Or a test email address) to the appSettings 'AdminEmailAddresses' list. Any email address in this list, when the user registers they are added to the Admin role so you can access the Admin section.
