@@ -18,6 +18,7 @@ public class PostDbMapping : IEntityTypeConfiguration<Post>
         builder.Property(x => x.Excerpt).HasMaxLength(3000);
         builder.HasOne(x => x.FeaturedImage);
         builder.HasOne(x => x.SocialImage);
+        builder.HasOne(x => x.User);
         
         builder.Property(x => x.PageTitle).HasMaxLength(100);
         builder.Property(x => x.MetaDescription).HasMaxLength(350);

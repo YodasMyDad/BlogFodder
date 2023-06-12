@@ -9,6 +9,9 @@
 @using MediatR
 @using Microsoft.Extensions.Configuration
 @using Microsoft.Extensions.DependencyInjection
+@using System.Security.Claims
+@using BlogFodder.Core.Membership.Commands
+@using BlogFodder.Core.Membership.Models
 @implements BlogFodder.Core.Plugins.Interfaces.IPluginContentComponent
 
 @if (PostId != null)
@@ -16,15 +19,23 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <EditForm Model="@Comment" OnSubmit="@HandleSubmit">
-                    <div class="mb-3">
-                        <label for="Comment.Comment" class="form-label bf-label">Comment</label>
-                        <InputTextArea @bind-Value="@Comment.Comment" id="Comment.Comment" class="form-control shadow-sm" rows="8"/>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Post Comment</button>
-                    </div>
-                </EditForm>
+                <AuthorizeView>
+                    <Authorized Context="authState">
+                        <EditForm Model="@Comment" OnSubmit="@HandleSubmit">
+                            <div class="mb-3">
+                                <label for="Comment.Comment" class="form-label bf-label">Comment</label>
+                                <InputTextArea @bind-Value="@Comment.Comment" id="Comment.Comment" class="form-control shadow-sm" rows="8"/>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Post Comment</button>
+                            </div>
+                        </EditForm>
+                    </Authorized>
+                    <NotAuthorized>
+                        <p>You need to be logged in to comment</p>
+                    </NotAuthorized>
+                </AuthorizeView>
+                
                 <div class="pt-5">
                     @if (PostContentModel.PluginModel != null)
                     {
@@ -32,7 +43,14 @@
                         {
                             <div class="card mb-2">
                                 <div class="card-header">
-                                    Name Here TODO
+                                    @if (CommentUsers.TryGetValue(comment.UserId, out var user))
+                                    {
+                                        @user.UserName
+                                    }
+                                    else
+                                    {
+                                        @("Unknown")
+                                    }
                                 </div>
                                 <div class="card-body">
                                     @comment.Comment
@@ -69,15 +87,37 @@
     [Inject]
     public IServiceProvider ServiceProvider { get; set; } = default!;
 
+    [Inject]
+    public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
     private PostComment Comment { get; set; } = new() {DateCreated = DateTime.UtcNow};
     private PluginContentModel<List<PostComment>, PostCommentSettings> PostContentModel { get; set; } = new();
+    private ClaimsPrincipal? User { get; set; }
+    private Dictionary<Guid, User> CommentUsers { get; set; } = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (PostId != null)
         {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            User = authState.User;
+            
             Comment.PostId = PostId.Value;
             PostContentModel = new PluginContentModel<List<PostComment>, PostCommentSettings>(Model, Settings);
+            
+            using var scope = ServiceProvider.CreateScope();
+            var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            
+            // Get the users on each comment
+            var usersIds = PostContentModel.PluginModel?.Select(x => x.UserId);
+            if (usersIds != null)
+            {
+                var users = await mediatr.Send(new GetUsersCommand {Ids = usersIds.ToList()});
+                if (users.Any())
+                {
+                    CommentUsers = users.ToDictionary(x => x.Id, x => x);
+                }
+            }
         }
     }
 
@@ -94,8 +134,8 @@
         }
 
         var canPostComment = true;
-
-    // Sanitise comment
+        
+        Comment.UserId = User?.GetUserId() ?? Guid.Empty;
         Comment.Comment = sanitizer.Sanitize(Comment.Comment);
 
         if (PostContentModel.PluginSettings?.EnableAkismetSpamCheck == true)
@@ -110,8 +150,8 @@
                 var comment = new AkismetComment
                 {
                     Blog = Configuration.GetSection("PostCommentsPlugin")["Url"],
-                    CommentAuthorEmail = Comment.Name, // TODO - This needs to be the email!
-                    CommentContent = Comment.Comment,
+                    CommentAuthorEmail = User?.GetUserEmail(),
+                    CommentContent = Comment.Comment
                 };
                 var result = await akismetService.CheckCommentAsync(comment);
                 if (result.IsSpam)
@@ -135,7 +175,7 @@
         }
 
         var createUpdateCommand = new CreateUpdatePluginCommand();
-        var plugin = await mediatr!.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
+        var plugin = await mediatr.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
         if (plugin == null)
         {
     // This should not happen, but just in case

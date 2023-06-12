@@ -18,4 +18,11 @@ public static class CacheExtensions
         var cacheKey = string.Join("-", identifier.OrderBy(x => x));
         return $"{item.Name}-{cacheKey}";
     }
+    
+    public static string ToCacheKey(this Type item, List<Guid> identifier)
+    {
+        // need to order the items and CSV them to keep them consistent
+        var cacheKey = string.Join("-", identifier.OrderBy(x => x));
+        return $"{item.Name}-{cacheKey}";
+    }
 }

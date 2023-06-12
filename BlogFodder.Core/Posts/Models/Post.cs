@@ -1,6 +1,7 @@
 ﻿using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Media.Models;
+using BlogFodder.Core.Membership.Models;
 
 namespace BlogFodder.Core.Posts.Models;
 
@@ -16,9 +17,10 @@ public class Post
     public int AuthorId { get; set; }
 
     public Guid? FeaturedImageId { get; set; }
-    public virtual BlogFodderFile? FeaturedImage { get; set; }
+    public BlogFodderFile? FeaturedImage { get; set; }
     
-    // TODO - Tags, Categories?
+    public Guid? UserId { get; set; }
+    public User? User { get; set; }
     
     // SEO
     public string? PageTitle { get; set; }
@@ -26,7 +28,7 @@ public class Post
     public bool NoIndex { get; set; }
     
     public Guid? SocialImageId { get; set; }
-    public virtual BlogFodderFile? SocialImage { get; set; }
+    public BlogFodderFile? SocialImage { get; set; }
     public string? Url { get; set; }
     
     public Dictionary<string, string> ExtendedData { get; set; } = new();

@@ -6,6 +6,7 @@ using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
+using BlogFodder.Core.Shared.Services;
 using MediatR;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -22,16 +23,18 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
     private readonly AuthenticationStateProvider _authenticationStateProvider;
     private readonly IServiceProvider _serviceProvider;
     private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
 
     public CreateUpdateUserHandler(
         ProviderService providerService,
-        ILogger<CreateUpdateUserHandler> logger, AuthenticationStateProvider authenticationStateProvider, IServiceProvider serviceProvider, IMapper mapper)
+        ILogger<CreateUpdateUserHandler> logger, AuthenticationStateProvider authenticationStateProvider, IServiceProvider serviceProvider, IMapper mapper, ICacheService cacheService)
     {
         _providerService = providerService;
         _logger = logger;
         _authenticationStateProvider = authenticationStateProvider;
         _serviceProvider = serviceProvider;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     public async Task<HandlerResult<User>> Handle(CreateUpdateUserCommand request, CancellationToken cancellationToken)
@@ -197,6 +200,8 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             handlerResult.AddMessage("Unable to get the database user from the logged in user", ResultMessageType.Error);
         }
 
+        // Clear user caches
+        _cacheService.ClearCachedItemsWithPrefix(nameof(User));
 
         return handlerResult;
     }

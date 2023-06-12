@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json;
 using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Data;
@@ -13,6 +14,7 @@ using BlogFodder.Core.Providers;
 using BlogFodder.Plugins.Admin.Posts.Dialogs;
 using MediatR;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +31,7 @@ public partial class CreatePost : ComponentBase
     [Inject] public IDialogService Dialog { get; set; } = default!;
     [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
     [Inject] public ProviderService ProviderService { get; set; } = default!;
-
+    [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
     [Parameter] public Guid? Id { get; set; }
 
     private CreateUpdatePostCommand PostCommand { get; set; } = new();
@@ -46,7 +48,7 @@ public partial class CreatePost : ComponentBase
     private const string DefaultDropZoneSelector = "plugins";
     private readonly string _customCardStyle = $"cursor: pointer; border: 1px {Colors.BlueGrey.Lighten4} solid;";
     private readonly DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
-
+    private ClaimsPrincipal? User { get; set; }
     protected override async Task OnInitializedAsync()
     {
         using var scope = ServiceProvider.CreateScope();
@@ -54,6 +56,9 @@ public partial class CreatePost : ComponentBase
         
         Categories = await dbContext.Categories.ToListAsync();
 
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+        
         // See if this is an edit or not
         if (Id != null)
         {
@@ -318,6 +323,7 @@ public partial class CreatePost : ComponentBase
             }
 
             PostCommand.Post.Categories = SelectedCategories.ToList();
+            PostCommand.Post.UserId = User?.GetUserId();
 
             // Call mediatr and return and check for errors
             // Send the email
