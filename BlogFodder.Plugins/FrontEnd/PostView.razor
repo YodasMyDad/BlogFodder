@@ -12,7 +12,10 @@
             <article class="blog-post">
                 <img class="img-fluid" src="@Post.FeaturedImage?.Url?width=900&height=300&mode=crop" alt="@Post.Name - Image">
                 <h1>@Post.Name</h1>
-                <p>Last Updated: @Post.DateUpdated.Humanize()</p>
+                <p class="fw-light">By: @Post.User?.UserName</p>
+                <p class="text-muted">
+                    <small>Last Updated: @Post.DateUpdated.Humanize()</small>
+                </p>
                 @foreach (var postContentItem in Post.ContentItems)
                 {
                     <div class="postContentItem">

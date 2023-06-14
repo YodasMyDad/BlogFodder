@@ -8,6 +8,7 @@ using BlogFodder.Core.Providers;
 using BlogFodder.Core.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,13 +20,15 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
     private readonly ProviderService _providerService;
     private readonly IMapper _mapper;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CreateUpdatePostHandler(ProviderService providerService, 
-        IServiceProvider serviceProvider, IMapper mapper)
+        IServiceProvider serviceProvider, IMapper mapper, IHttpContextAccessor httpContextAccessor)
     {
         _providerService = providerService;
         _serviceProvider = serviceProvider;
         _mapper = mapper;
+        _httpContextAccessor = httpContextAccessor;
         _slugHelper = new SlugHelper();
     }
 
@@ -78,6 +81,15 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
         
         if (!request.IsUpdate)
         {
+            // Set the user it's created by too
+            var userId = _httpContextAccessor.HttpContext?.User.GetUserId();
+            if (userId != null)
+            {
+                var user = dbContext.Users.FirstOrDefault(x => x.Id == userId);
+                post.User = user;
+                post.UserId = userId;
+            }
+
             dbContext.Posts.Add(post);
         }
 

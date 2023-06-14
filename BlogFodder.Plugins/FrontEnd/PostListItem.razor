@@ -6,8 +6,11 @@
     <img src="@Post.FeaturedImage?.Url?width=400&height=215&mode=crop" class="card-img-top" alt="@Post.Name">
     <div class="card-body">
         <h5 class="card-title">@Post.Name</h5>
+        <p class="card-text fw-light">
+            <small>By @Post.User?.UserName</small>
+        </p>
         <p class="card-text">@Post.Excerpt</p>
-        <p class="card-text">
+        <p class="card-text fw-bolder">
             @(string.Join(", ", Post.Categories.Select(x => x.Name?.ToString())))
         </p>
         <p class="card-text">

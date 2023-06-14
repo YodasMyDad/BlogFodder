@@ -93,6 +93,8 @@ else
         var post = dbContext.Posts
             .Include(x => x.FeaturedImage)
             .Include(x => x.SocialImage)
+            .Include(x => x.User)
+            .Include(x => x.Categories)
             .Include(x => x.ContentItems).AsNoTracking().FirstOrDefault(x => x.Url == Slug);
         if (post != null)
         {

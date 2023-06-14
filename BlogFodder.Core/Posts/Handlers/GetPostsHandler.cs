@@ -24,6 +24,11 @@ public class GetPostsHandler : IRequestHandler<GetPostsCommand, PaginatedList<Po
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         var query = dbContext.Posts.AsQueryable();
 
+        if (request.AsNoTracking)
+        {
+            query = query.AsNoTracking();
+        }
+        
         if (request.IncludeCategories)
         {
             query = query.Include(x => x.Categories);
@@ -34,14 +39,29 @@ public class GetPostsHandler : IRequestHandler<GetPostsCommand, PaginatedList<Po
             query = query.Include(x => x.FeaturedImage);
         }
         
-        if (request.AsNoTracking)
+        if (request.IncludeSocialImage)
         {
-            query = query.AsNoTracking();
+            query = query.Include(x => x.SocialImage);
+        }
+        
+        if (request.IncludeContentItems)
+        {
+            query = query.Include(x => x.SocialImage);
+        }
+        
+        if (request.IncludeUsers)
+        {
+            query = query.Include(x => x.User);
         }
 
         if (request.CategoryIds.Any())
         {
             query = query.Where(p => p.Categories.Any(c => request.CategoryIds.Contains(c.Id)));
+        }
+
+        if (request.UserId != null)
+        {
+            query = query.Where(p => p.UserId == request.UserId.Value);
         }
 
         if (!request.SearchTerm.IsNullOrWhiteSpace())

@@ -14,8 +14,6 @@ public class Post
     
     public string? Excerpt { get; set; } 
     
-    public int AuthorId { get; set; }
-
     public Guid? FeaturedImageId { get; set; }
     public BlogFodderFile? FeaturedImage { get; set; }
     

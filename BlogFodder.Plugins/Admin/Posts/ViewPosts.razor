@@ -1,11 +1,9 @@
 @page "/admin/posts"
 @using BlogFodder.Core.Posts.Models
-@using BlogFodder.Core.Data
 @using BlogFodder.Core.Extensions
 @using BlogFodder.Core.Posts.Commands
 @using Humanizer
 @using MediatR
-@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.DependencyInjection
 @layout AdminLayout
 <PageTitle>View Posts</PageTitle>
@@ -13,11 +11,13 @@
 <MudTable Items="@Posts" Hover="true" OnRowClick="RowClickEvent" T="Post" RowClass="rowpointer">
     <HeaderContent>
         <MudTh>Title</MudTh>
+        <MudTh>User</MudTh>
         <MudTh>Date Updated</MudTh>
         <MudTh>Delete</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Title">@context.Name</MudTd>
+        <MudTd DataLabel="User">@context.User?.UserName</MudTd>
         <MudTd DataLabel="Date Updated">@context.DateUpdated.Humanize()</MudTd>
         <MudTd DataLabel="Delete">
             <MudButton Color="Color.Primary" OnClick="@(() => DeletePost(context))">Delete</MudButton>
@@ -35,19 +35,20 @@
     [Inject] private IDialogService DialogService { get; set; } = default!;
     [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
 
-    public List<Post> Posts { get; set; } = new();
+    private IEnumerable<Post> Posts { get; set; } = Enumerable.Empty<Post>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
-        Posts = dbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        // TODO - Need to sort server side paging
+        var pagedList = await mediatr.Send(new GetPostsCommand(int.MaxValue));
+        Posts = pagedList.Items;
     }
 
     private async Task DeletePost(Post post)
     {
         using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         var dialogResult = await DialogService.ShowMessageBox(
@@ -67,7 +68,9 @@
             else
             {
                 Snackbar.Add("Post Deleted", Severity.Success);
-                Posts = dbContext.Posts.AsNoTracking().OrderByDescending(x => x.DateCreated).ToList();
+                // TODO - Need to sort server side paging
+                var pagedList = await mediatr.Send(new GetPostsCommand(int.MaxValue));
+                Posts = pagedList.Items;
                 StateHasChanged();
             }   
         }
