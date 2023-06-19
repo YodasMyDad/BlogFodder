@@ -4,7 +4,7 @@ using MudBlazor;
 
 namespace BlogFodder.Plugins.ContentEditors.MarkdownEditor;
 
-public class MarkdownEditorEditorPlugin : IEditorPlugin
+public class MarkdownEditorPlugin : IEditorPlugin
 {
     public string Alias => "MarkdownEditorPlugin";
     public string Name => "Markdown Editor";
@@ -29,9 +29,7 @@ public class MarkdownEditorEditorPlugin : IEditorPlugin
 
     public EditorContentPlugin Content { get; set; } = new()
     {
-        Component = typeof(MarkdownContentComponent),
-        CssFiles = new List<string>(),
-        JsFiles = new List<string>()
+        Component = typeof(MarkdownContentComponent)
     };
 
     public SettingsPlugin? Settings { get; set; }

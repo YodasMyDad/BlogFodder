@@ -1,0 +1,24 @@
+@using BlogFodder.Core.Posts.Models
+@using System.Text.Json
+@using BlogFodder.Core.Extensions
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponentPreview
+
+@foreach (var ci in CarouselItems)
+{
+    <p>@ci.Heading</p>
+}
+
+@code {
+    
+    [Parameter]
+    public PostContentItem? PostContentItem { get; set; }
+    private List<CarouselItem> CarouselItems { get; set; } = new();
+    
+    protected override void OnParametersSet()
+    {
+        if (PostContentItem?.PluginData.IsNullOrWhiteSpace() == false)
+        {
+            CarouselItems = JsonSerializer.Deserialize<List<CarouselItem>>(PostContentItem.PluginData) ?? new List<CarouselItem>();
+        }
+    }
+}

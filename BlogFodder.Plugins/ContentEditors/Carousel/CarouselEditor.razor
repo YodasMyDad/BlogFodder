@@ -1,0 +1,167 @@
+@using BlogFodder.Core.Posts.Models
+@using System.Text.Json
+@using BlogFodder.Core.Extensions
+@using BlogFodder.Core.Media.Commands
+@using BlogFodder.Core.Media.Models
+@using BlogFodder.Core.Providers
+@using MediatR
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
+
+
+<MudDialog>
+    <DialogContent>
+        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
+
+            <MudTabPanel Text="Editor">
+                
+                @if (CarouselItems.Any())
+                {
+                    <MudExpansionPanels>
+                        @foreach (var ci in CarouselItems)
+                        {
+                            <MudExpansionPanel Text="Panel One">
+                                <MudGrid>
+                                    <MudItem xs="3">
+                                        <MudField Label="Featured Image">
+                                            @if (!ci.ImageUrl.IsNullOrWhiteSpace())
+                                            {
+                                                <MudImage ObjectFit="ObjectFit.Cover" Width="100" Src="@($"{ci.ImageUrl}?width=100")" Class="rounded"/>
+                                            }
+                                            @if (ci.Image != null)
+                                            {
+                                                <MudChip Color="Color.Default" OnClose="@(() => ci.Image = null)">
+                                                    @ci.Image?.Name
+                                                </MudChip>
+                                            }
+                                            <MudStack Row="true">
+                                                <MudFileUpload T="IBrowserFile" For="@(() => ci.Image)" @bind-Files="ci.Image" OnFilesChanged="CheckImageSize">
+                                                    <ButtonTemplate>
+                                                        <MudButton HtmlTag="label"
+                                                                   Variant="Variant.Filled"
+                                                                   Color="Color.Primary"
+                                                                   StartIcon="@Icons.Material.Filled.Image"
+                                                                   for="@context">
+                                                            Upload Image
+                                                        </MudButton>
+                                                    </ButtonTemplate>
+                                                </MudFileUpload>
+                                                @if (!ci.ImageUrl.IsNullOrWhiteSpace())
+                                                {
+                                                    <MudButton Variant="Variant.Text" OnClick="@(() => { ci.ImageUrl = null; ci.ImageId = null; })">Remove Image</MudButton>
+                                                }
+                                            </MudStack>
+                                        </MudField>
+                                    </MudItem>
+                                    <MudItem xs="9">
+                                        <MudTextField @bind-Value="ci.Heading" Label="Heading" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                        <MudTextField Lines="5" Label="Description" Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="300"
+                                                      HelperText="Max. 300 characters" @bind-Value="ci.Description" For="@(() => ci.Description)"/>
+                                        <MudTextField @bind-Value="ci.Url" Label="Url" HelperText="Optional: Url for the carousel item" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudExpansionPanel>
+                        }
+                    </MudExpansionPanels>
+                }
+                else
+                {
+                    <p>No carousel items to show</p>
+                }
+                
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton Variant="Variant.Filled" OnClick="@(AddCarousel)" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">
+                        Add Carousel
+                    </MudButton>
+                </MudItem>
+
+            </MudTabPanel>
+
+            <MudTabPanel Text="Settings">
+                <EditorSettingsDefault EditorSettings="@EditorSettings"/>
+            </MudTabPanel>
+
+        </MudTabs>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Size="Size.Large" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] public ProviderService ProviderService { get; set; } = default!;
+    [Inject] public IMediator Mediator { get; set; } = default!;
+    
+    [Parameter]
+    public PostContentItem PostContentItem { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<PostContentItem> SaveAndClose { get; set; }
+
+    private List<CarouselItem> CarouselItems { get; set; } = new();
+
+    private CarouselEditorSettings EditorSettings { get; set; } = new();
+
+    private List<BlogFodderFile> ExistingImages { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
+        {
+            CarouselItems = JsonSerializer.Deserialize<List<CarouselItem>>(PostContentItem.PluginData) ?? new List<CarouselItem>();
+            var imageIds = CarouselItems.Where(x => x.ImageId != null).Select(x => x.ImageId!.Value).ToList();
+            ExistingImages = await Mediator.Send(new GetFilesCommand {Ids = imageIds});
+        }
+
+        if (!PostContentItem.PluginSettings.IsNullOrWhiteSpace())
+        {
+            EditorSettings = JsonSerializer.Deserialize<CarouselEditorSettings>(PostContentItem.PluginSettings) ?? new CarouselEditorSettings();
+        }
+    }
+    
+    /// <summary>
+    /// Checks the image size and notifies the user if the image selected is too large
+    /// </summary>
+    /// <param name="args"></param>
+    private void CheckImageSize(InputFileChangeEventArgs args)
+    {
+        var result = ProviderService.StorageProvider?.CanUseFile(args.File).Result;
+        if (result is {Success: false})
+        {
+            foreach (var errorMessage in result.ErrorMessages)
+            {
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+    }
+
+    private void AddCarousel()
+    {
+        CarouselItems.Add(new CarouselItem());
+    }
+
+    private async Task<Task> Submit()
+    {
+        // Look for new images, and find images to delete
+        foreach (var ci in CarouselItems)
+        {
+            if (ci.Image != null)
+            {
+                // Need to save the image
+                
+            }
+        }
+        
+        PostContentItem.PluginData = JsonSerializer.Serialize(CarouselItems, new JsonSerializerOptions {WriteIndented = false});
+        PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions {WriteIndented = false});
+        return SaveAndClose.InvokeAsync(PostContentItem);
+    }
+
+    private void SaveSyncImages()
+    {
+        
+    }
+
+}

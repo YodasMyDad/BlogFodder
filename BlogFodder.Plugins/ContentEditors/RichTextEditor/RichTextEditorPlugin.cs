@@ -5,7 +5,7 @@ using MudBlazor;
 
 namespace BlogFodder.Plugins.ContentEditors.RichTextEditor;
 
-public class RichTextEditorEditorPlugin : IEditorPlugin
+public class RichTextEditorPlugin : IEditorPlugin
 {
     public string Alias => RichTextEditorConstants.PluginAlias;
     public string Name => RichTextEditorConstants.PluginName;
