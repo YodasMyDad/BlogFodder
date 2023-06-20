@@ -1,10 +1,11 @@
 @using BlogFodder.Core.Posts.Models
 @using System.Text.Json
+@using BlogFodder.Core.Data
 @using BlogFodder.Core.Extensions
-@using BlogFodder.Core.Media.Commands
-@using BlogFodder.Core.Media.Models
 @using BlogFodder.Core.Providers
+@using BlogFodder.Core.Shared.Models
 @using MediatR
+@using Microsoft.Extensions.DependencyInjection
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
 
 
@@ -13,7 +14,7 @@
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
             <MudTabPanel Text="Editor">
-                
+
                 @if (CarouselItems.Any())
                 {
                     <MudExpansionPanels>
@@ -41,13 +42,13 @@
                                                                    Color="Color.Primary"
                                                                    StartIcon="@Icons.Material.Filled.Image"
                                                                    for="@context">
-                                                            Upload Image
+                                                            Select
                                                         </MudButton>
                                                     </ButtonTemplate>
                                                 </MudFileUpload>
                                                 @if (!ci.ImageUrl.IsNullOrWhiteSpace())
                                                 {
-                                                    <MudButton Variant="Variant.Text" OnClick="@(() => { ci.ImageUrl = null; ci.ImageId = null; })">Remove Image</MudButton>
+                                                    <MudButton Variant="Variant.Text" OnClick="@(() => { ci.ImageUrl = null; ci.ImageId = null; })">Remove</MudButton>
                                                 }
                                             </MudStack>
                                         </MudField>
@@ -67,10 +68,10 @@
                 {
                     <p>No carousel items to show</p>
                 }
-                
+
                 <MudItem xs="12" Class="d-flex justify-center">
-                    <MudButton Variant="Variant.Filled" OnClick="@(AddCarousel)" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">
-                        Add Carousel
+                    <MudButton OnClick="@(AddCarousel)" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">
+                        Add Carousel Item
                     </MudButton>
                 </MudItem>
 
@@ -83,17 +84,25 @@
         </MudTabs>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" Size="Size.Large" OnClick="Submit">Ok</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="Submit">Save</MudButton>
     </DialogActions>
 </MudDialog>
 
 
 @code {
 
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
-    [Inject] public ProviderService ProviderService { get; set; } = default!;
-    [Inject] public IMediator Mediator { get; set; } = default!;
-    
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    public ProviderService ProviderService { get; set; } = default!;
+
+    [Inject]
+    public IMediator Mediator { get; set; } = default!;
+
+    [Inject]
+    public IServiceProvider ServiceProvider { get; set; } = default!;
+
     [Parameter]
     public PostContentItem PostContentItem { get; set; } = new();
 
@@ -101,18 +110,17 @@
     public EventCallback<PostContentItem> SaveAndClose { get; set; }
 
     private List<CarouselItem> CarouselItems { get; set; } = new();
+    private Dictionary<Guid, CarouselItem> OriginalCarouselItems { get; set; } = new();
 
     private CarouselEditorSettings EditorSettings { get; set; } = new();
 
-    private List<BlogFodderFile> ExistingImages { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
         {
             CarouselItems = JsonSerializer.Deserialize<List<CarouselItem>>(PostContentItem.PluginData) ?? new List<CarouselItem>();
-            var imageIds = CarouselItems.Where(x => x.ImageId != null).Select(x => x.ImageId!.Value).ToList();
-            ExistingImages = await Mediator.Send(new GetFilesCommand {Ids = imageIds});
+    // We store this so we can see if a new image was added/changed
+            OriginalCarouselItems = CarouselItems.ToDictionary(x => x.Id, x => x);
         }
 
         if (!PostContentItem.PluginSettings.IsNullOrWhiteSpace())
@@ -120,7 +128,7 @@
             EditorSettings = JsonSerializer.Deserialize<CarouselEditorSettings>(PostContentItem.PluginSettings) ?? new CarouselEditorSettings();
         }
     }
-    
+
     /// <summary>
     /// Checks the image size and notifies the user if the image selected is too large
     /// </summary>
@@ -144,24 +152,60 @@
 
     private async Task<Task> Submit()
     {
-        // Look for new images, and find images to delete
-        foreach (var ci in CarouselItems)
+        var handlerResult = new HandlerResult<CarouselItem> {Success = true};
+
+        if (CarouselItems.Any(x => x.Image == null && x.ImageId == null))
         {
-            if (ci.Image != null)
+            Snackbar.Add("All carousel items must have an image", Severity.Warning);
+        }
+        else
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+
+            // Look for new images, and find images to delete
+            foreach (var ci in CarouselItems)
             {
-                // Need to save the image
-                
+                // Do we have a browser file selected
+                if (ci.Image != null)
+                {
+                    if (handlerResult.Success == false)
+                    {
+                        // Return 
+                        foreach (var errorMessage in handlerResult.Messages.ErrorMessages())
+                        {
+                            Snackbar.Add(errorMessage.Message, Severity.Error);
+                        }
+                    }
+                    else
+                    {
+                        // Add the new file and save to db, then add the url and id to this carousel item
+                        var featuredImageFile =
+                            await ci.Image.AddFileToDb(CarouselEditorConstants.PluginAlias, handlerResult, ProviderService, dbContext);
+                        ci.ImageId = featuredImageFile?.Id;
+                        ci.ImageUrl = featuredImageFile?.Url;
+
+                        // See if this item had an image, if so, need to save the file and remove the old one
+                        OriginalCarouselItems.TryGetValue(ci.Id, out var item);
+                        if (item != null)
+                        {
+                            // Delete this file
+                            var oldFeaturedImage = await dbContext.Files.FindAsync(item.ImageId);
+                            if (oldFeaturedImage != null)
+                            {
+                                dbContext.Files.Remove(oldFeaturedImage);
+                            }
+                        }
+                    }
+                }
             }
+            
+            // Save db
+            await dbContext.SaveChangesAsync();
         }
         
         PostContentItem.PluginData = JsonSerializer.Serialize(CarouselItems, new JsonSerializerOptions {WriteIndented = false});
         PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions {WriteIndented = false});
         return SaveAndClose.InvokeAsync(PostContentItem);
     }
-
-    private void SaveSyncImages()
-    {
-        
-    }
-
 }

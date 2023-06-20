@@ -95,7 +95,9 @@
                     <MudItem xs="12" Class="mb-8">
                         <MudCard @onclick="@(() => ShowEditor(context))" Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
                             <MudCardContent Class="d-flex align-center flex-grow-1 gap-4">
-                                <MudIcon Icon="@AvailableEditorPlugins[context.PluginAlias!].Icon" Color="Color.Default"/>
+                                <div style="width:40px;">
+                                    <MudIcon Icon="@AvailableEditorPlugins[context.PluginAlias!].Icon" Color="Color.Default"/>
+                                </div>
                                 <div class="flex-grow-1">
                                     <div style="color: @Colors.BlueGrey.Lighten1">
                                         <MudText Typo="Typo.subtitle1">@AvailableEditorPlugins[context.PluginAlias!].Name</MudText>
@@ -103,7 +105,7 @@
                                     <DynamicComponent Type="@AvailableEditorPlugins[context.PluginAlias!].Editor?.PreviewComponent"
                                                       Parameters="@(new Dictionary<string, object> {{"PostContentItem", context}})"/>
                                 </div>
-                                <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Outlined.RemoveCircleOutline" Size="Size.Medium" OnClick="() => RemoveContentItem(context)"/>
+                                <MudFab Style="width:48px;" Color="Color.Secondary" StartIcon="@Icons.Material.Outlined.RemoveCircleOutline" Size="Size.Medium" OnClick="() => RemoveContentItem(context)"/>
                             </MudCardContent>
                         </MudCard>
                     </MudItem>

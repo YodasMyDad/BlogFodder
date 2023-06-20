@@ -35,7 +35,7 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
     public async Task<HandlerResult<Post>> Handle(CreateUpdatePostCommand request, CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<BlogFodderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
 
         var handlerResult = new HandlerResult<Post>();
 
