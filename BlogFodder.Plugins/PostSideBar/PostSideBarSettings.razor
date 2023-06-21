@@ -60,12 +60,18 @@
                                     </MudButton>
                                 </ButtonTemplate>
                             </MudFileUpload>
-                            @*@if (AboutImageExisting != null)
+                            @if (AboutImageExisting != null)
                             {
                                 <MudButton Variant="Variant.Text" OnClick="@(() => AboutImageExisting = null)">Remove Image</MudButton>
-                            }*@
+                            }
                         </MudStack>
                     </MudField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Settings.AboutBoxImageHeight" For="@(() => Settings.AboutBoxImageHeight)" Label="Image Height" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Settings.AboutBoxImageWidth" For="@(() => Settings.AboutBoxImageWidth)" Label="Image Width" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField @bind-Value="Settings.AboutBoxTitle" For="@(() => Settings.AboutBoxTitle)" Label="About Title" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
@@ -95,9 +101,14 @@
 
 @code
 {
-    [Inject] public ISnackbar Snackbar { get; set; } = default!;
-    [Inject] public ProviderService ProviderService { get; set; } = default!;
-    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    [Inject]
+    public ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    public ProviderService ProviderService { get; set; } = default!;
+
+    [Inject]
+    public IServiceProvider ServiceProvider { get; set; } = default!;
 
     private MudForm Form { get; set; } = default!;
     private string?[] Errors { get; set; } = Array.Empty<string>();
@@ -105,9 +116,9 @@
     private CreateUpdatePluginCommand SavePluginSettingsCommand { get; set; } = new();
     private IBrowserFile? AboutImage { get; set; }
     private BlogFodderFile? AboutImageExisting { get; set; }
-    
-    private const string AboutBoxImageId = "AboutBoxImageId";
-    
+    private Guid? AboutImageExistingId { get; set; }
+        private const string AboutBoxImageId = "AboutBoxImageId";
+
     protected override async Task OnInitializedAsync()
     {
         using var scope = ServiceProvider.CreateScope();
@@ -127,10 +138,11 @@
 
             Settings.Enabled = SavePluginSettingsCommand.Plugin.Enabled;
 
-            // See if there is an existing image
+    // See if there is an existing image
             if (Settings.AboutBoxImageId != null)
             {
                 AboutImageExisting = await dbContext.Files.AsNoTracking().FirstOrDefaultAsync(x => x.Id == Settings.AboutBoxImageId);
+                AboutImageExistingId = AboutImageExisting?.Id;
             }
         }
         else
@@ -150,38 +162,45 @@
         await Form.Validate();
         if (Form.IsValid)
         {
-            
             using var scope = ServiceProvider.CreateScope();
             var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
             var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
-            
-    // Profile Image - Need to save image and then create a file
+
+            // Profile Image - Need to save image and then create a file
             if (AboutImage != null)
             {
-                // Delete the old one if there is one
-                if (AboutImageExisting != null)
-                {
-                    dbContext.Files.Remove(AboutImageExisting);
-                    await dbContext.SaveChangesAsync();
-                    AboutImageExisting = null;
-                }
-
-                    // Save the file, create a file and attach it to the user
+                // Save the file, create a file and attach it to the user
                 var fileResult = await AboutImage.AddFileToDb(AboutBoxImageId, new HandlerResult<BlogFodderFile>(), ProviderService, dbContext);
                 await dbContext.SaveChangesAsync();
 
+                await DeleteExistingImage(dbContext);
+
                 // Set the file to the user
                 AboutImageExisting = fileResult;
+                AboutImageExistingId = AboutImageExisting?.Id;
                 Settings.AboutBoxImageId = AboutImageExisting?.Id;
                 Settings.AboutBoxImageUrl = AboutImageExisting?.Url;
+            }
+            else if (AboutImageExisting == null && AboutImageExistingId != null)
+            {
+                // They have removed the existing image
+                await DeleteExistingImage(dbContext);
             }
 
             SavePluginSettingsCommand = SavePluginSettingsCommand.ReadyToSave(Settings);
 
             var result = await mediatr.Send(SavePluginSettingsCommand).ConfigureAwait(false);
             AboutImage = null;
-            
+
             Errors = SavePluginSettingsCommand.ProcessResult(result, Snackbar);
         }
+    }
+
+    private async Task DeleteExistingImage(BlogFodderDbContext dbContext)
+    {
+        var toDelete = dbContext.Files.FirstOrDefault(x => x.Id == AboutImageExistingId);
+        if (toDelete != null) dbContext.Files.Remove(toDelete);
+        await dbContext.SaveChangesAsync();
+        AboutImageExisting = null;
     }
 }

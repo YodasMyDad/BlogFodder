@@ -7,7 +7,8 @@
     <div class="card mb-4">
         @if (PostContentModel.PluginSettings?.AboutBoxImageUrl.IsNullOrWhiteSpace() == false)
         {
-            <img src="@PostContentModel.PluginSettings?.AboutBoxImageUrl" class="card-img-top" alt="@PostContentModel.PluginSettings?.AboutBoxTitle">   
+            <img src="@PostContentModel.PluginSettings?.AboutBoxImageUrl?width=@(PostContentModel.PluginSettings?.AboutBoxImageWidth)&height=@(PostContentModel.PluginSettings?.AboutBoxImageHeight)&mode=crop" 
+                 class="card-img-top" alt="@PostContentModel.PluginSettings?.AboutBoxTitle">   
         }
         <div class="card-body">
             <h5 class="card-title">@PostContentModel.PluginSettings?.AboutBoxTitle</h5>
@@ -27,5 +28,4 @@
     {
         PostContentModel = new PluginContentModel<string?, PostSideBarSettingsModel>(Model, Settings);
     }
-
 }

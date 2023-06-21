@@ -10,20 +10,29 @@
         <div class="col-md-8">
 
             <article class="blog-post">
-                <img class="img-fluid" src="@Post.FeaturedImage?.Url?width=900&height=300&mode=crop" alt="@Post.Name - Image">
-                <h1>@Post.Name</h1>
-                <p class="fw-light">By: @Post.User?.UserName</p>
-                <p class="text-muted">
-                    <small>Last Updated: @Post.DateUpdated.Humanize()</small>
-                </p>
+                @if (Post.ShowFeaturedImageOnPost)
+                {
+                    <img class="img-fluid" src="@Post.FeaturedImage?.Url?width=900&height=300&mode=crop" alt="@Post.Name - Image">   
+                }
+                @if (Post.ShowDefaultHeading)
+                {
+                    <h1>@Post.Name</h1>   
+                }
+                @if (Post.ShowAuthorName)
+                {
+                    <p class="fw-light">By: @Post.User?.UserName</p>   
+                }
+                @if (Post.ShowLastUpdated)
+                {
+                    <p class="text-muted">
+                        <small>Last Updated: @Post.DateUpdated.Humanize()</small>
+                    </p>   
+                }
                 @foreach (var postContentItem in Post.ContentItems)
                 {
                     <div class="postContentItem">
                         <DynamicComponent Type="@AvailableEditorPlugins[postContentItem.PluginAlias!].Content.Component"
-                                          Parameters="@(new Dictionary<string, object> {
-                                                          {"Model", postContentItem.PluginData ?? ""},
-                                                          {"Settings", postContentItem.PluginSettings ?? ""}
-                                                      })"/>
+                                          Parameters="@(new Dictionary<string, object> { {"Model", postContentItem.PluginData ?? ""}, {"Settings", postContentItem.PluginSettings ?? ""} })"/>
                     </div>
                 }
             </article>

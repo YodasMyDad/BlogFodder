@@ -175,7 +175,8 @@ public class CreateUpdatePostHandler : IRequestHandler<CreateUpdatePostCommand, 
             else
             {
                 // New item, add it to the collection
-                post.ContentItems.Add(updatedItem);
+                updatedItem.Post = post;
+                dbContext.PostContentItems.Add(updatedItem);
             }
         }
 

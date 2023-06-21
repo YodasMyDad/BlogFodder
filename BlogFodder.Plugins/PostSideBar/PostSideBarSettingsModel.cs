@@ -11,6 +11,8 @@ public class PostSideBarSettingsModel : IPluginSettings
     public Guid? AboutBoxImageId { get; set; }
     public string? AboutBoxImageUrl { get; set; }
     public string? AboutBoxText { get; set; }
-
+    public int AboutBoxImageHeight { get; set; } = 160;
+    public int AboutBoxImageWidth { get; set; } = 400;
+    
     public int LatestPostsAmount { get; set; } = 3;
 }

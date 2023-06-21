@@ -80,11 +80,6 @@
         </MudTabPanel>
 
         <MudTabPanel Text="Content">
-
-            <MudPaper Class="d-flex justify-center flex-grow-1 gap-4 mb-4" Elevation="0">
-                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" @onclick="@(ShowContentEditors)">Add Content Editor</MudButton>
-            </MudPaper>
-
             <MudDropContainer T="PostContentItem" @ref="DropContainer" Items="PostCommand.Post.ContentItems" ItemsSelector="@((item, dropzone) => item.Selector == dropzone)" ItemDropped="DropItemUpdated" Class="d-flex flex-wrap flex-grow-1">
                 <ChildContent>
                     <MudGrid Class="mt-8">
@@ -111,6 +106,9 @@
                     </MudItem>
                 </ItemRenderer>
             </MudDropContainer>
+            <MudPaper Class="d-flex justify-center flex-grow-1 gap-4 mb-4" Elevation="0">
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" @onclick="@(ShowContentEditors)">Add New Content Editor</MudButton>
+            </MudPaper>
         </MudTabPanel>
 
         <MudTabPanel Text="SEO">
@@ -161,23 +159,36 @@
             </MudGrid>
         </MudTabPanel>
 
-        <MudTabPanel Text="Plugins">
-            <MudGrid Class="mt-8">
-
+        <MudTabPanel Text="Settings">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSwitch @bind-Checked="@PostCommand.Post.ShowFeaturedImageOnPost" Label="Show Featured Image On Post (Top)" Color="Color.Primary"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSwitch @bind-Checked="@PostCommand.Post.ShowDefaultHeading" Label="Show Default Heading (H1)" Color="Color.Primary"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSwitch @bind-Checked="@PostCommand.Post.ShowAuthorName" Label="Show Author Name" Color="Color.Primary"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSwitch @bind-Checked="@PostCommand.Post.ShowLastUpdated" Label="Show Last Updated" Color="Color.Primary"/>
+                </MudItem>
             </MudGrid>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Plugins">
             @foreach (var plugin in AvailablePlugins)
             {
                 var pluginData = PluginData.FirstOrDefault(x => x.Key == plugin.Key);
                 <MudItem xs="12" Class="mb-8">
                     <MudCard @onclick="@(() => ShowPostPlugin(plugin.Value, pluginData.Value))" Elevation="2" Class="rounded-lg" Style="@_customCardStyle">
-   
-                            <DynamicComponent Type="@plugin.Value.Editor?.PreviewComponent"
-                                              Parameters="@(new Dictionary<string, object> {{"Plugin", pluginData.Value}, {"Iplugin", plugin.Value}})"/>   
-                    
+
+                        <DynamicComponent Type="@plugin.Value.Editor?.PreviewComponent"
+                                          Parameters="@(new Dictionary<string, object> {{"Plugin", pluginData.Value}, {"Iplugin", plugin.Value}})"/>
+
                     </MudCard>
                 </MudItem>
             }
-
         </MudTabPanel>
 
     </MudTabs>

@@ -17,6 +17,13 @@ public class Post
     public Guid? FeaturedImageId { get; set; }
     public BlogFodderFile? FeaturedImage { get; set; }
     
+    //Settings
+    public bool ShowFeaturedImageOnPost { get; set; } = true;
+    public bool ShowDefaultHeading { get; set; } = true;
+    public bool ShowAuthorName { get; set; } = true;
+    public bool ShowLastUpdated { get; set; } = true;
+    
+    
     public Guid? UserId { get; set; }
     public User? User { get; set; }
     

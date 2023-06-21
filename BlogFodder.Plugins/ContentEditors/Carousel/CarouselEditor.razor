@@ -18,9 +18,10 @@
                 @if (CarouselItems.Any())
                 {
                     <MudExpansionPanels>
-                        @foreach (var ci in CarouselItems)
+                        @for (var index = 0; index < CarouselItems.Count; index++)
                         {
-                            <MudExpansionPanel Text="Panel One">
+                            var ci = CarouselItems[index];
+                            <MudExpansionPanel Text="@(!ci.Heading.IsNullOrWhiteSpace() ? ci.Heading : $"Carousel {index + 1}")">
                                 <MudGrid>
                                     <MudItem xs="3">
                                         <MudField Label="Featured Image">
@@ -52,15 +53,29 @@
                                                 }
                                             </MudStack>
                                         </MudField>
+                                        <MudItem xs="12" Class="d-flex justify-center">
+                                            <MudButton StartIcon="@Icons.Material.Filled.Remove" OnClick="@(() => RemoveCarousel(ci))" DisableElevation="true" Color="Color.Primary" Class="mt-2">
+                                                Remove Carousel
+                                            </MudButton>
+                                        </MudItem>
+
                                     </MudItem>
                                     <MudItem xs="9">
-                                        <MudTextField @bind-Value="ci.Heading" Label="Heading" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-                                        <MudTextField Lines="5" Label="Description" Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="300"
-                                                      HelperText="Max. 300 characters" @bind-Value="ci.Description" For="@(() => ci.Description)"/>
-                                        <MudTextField @bind-Value="ci.Url" Label="Url" HelperText="Optional: Url for the carousel item" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                        <MudGrid>
+                                            <MudItem xs="12">
+                                                <MudTextField @bind-Value="ci.Heading" Label="Heading" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                            </MudItem>
+                                            <MudItem xs="12">
+                                                <MudTextField Lines="5" Label="Description" Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="300" HelperText="Max. 300 characters" @bind-Value="ci.Description" For="@(() => ci.Description)"/>
+                                            </MudItem>
+                                            <MudItem xs="12">
+                                                <MudTextField @bind-Value="ci.Url" Label="Url" HelperText="Optional: Url for the carousel item" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                            </MudItem>
+                                        </MudGrid>
                                     </MudItem>
                                 </MudGrid>
                             </MudExpansionPanel>
+                            
                         }
                     </MudExpansionPanels>
                 }
@@ -70,14 +85,22 @@
                 }
 
                 <MudItem xs="12" Class="d-flex justify-center">
-                    <MudButton OnClick="@(AddCarousel)" DisableElevation="true" Color="Color.Primary" Size="Size.Large" Class="mt-8">
-                        Add Carousel Item
+                    <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="@(AddCarousel)" DisableElevation="true" Color="Color.Primary" Class="mt-8">
+                        Add New Carousel Item
                     </MudButton>
                 </MudItem>
 
             </MudTabPanel>
 
             <MudTabPanel Text="Settings">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudNumericField @bind-Value="EditorSettings.ImageHeight" Label="Image Height" Variant="Variant.Outlined" Margin="Margin.Dense" For="@(() => EditorSettings.ImageHeight)"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudNumericField @bind-Value="EditorSettings.ImageWidth" Label="Image Width" Variant="Variant.Outlined" Margin="Margin.Dense" For="@(() => EditorSettings.ImageWidth)"/>
+                    </MudItem>
+                </MudGrid>
                 <EditorSettingsDefault EditorSettings="@EditorSettings"/>
             </MudTabPanel>
 
@@ -150,6 +173,11 @@
         CarouselItems.Add(new CarouselItem());
     }
 
+    private void RemoveCarousel(CarouselItem ci)
+    {
+        CarouselItems.Remove(ci);
+    }
+
     private async Task<Task> Submit()
     {
         var handlerResult = new HandlerResult<CarouselItem> {Success = true};
@@ -163,15 +191,15 @@
             using var scope = ServiceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
 
-            // Look for new images, and find images to delete
+    // Look for new images, and find images to delete
             foreach (var ci in CarouselItems)
             {
-                // Do we have a browser file selected
+    // Do we have a browser file selected
                 if (ci.Image != null)
                 {
                     if (handlerResult.Success == false)
                     {
-                        // Return 
+    // Return 
                         foreach (var errorMessage in handlerResult.Messages.ErrorMessages())
                         {
                             Snackbar.Add(errorMessage.Message, Severity.Error);
@@ -179,17 +207,17 @@
                     }
                     else
                     {
-                        // Add the new file and save to db, then add the url and id to this carousel item
+    // Add the new file and save to db, then add the url and id to this carousel item
                         var featuredImageFile =
                             await ci.Image.AddFileToDb(CarouselEditorConstants.PluginAlias, handlerResult, ProviderService, dbContext);
                         ci.ImageId = featuredImageFile?.Id;
                         ci.ImageUrl = featuredImageFile?.Url;
 
-                        // See if this item had an image, if so, need to save the file and remove the old one
+    // See if this item had an image, if so, need to save the file and remove the old one
                         OriginalCarouselItems.TryGetValue(ci.Id, out var item);
                         if (item != null)
                         {
-                            // Delete this file
+    // Delete this file
                             var oldFeaturedImage = await dbContext.Files.FindAsync(item.ImageId);
                             if (oldFeaturedImage != null)
                             {
@@ -199,13 +227,14 @@
                     }
                 }
             }
-            
-            // Save db
-            await dbContext.SaveChangesAsync();
+
+    // Save db
+            var result = await dbContext.SaveChangesAsync();
         }
-        
+
         PostContentItem.PluginData = JsonSerializer.Serialize(CarouselItems, new JsonSerializerOptions {WriteIndented = false});
         PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions {WriteIndented = false});
         return SaveAndClose.InvokeAsync(PostContentItem);
     }
+
 }

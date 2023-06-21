@@ -3,10 +3,14 @@
 @using BlogFodder.Core.Extensions
 @implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponentPreview
 
-@foreach (var ci in CarouselItems)
-{
-    <p>@ci.Heading</p>
-}
+<MudGrid Spacing="2" Justify="Justify.Center">
+    <MudItem>
+        @foreach (var ci in CarouselItems)
+        {
+            <img src="@ci.ImageUrl?width=100&height=60&mode=crop" alt="@ci.Heading" />
+        }        
+    </MudItem>
+</MudGrid>
 
 @code {
     
