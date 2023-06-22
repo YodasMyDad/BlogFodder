@@ -1,0 +1,30 @@
+@using BlogFodder.Core.Posts.Models
+@using BlogFodder.Core.Extensions
+@using System.Text.Json
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponentPreview
+
+<MudText Typo="Typo.body1">
+    
+    <ul>
+        @foreach (var url in Urls)
+        {
+            <li>@url</li>
+        }
+    </ul>
+    
+</MudText>
+
+
+@code {
+    [Parameter]
+    public PostContentItem? PostContentItem { get; set; }
+    private List<string> Urls { get; set; } = new();
+    
+    protected override void OnParametersSet()
+    {
+        if (PostContentItem?.PluginData.IsNullOrWhiteSpace() == false)
+        {
+            Urls = JsonSerializer.Deserialize<List<string>>(PostContentItem.PluginData) ?? new List<string>();
+        }
+    }
+}

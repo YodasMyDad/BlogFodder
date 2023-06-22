@@ -1,0 +1,92 @@
+@using BlogFodder.Core.Posts.Models
+@using System.Text.Json
+@using BlogFodder.Core.Extensions
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginComponent
+
+<MudDialog>
+    <DialogContent>
+        <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
+
+            <MudTabPanel Text="Editor">
+
+                @if (Urls.Any())
+                {
+                    <MudGrid>
+                        @for (var i = 0; i < Urls.Count; i++)
+                        {
+                            var index = i;
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="Urls[index]" Label="Url" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                            </MudItem>    
+                        }
+                    </MudGrid>
+                }
+                else
+                {
+                    <p>No videos added</p>
+                }
+
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="@(AddUrl)" DisableElevation="true" Color="Color.Primary" Class="mt-8">
+                        Add New YouTube Url
+                    </MudButton>
+                </MudItem>
+
+            </MudTabPanel>
+
+            <MudTabPanel Text="Settings">
+                <EditorSettingsDefault EditorSettings="@EditorSettings"/>
+            </MudTabPanel>
+
+        </MudTabs>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="Submit">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+    [Parameter]
+    public PostContentItem PostContentItem { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<PostContentItem> SaveAndClose { get; set; }
+
+    private List<string> Urls { get; set; } = new();
+
+    private YouTubeEditorSettings EditorSettings { get; set; } = new();
+
+    private void AddUrl()
+    {
+        Urls.Add(string.Empty);
+    }
+
+    private void RemoveUrl(string url)
+    {
+        Urls.Remove(url);
+    }
+
+    protected override void OnInitialized()
+    {
+        if (!PostContentItem.PluginData.IsNullOrWhiteSpace())
+        {
+            Urls = JsonSerializer.Deserialize<List<string>>(PostContentItem.PluginData) ?? new List<string>();
+        }
+
+        if (!PostContentItem.PluginSettings.IsNullOrWhiteSpace())
+        {
+            EditorSettings = JsonSerializer.Deserialize<YouTubeEditorSettings>(PostContentItem.PluginSettings) ?? new YouTubeEditorSettings();
+        }
+    }
+
+    private async Task<Task> Submit()
+    {
+        var strippedUrls = Urls.Where(x => !x.IsNullOrWhiteSpace()).ToList();
+        PostContentItem.PluginData = JsonSerializer.Serialize(strippedUrls, new JsonSerializerOptions {WriteIndented = false});
+        PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions {WriteIndented = false});
+        return SaveAndClose.InvokeAsync(PostContentItem);
+    }
+
+}

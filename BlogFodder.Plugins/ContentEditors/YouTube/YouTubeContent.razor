@@ -1,0 +1,45 @@
+@using BlogFodder.Core.Extensions
+@using System.Text.Json
+@implements BlogFodder.Core.Plugins.Interfaces.IEditorPluginContentComponent
+
+@if (Model != null)
+{
+    <div class="@((MarkupString) EditorSettings.PaddingMargin())">
+        @foreach (var url in Urls)
+        {
+            var video = url.ToYouTubeVideo();
+            if (!video.IsNullOrWhiteSpace())
+            {
+                <div class="ratio ratio-16x9 mb-4">
+                    @((MarkupString) url.ToYouTubeVideo())
+                </div>
+            }
+        }
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string? Model { get; set; }
+
+    [Parameter]
+    public string? Settings { get; set; }
+
+    private YouTubeEditorSettings EditorSettings { get; set; } = new();
+    private List<string> Urls { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        if (!Model.IsNullOrWhiteSpace())
+        {
+            Urls = JsonSerializer.Deserialize<List<string>>(Model) ?? new List<string>();
+        }
+
+        if (!Settings.IsNullOrWhiteSpace())
+        {
+            EditorSettings = JsonSerializer.Deserialize<YouTubeEditorSettings>(Settings) ?? new YouTubeEditorSettings();
+        }
+    }
+
+}
