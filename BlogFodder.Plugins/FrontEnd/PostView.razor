@@ -7,12 +7,12 @@
 <main class="container">
 
     <div class="row my-4 g-5">
-        <div class="col-md-8">
+        <div class="@PostWidth">
 
             <article class="blog-post">
                 @if (Post.ShowFeaturedImageOnPost)
                 {
-                    <img class="img-fluid" src="@Post.FeaturedImage?.Url?width=900&height=300&mode=crop" alt="@Post.Name - Image">   
+                    <img class="img-fluid mx-auto" src="@Post.FeaturedImage?.Url?width=900&height=300&mode=crop" alt="@Post.Name - Image">   
                 }
                 @if (Post.ShowDefaultHeading)
                 {
@@ -38,13 +38,15 @@
             </article>
 
         </div>
-
-        <div class="col-md-4">
-            <div class="position-sticky" style="top: 2rem;">
-                <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostSideBarTop"/>
-                <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostSideBarBottom"/>
-            </div>
-        </div>
+        @if (!Post.RemoveSideColumn)
+        {
+            <div class="col-md-4">
+                <div class="position-sticky" style="top: 2rem;">
+                    <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostSideBarTop"/>
+                    <RenderPlugins PluginDisplayArea="PluginDisplayArea.PostSideBarBottom"/>
+                </div>
+            </div>   
+        }
     </div>
 
 </main>
@@ -59,13 +61,18 @@
     [Parameter]
     public Post Post { get; set; } = default!;
 
-    protected override void OnInitialized()
+    private string PostWidth { get; set; } = "col-md-8";
+
+    protected override void OnParametersSet()
     {
+        if (Post.RemoveSideColumn)
+        {
+            PostWidth = "col-md-10 offset-md-1";
+        }
         var editorPlugins = ExtensionManager.GetInstances<IEditorPlugin>(true);
         foreach (var plugin in editorPlugins)
         {
-            AvailableEditorPlugins.Add(plugin.Value.Alias, plugin.Value);
+            AvailableEditorPlugins.TryAdd(plugin.Value.Alias, plugin.Value);
         }
     }
-
 }

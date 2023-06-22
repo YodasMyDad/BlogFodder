@@ -22,7 +22,7 @@ public class Post
     public bool ShowDefaultHeading { get; set; } = true;
     public bool ShowAuthorName { get; set; } = true;
     public bool ShowLastUpdated { get; set; } = true;
-    
+    public bool RemoveSideColumn { get; set; }
     
     public Guid? UserId { get; set; }
     public User? User { get; set; }

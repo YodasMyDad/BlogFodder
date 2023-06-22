@@ -1,0 +1,61 @@
+@code {
+
+    [Parameter]
+    public string HtmlContent { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        var doc = new HtmlAgilityPack.HtmlDocument();
+        doc.LoadHtml(HtmlContent);
+
+        foreach (var node in doc.DocumentNode.ChildNodes)
+        {
+            switch (node.Name)
+            {
+                case "h1":
+                    ContentItems.Add(new ContentItem { ClassName = "mud-typography mud-typography-h1", Text = node.InnerHtml });
+                    break;
+                case "h2":
+                    ContentItems.Add(new ContentItem { ClassName = "mud-typography mud-typography-h2", Text = node.InnerHtml });
+                    break;
+                case "h3":
+                    ContentItems.Add(new ContentItem { ClassName = "mud-typography mud-typography-h3", Text = node.InnerHtml });
+                    break;
+                case "h4":
+                    ContentItems.Add(new ContentItem { ClassName = "mud-typography mud-typography-h4", Text = node.InnerHtml });
+                    break;
+                case "h5":
+                    ContentItems.Add(new ContentItem { ClassName = "mud-typography mud-typography-h5", Text = node.InnerHtml });
+                    break;
+                case "h6":
+                    ContentItems.Add(new ContentItem { ClassName = "mud-typography mud-typography-h6", Text = node.InnerHtml });
+                    break;
+                default:
+                    ContentItems.Add(new ContentItem { ClassName = "mud-typography mud-typography-body1", Text = node.InnerHtml });
+                    break;
+            }
+        }
+    }
+
+    private List<ContentItem> ContentItems { get; set; } = new();
+}
+
+@foreach (var item in ContentItems)
+{
+    if (!string.IsNullOrEmpty(item.ClassName))
+    {
+        <div class="@item.ClassName">@((MarkupString)item.Text)</div>
+    }
+    else
+    {
+        @((MarkupString)item.Text)
+    }
+}
+
+@code {
+    private class ContentItem
+    {
+        public string ClassName { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+    }
+}
