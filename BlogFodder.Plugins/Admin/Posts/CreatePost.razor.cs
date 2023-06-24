@@ -65,7 +65,7 @@ public partial class CreatePost : ComponentBase
             // Yes, should probably be in a service or Mediatr call
             var dbPost = dbContext.Posts
                 .AsNoTracking()
-                .Include(x => x.ContentItems)
+                .Include(x => x.ContentItems.OrderBy(c => c.SortOrder))
                 .Include(x => x.FeaturedImage)
                 .Include(x => x.SocialImage)
                 .Include(x => x.Categories)
@@ -80,6 +80,9 @@ public partial class CreatePost : ComponentBase
                 {
                     postContentItem.Selector = DefaultDropZoneSelector;
                 }
+                
+                // Also order the Content Items
+                
 
                 var categoryIds = dbPost.Categories.Select(x => x.Id);
                 SelectedCategories = Categories.Where(x => categoryIds.Contains(x.Id));
@@ -191,9 +194,32 @@ public partial class CreatePost : ComponentBase
     private void DropItemUpdated(MudItemDropInfo<PostContentItem> dropItem)
     {
         if (dropItem.Item != null) dropItem.Item.Selector = dropItem.DropzoneIdentifier;
-        // TODO - This doesn't seem to set the correct order!
-        PostCommand.Post.ContentItems.UpdateOrder(dropItem, item => item.SortOrder,
-            PostCommand.Post.ContentItems.Count);
+
+        var contentItems = PostCommand.Post.ContentItems.OrderBy(x => x.SortOrder).ToList();
+    
+        var oldIndex = contentItems.FindIndex(x => x.Id == dropItem.Item?.Id);
+        var newIndex = dropItem.IndexInZone;
+
+        if(oldIndex < 0 || oldIndex == newIndex) return;
+
+        contentItems[oldIndex].SortOrder = newIndex;
+
+        if (oldIndex < newIndex)
+        {
+            // Moving down: Increase sort order of items between old and new position
+            for (var i = oldIndex + 1; i <= newIndex; i++)
+            {
+                contentItems[i].SortOrder--;
+            }
+        }
+        else
+        {
+            // Moving up: Decrease sort order of items between old and new position
+            for (var i = newIndex; i < oldIndex; i++)
+            {
+                contentItems[i].SortOrder++;
+            }
+        }
     }
 
     /// <summary>
@@ -203,6 +229,13 @@ public partial class CreatePost : ComponentBase
     private void RemoveContentItem(PostContentItem postContentItem)
     {
         PostCommand.Post.ContentItems.Remove(postContentItem);
+
+        var contentItems = PostCommand.Post.ContentItems.OrderBy(x => x.SortOrder).ToList();
+        for (var i = 0; i < contentItems.Count; i++)
+        {
+            contentItems[i].SortOrder = i;
+        }
+
         RefreshDopList();
     }
 
@@ -251,6 +284,7 @@ public partial class CreatePost : ComponentBase
             // Save the data to this contentItem, or do we have to loop
             // to find the one with the Id? And set the data that way?
             contentItem = result.Data as PostContentItem ?? contentItem;
+            
             RefreshDopList();
         }
     }
@@ -266,14 +300,13 @@ public partial class CreatePost : ComponentBase
         {
             // Save the data to this contentItem, or do we have to loop
             // to find the one with the Id? And set the data that way?
-            var plugin = result.Data as IEditorPlugin;
-            if (plugin != null)
+            if (result.Data is IEditorPlugin plugin)
             {
                 var postContentItem = new PostContentItem
                 {
                     PluginAlias = plugin.Alias,
                     Selector = DefaultDropZoneSelector,
-                    SortOrder = PostCommand.Post.ContentItems.Count + 1,
+                    SortOrder = PostCommand.Post.ContentItems.Count,
                     PostId = PostCommand.Post.Id,
                     IsNew = true
                 };
