@@ -1,0 +1,68 @@
+@using BlogFodder.Core.Membership.Models
+@using Humanizer
+@using Microsoft.Extensions.DependencyInjection
+@using BlogFodder.Core.Data
+@using BlogFodder.Plugins.Admin.Membership.Dialogs
+@using Microsoft.EntityFrameworkCore
+@implements BlogFodder.Core.Plugins.Interfaces.IAdminDashboard
+
+<MudItem xs="12" sm="@Columns">
+    <MudTable Elevation="2" Items="@Users" Hover="true" OnRowClick="RowClickEvent" T="User" RowClass="rowpointer">
+            <ToolBarContent>
+                <MudIcon Icon="@Icon" Color="Color.Default" Size="Size.Medium"/>
+                <MudText Typo="Typo.body1">Latest Users</MudText>
+                <MudSpacer/>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Date Created</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.UserName</MudTd>
+                <MudTd DataLabel="Date Created">@context.CreateDate.Humanize()</MudTd>
+            </RowTemplate>
+        </MudTable>
+</MudItem>
+
+@code {
+    public string? Heading { get; } = "Latest Users";
+    public string? Description { get; } = string.Empty;
+    public string Icon { get; } = Icons.Material.Outlined.Person;
+    public int Columns { get; } = 6;
+    public int SortOrder { get; } = 2;
+    
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    [Inject] private IDialogService DialogService { get; set; } = default!;
+    
+    private IEnumerable<User> Users { get; set; } = Enumerable.Empty<User>();
+    private readonly DialogOptions _defaultDialogOptions = new() {MaxWidth = MaxWidth.Large, FullWidth = true};
+    
+    protected override async Task OnInitializedAsync()
+    {
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+        Users = await dbContext.Users
+            .AsNoTracking()
+            .OrderByDescending(x => x.CreateDate).Take(10)
+            .ToListAsync();
+    }
+
+    
+    private async Task RowClickEvent(TableRowClickEventArgs<User> tableRowClickEventArgs)
+    {
+    // Open up the user editor
+        var parameters = new DialogParameters
+        {
+            {"User", tableRowClickEventArgs.Item}
+        };
+
+        var dialog = await DialogService.ShowAsync<EditUser>($"Edit {tableRowClickEventArgs.Item.UserName}", parameters, _defaultDialogOptions);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            StateHasChanged();
+        }
+    }
+}

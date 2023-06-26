@@ -1,15 +1,32 @@
 @page "/admin"
+@using BlogFodder.Core.Plugins.Interfaces
+@using BlogFodder.Core.Plugins
 @layout AdminLayout
 <PageTitle>Admin</PageTitle>
 <MudGrid>
-    <MudItem xs="12" sm="6">
-        <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
-            Latest Posts
-        </MudPaper>
-    </MudItem>
+
+    @foreach (var dashboard in Dashboards)
+    {
+        <DynamicComponent Type="@dashboard" />
+    }
+    
+    @*
     <MudItem xs="12" sm="6">
         <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
             Latest Users
         </MudPaper>
-    </MudItem>
+    </MudItem>*@
 </MudGrid>
+
+@code
+{
+    [Inject]
+    public ExtensionManager ExtensionManager { get; set; } = default!;
+    
+    private IEnumerable<Type> Dashboards { get; set; } = Enumerable.Empty<Type>();
+
+    protected override void OnParametersSet()
+    {
+        Dashboards = ExtensionManager.GetImplementations<IAdminDashboard>();
+    }
+}

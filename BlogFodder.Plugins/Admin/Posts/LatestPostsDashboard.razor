@@ -1,0 +1,51 @@
+@using BlogFodder.Core.Posts.Models
+@using MediatR
+@using Microsoft.Extensions.DependencyInjection
+@using BlogFodder.Core.Posts.Commands
+@using Humanizer
+@implements BlogFodder.Core.Plugins.Interfaces.IAdminDashboard
+
+<MudItem xs="12" sm="@Columns">
+    <MudTable Elevation="2" Items="@Posts" Hover="true" OnRowClick="RowClickEvent" T="Post" RowClass="rowpointer">
+            <ToolBarContent>
+                <MudIcon Icon="@Icon" Color="Color.Default" Size="Size.Medium"/>
+                <MudText Typo="Typo.body1">Latest Posts</MudText>
+                <MudSpacer/>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Title</MudTh>
+                <MudTh>Date Updated</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Title">@context.Name</MudTd>
+                <MudTd DataLabel="Date Updated">@context.DateUpdated.Humanize()</MudTd>
+            </RowTemplate>
+        </MudTable>
+</MudItem>
+
+@code {
+    public string? Heading { get; } = "Latest Posts";
+    public string? Description { get; } = string.Empty;
+    public string Icon { get; } = Icons.Material.Outlined.PostAdd;
+    public int Columns { get; } = 6;
+    public int SortOrder { get; } = 1;
+
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
+    
+    private IEnumerable<Post> Posts { get; set; } = Enumerable.Empty<Post>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var scope = ServiceProvider.CreateScope();
+        var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var pagedList = await mediatr.Send(new GetPostsCommand(10));
+        Posts = pagedList.Items;
+    }
+    
+    private void RowClickEvent(TableRowClickEventArgs<Post> tableRowClickEventArgs)
+    {
+        NavigationManager.NavigateTo($"/admin/createpost/{tableRowClickEventArgs.Item.Id}");
+    }
+
+}
