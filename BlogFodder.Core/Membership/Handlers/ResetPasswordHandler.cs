@@ -22,10 +22,10 @@ namespace BlogFodder.Core.Membership.Handlers
             var result = new AuthenticationResult();
             using var scope = _serviceProvider.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-            var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
+            var user = await userManager.FindByEmailAsync(request.Email);
             if (user != null)
             {
-                var resetResult = await userManager.ResetPasswordAsync(user, request.Code, request.Password).ConfigureAwait(false);
+                var resetResult = await userManager.ResetPasswordAsync(user, request.Code, request.Password);
                 if (resetResult.Succeeded == false)
                 {
                     result.Success = false;

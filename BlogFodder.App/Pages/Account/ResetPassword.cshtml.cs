@@ -33,7 +33,7 @@ namespace BlogFodder.App.Pages.Account
             {
                 return BadRequest("A code must be supplied for password reset.");
             }
-            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            Settings = await _mediator.Send(new GetSiteSettingsCommand());
             ResetPasswordCommand.Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             ResetPasswordCommand.Email = email;
             return Page();
@@ -41,10 +41,10 @@ namespace BlogFodder.App.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
-            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            Settings = await _mediator.Send(new GetSiteSettingsCommand());
             if (ModelState.IsValid)
             {
-                Result = await _mediator.Send(ResetPasswordCommand).ConfigureAwait(false);
+                Result = await _mediator.Send(ResetPasswordCommand);
 
                 if (Result.Success == false)
                 {

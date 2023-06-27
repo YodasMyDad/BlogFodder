@@ -317,7 +317,7 @@ public partial class CreatePost : ComponentBase
                     {
                         Alias = plugin.Alias
                     };
-                    var globalSettings = await mediatr!.Send(globalSettingsCommand).ConfigureAwait(false);
+                    var globalSettings = await mediatr!.Send(globalSettingsCommand);
                     postContentItem.GlobalSettings = globalSettings != null
                         ? JsonSerializer.Serialize(globalSettings.Data,
                             new JsonSerializerOptions {WriteIndented = false})
@@ -360,7 +360,7 @@ public partial class CreatePost : ComponentBase
 
             // Call mediatr and return and check for errors
             // Send the email
-            var result = await mediatr.Send(PostCommand).ConfigureAwait(false);
+            var result = await mediatr.Send(PostCommand);
             if (result.Success)
             {
                 PostCommand.Post = result.Entity;

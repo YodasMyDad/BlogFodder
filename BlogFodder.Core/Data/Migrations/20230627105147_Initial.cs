@@ -192,15 +192,19 @@ namespace BlogFodder.Core.Data.Migrations
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Excerpt = table.Column<string>(type: "TEXT", maxLength: 3000, nullable: true),
-                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
                     FeaturedImageId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    ShowFeaturedImageOnPost = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShowDefaultHeading = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShowAuthorName = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShowLastUpdated = table.Column<bool>(type: "INTEGER", nullable: false),
+                    RemoveSideColumn = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<Guid>(type: "TEXT", nullable: true),
                     PageTitle = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
                     MetaDescription = table.Column<string>(type: "TEXT", maxLength: 350, nullable: true),
                     NoIndex = table.Column<bool>(type: "INTEGER", nullable: false),
                     SocialImageId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Url = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    ExtendedData = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    ExtendedData = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false)
                 },
                 constraints: table =>
                 {

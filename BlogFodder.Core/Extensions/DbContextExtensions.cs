@@ -26,7 +26,7 @@ public static class DbContextExtensions
     {
         try
         {
-            var isSaved = await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            var isSaved = await context.SaveChangesAsync(cancellationToken);
             crudResult.Success = true;
             if (entity != null)
             {

@@ -42,7 +42,7 @@ namespace BlogFodder.Core.Membership.Handlers
             
             var newUser = new User { Id = Guid.NewGuid().NewSequentialGuid(), Email = request.Email, UserName = request.Username };
             var loginResult = new AuthenticationResult();
-            var createResult = await userManager.CreateAsync(newUser, request.Password).ConfigureAwait(false);
+            var createResult = await userManager.CreateAsync(newUser, request.Password);
             loginResult.Success = createResult.Succeeded;
             if (loginResult.Success)
             {
@@ -61,7 +61,7 @@ namespace BlogFodder.Core.Membership.Handlers
                     await roleManager.CreateAsync(new Role {Name = startingRoleName});
                 }
                 
-                var addToRoleResult = await userManager.AddToRoleAsync(newUser, startingRoleName).ConfigureAwait(false);
+                var addToRoleResult = await userManager.AddToRoleAsync(newUser, startingRoleName);
                 if (addToRoleResult.Succeeded == false)
                 {
                     addToRoleResult.LogErrors();
@@ -70,7 +70,7 @@ namespace BlogFodder.Core.Membership.Handlers
                     return loginResult;
                 }
 
-                var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
+                var user = await userManager.FindByEmailAsync(request.Email);
 
                 if (userManager.Options.SignIn.RequireConfirmedAccount)
                 {
@@ -80,13 +80,13 @@ namespace BlogFodder.Core.Membership.Handlers
                         User = user
                     };
 
-                    await mediatr.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
+                    await mediatr.Send(sendConfirmationEmailCommand, cancellationToken);
 
                     loginResult.AddMessage("Please check your email and click the link to confirm your account", ResultMessageType.Success);
                 }
                 else
                 {
-                    await signInManager.SignInAsync(user, request.RememberMe).ConfigureAwait(false);
+                    await signInManager.SignInAsync(user, request.RememberMe);
 
                     loginResult.NavigateToUrl = request.ReturnUrl ?? "~/";
                 }

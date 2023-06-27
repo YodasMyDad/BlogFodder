@@ -30,12 +30,12 @@ namespace BlogFodder.App.Pages.Account.Manage
         protected override async Task OnInitializedAsync()
         {
             Loading = true;
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
             using var scope = ServiceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
             
-            await SetCuUserCommand(authState.User.GetUserId(), dbContext).ConfigureAwait(false);
+            await SetCuUserCommand(authState.User.GetUserId(), dbContext);
 
             // Check if this is a refresh and look for messages to display
             // This is shite, but it's a hack to get around RefreshSignInAsync
@@ -59,7 +59,7 @@ namespace BlogFodder.App.Pages.Account.Manage
 
         private async Task SetCuUserCommand(Guid userId, BlogFodderDbContext context)
         {
-            CurrentUser = await context.Users.Include(x => x.ProfileImage).FirstOrDefaultAsync(x => x.Id == userId).ConfigureAwait(false);
+            CurrentUser = await context.Users.Include(x => x.ProfileImage).FirstOrDefaultAsync(x => x.Id == userId);
             if (CurrentUser != null)
             {
                 var logins = context.UserLogins.AsNoTracking().Where(l => l.UserId == userId);
@@ -82,7 +82,7 @@ namespace BlogFodder.App.Pages.Account.Manage
             var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
             var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
             
-            var result = await mediatr.Send(CreateUpdateUserCommand).ConfigureAwait(false);
+            var result = await mediatr.Send(CreateUpdateUserCommand);
 
             // Yes this is really shit for
             // Cannot refresh RefreshSignInAsync in Blazor, so have to redirect to a razor page and then 
@@ -93,7 +93,7 @@ namespace BlogFodder.App.Pages.Account.Manage
             }
             else
             {
-                await SetCuUserCommand(CurrentUser.Id, dbContext).ConfigureAwait(false);
+                await SetCuUserCommand(CurrentUser.Id, dbContext);
 
                 if (result.Messages.Count > 0)
                 {
@@ -116,7 +116,7 @@ namespace BlogFodder.App.Pages.Account.Manage
             }
 
             Loading = false;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

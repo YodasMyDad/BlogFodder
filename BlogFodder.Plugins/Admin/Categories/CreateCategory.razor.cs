@@ -96,7 +96,7 @@ public partial class CreateCategory : ComponentBase
             
             // Call mediatr and return and check for errors
             // Send the email
-            var result = await mediatr!.Send(CreateUpdateCategoryCommand).ConfigureAwait(false);
+            var result = await mediatr!.Send(CreateUpdateCategoryCommand);
             if (result.Success)
             {
                 CreateUpdateCategoryCommand.Category = result.Entity;

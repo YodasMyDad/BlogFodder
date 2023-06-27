@@ -86,7 +86,7 @@ else
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
 
-        Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        Settings = await mediatr.Send(new GetSiteSettingsCommand());
         CurrentDomain = HttpContextAccessor.HttpContext?.Request.Host.Value;
         CurrentUrl = $"{CurrentDomain}{Urls.Create(Slug, typeof(Post))}";
 

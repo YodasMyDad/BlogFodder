@@ -33,7 +33,7 @@ namespace BlogFodder.Core.Membership.Handlers
                 return result;
             }
 
-            var user = await userManager.FindByIdAsync(request.UserId).ConfigureAwait(false);
+            var user = await userManager.FindByIdAsync(request.UserId);
             if (user == null)
             {
                 result.Success = false;
@@ -49,8 +49,7 @@ namespace BlogFodder.Core.Membership.Handlers
                 var newEmail = user!.ExtendedData.Get(Constants.ExtendedDataKeys.NewEmailAddress);
                 if (!newEmail.IsNullOrWhiteSpace())
                 {
-                    var changeResult = await userManager.ChangeEmailAsync(user, newEmail, request.Code)
-                        .ConfigureAwait(false);
+                    var changeResult = await userManager.ChangeEmailAsync(user, newEmail, request.Code);
                     if (!changeResult.Succeeded)
                     {
                         result.Success = false;
@@ -61,14 +60,14 @@ namespace BlogFodder.Core.Membership.Handlers
 
                     // lear new email from user
                     user.ExtendedData.Remove(Constants.ExtendedDataKeys.NewEmailAddress);
-                    var updateResult = await userManager.UpdateAsync(user).ConfigureAwait(false);
+                    var updateResult = await userManager.UpdateAsync(user);
                     if (!updateResult.Succeeded)
                     {
                         updateResult.LogErrors();
                         return result;
                     }
 
-                    await signInManager.RefreshSignInAsync(user).ConfigureAwait(false);
+                    await signInManager.RefreshSignInAsync(user);
 
                     // return success message
                     result.AddMessage("Email address changed", ResultMessageType.Success);
@@ -83,7 +82,7 @@ namespace BlogFodder.Core.Membership.Handlers
             }
             else
             {
-                var confirmResult = await userManager.ConfirmEmailAsync(user!, request.Code).ConfigureAwait(false);
+                var confirmResult = await userManager.ConfirmEmailAsync(user!, request.Code);
                 if (confirmResult.Succeeded)
                 {
                     result.AddMessage("Email confirmed, you can now login", ResultMessageType.Success);

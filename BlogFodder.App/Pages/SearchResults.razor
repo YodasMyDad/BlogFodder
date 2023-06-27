@@ -75,7 +75,7 @@ else
     {
         using var scope = ServiceProvider.CreateScope();
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
-        Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        Settings = await mediatr.Send(new GetSiteSettingsCommand());
         PostsPerPage = Settings.HomeAmountPerPage;
         await GetPosts(mediatr);
     }
@@ -94,7 +94,7 @@ else
             using var scope = ServiceProvider.CreateScope();
             mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         }
-        Posts = await mediatr.Send(postsQuery).ConfigureAwait(false);
+        Posts = await mediatr.Send(postsQuery);
         StateHasChanged();
     }
 

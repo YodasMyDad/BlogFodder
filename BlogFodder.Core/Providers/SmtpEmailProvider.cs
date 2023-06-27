@@ -34,7 +34,7 @@ public class SmtpEmailProvider : IEmailProvider
         {
             using var scope = _serviceProvider.CreateScope();
             var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            var settings = await mediatr.Send(new GetSiteSettingsCommand());
             
             // Get the default email template and the logo
             //string webRootPath = _env.WebRootPath;
@@ -59,7 +59,7 @@ public class SmtpEmailProvider : IEmailProvider
 
             await smtp.ConnectAsync(_gabSettings.Email.Smtp.Host, _gabSettings.Email.Smtp.Port, SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync(_gabSettings.Email.Smtp.Username, _gabSettings.Email.Smtp.Password);
-            await smtp.SendAsync(emailMessage).ConfigureAwait(false);
+            await smtp.SendAsync(emailMessage);
             await smtp.DisconnectAsync(true);
         }
 
@@ -79,7 +79,7 @@ public class SmtpEmailProvider : IEmailProvider
 
             await smtp.ConnectAsync(_gabSettings.Email.Smtp.Host, _gabSettings.Email.Smtp.Port, SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync(_gabSettings.Email.Smtp.Username, _gabSettings.Email.Smtp.Password);
-            await smtp.SendAsync(emailMessage).ConfigureAwait(false);
+            await smtp.SendAsync(emailMessage);
             await smtp.DisconnectAsync(true);
         }
 

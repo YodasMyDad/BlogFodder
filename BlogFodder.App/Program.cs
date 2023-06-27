@@ -7,6 +7,7 @@ using BlogFodder.Core.Membership.Models;
 using BlogFodder.Core.Plugins;
 using BlogFodder.Core.Providers;
 using BlogFodder.Core.Settings;
+using BlogFodder.Core.Settings.Models;
 using BlogFodder.Core.Shared.Middleware;
 using BlogFodder.Core.Shared.Services;
 using BlogFodder.Plugins;
@@ -57,6 +58,15 @@ using (var scope = app.Services.CreateScope())
         if (dbContext.Database.GetPendingMigrations().Any())
         {
             dbContext.Database.Migrate();
+        }
+        
+        // TODO - need to seed data here
+        var settings = dbContext.SiteSettings.FirstOrDefault();
+        if (settings == null)
+        {
+            // Create one
+            dbContext.SiteSettings.Add(new SiteSettings());
+            dbContext.SaveChanges();
         }
     }
     catch (Exception ex)

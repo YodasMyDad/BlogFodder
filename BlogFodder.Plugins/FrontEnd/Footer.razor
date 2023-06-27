@@ -8,7 +8,7 @@
 <footer class="bg-secondary-subtle mt-6">
     <div class="container">
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4">
-            <p class="col-md-4 mb-0 text-muted">&copy; @DateTime.Now.Year @Settings.SiteName</p>
+            <p class="col-md-4 mb-0 text-muted">&copy; @DateTime.Now.Year @(Settings?.SiteName ?? "BlogFodder")</p>
 
             <ul class="nav col-md-4 justify-content-end">
                 @foreach (var footerNav in BlogFodderSettings.Value.FrontEnd.SiteNavigation.FooterNav)
@@ -26,13 +26,13 @@
 
     [Inject] IOptions<BlogFodderSettings> BlogFodderSettings { get; set; } = default!;
     [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
-    private SiteSettings Settings { get; set; } = default!;
+    private SiteSettings? Settings { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var scope = ServiceProvider.CreateScope();
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
-        Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        Settings = await mediatr.Send(new GetSiteSettingsCommand());
     }
 
 }

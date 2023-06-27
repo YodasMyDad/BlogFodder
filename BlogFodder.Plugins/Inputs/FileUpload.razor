@@ -150,7 +150,7 @@
     {
         _editContext = CascadedEditContext;
         _fieldIdentifier = IsMultiselect ? FieldIdentifier.Create(ValuesExpression) : FieldIdentifier.Create(ValueExpression);
-        var authState = await AuthenticationStateTask.ConfigureAwait(false);
+        var authState = await AuthenticationStateTask;
         User = authState.User;
     }
 
@@ -180,7 +180,7 @@
                         else
                         {
                             allowedToUseFiles.Clear();
-                            await ClearFiles().ConfigureAwait(false);
+                            await ClearFiles();
                             if (result?.ErrorMessages != null)
                             {
                                 foreach (var errorMessage in result.ErrorMessages)
@@ -193,14 +193,14 @@
                     }
                     if (allowedToUseFiles.Any())
                     {
-                        await ValuesChanged.InvokeAsync(allowedToUseFiles).ConfigureAwait(false);
+                        await ValuesChanged.InvokeAsync(allowedToUseFiles);
                         _editContext?.NotifyFieldChanged(_fieldIdentifier);
                         StateHasChanged();
                     }
                 }
                 catch (Exception ex)
                 {
-                    await ClearFiles().ConfigureAwait(false);
+                    await ClearFiles();
                     Snackbar.Add(ex.Message, Severity.Error);
                 }
             }
@@ -209,13 +209,13 @@
                 var result = ProviderService.StorageProvider?.CanUseFile(e.File, ImagesOnly).Result;
                 if (result?.Success == true)
                 {
-                    await ValueChanged.InvokeAsync(e.File).ConfigureAwait(false);
+                    await ValueChanged.InvokeAsync(e.File);
                     _editContext?.NotifyFieldChanged(_fieldIdentifier);
                     StateHasChanged();
                 }
                 else
                 {
-                    await ClearFiles().ConfigureAwait(false);
+                    await ClearFiles();
                     if (result?.ErrorMessages != null)
                     {
                         foreach (var errorMessage in result.ErrorMessages)
@@ -233,11 +233,11 @@
     {
         if (IsMultiselect)
         {
-            await ValuesChanged.InvokeAsync(new List<IBrowserFile>()).ConfigureAwait(false);
+            await ValuesChanged.InvokeAsync(new List<IBrowserFile>());
         }
         else
         {
-            await ValueChanged.InvokeAsync(default).ConfigureAwait(false);
+            await ValueChanged.InvokeAsync(default);
         }
 
         _editContext?.NotifyFieldChanged(_fieldIdentifier);
@@ -249,11 +249,11 @@
         if (valueList.Contains(item))
         {
             valueList.Remove(item);
-            await ValuesChanged.InvokeAsync(valueList).ConfigureAwait(false);
+            await ValuesChanged.InvokeAsync(valueList);
         }
         else if (item.Equals(Value))
         {
-            await ValueChanged.InvokeAsync(default).ConfigureAwait(false);
+            await ValueChanged.InvokeAsync(default);
         }
 
         _editContext?.NotifyFieldChanged(_fieldIdentifier);

@@ -19,7 +19,7 @@ namespace BlogFodder.Core.Membership.Stores
 
         public async Task<User?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            return await _db.Users.FirstOrDefaultAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await _db.Users.FirstOrDefaultAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken: cancellationToken);
         }
 
         public Task<string?> GetEmailAsync(User user, CancellationToken cancellationToken)

@@ -80,7 +80,7 @@ namespace BlogFodder.Core.Providers;
         /// <inheritdoc />
         public async Task<FileSaveResult> SaveFile(IBrowserFile file, string contentidentifier, bool overwrite = true)
         {
-            var fileSaveResult = await CanUseFile(file).ConfigureAwait(false);
+            var fileSaveResult = await CanUseFile(file);
             fileSaveResult.OriginalFile = file;
             if (!fileSaveResult.Success)
             {
@@ -101,17 +101,17 @@ namespace BlogFodder.Core.Providers;
                 {
                     if (file.IsImage())
                     {
-                        using var image = await Image.LoadAsync(stream).ConfigureAwait(false);
+                        using var image = await Image.LoadAsync(stream);
                         image.OverMaxSizeCheck(_settings.MaxImageSizeInPixels);
-                        await image.SaveAsync(filePath).ConfigureAwait(false);
+                        await image.SaveAsync(filePath);
                         fileSaveResult.Width = image.Width;
                         fileSaveResult.Height = image.Height;
                     }
                     else
                     {
                         using var mstream = new MemoryStream();
-                        await stream.CopyToAsync(mstream).ConfigureAwait(false);
-                        await File.WriteAllBytesAsync(filePath, mstream.ToArray()).ConfigureAwait(false);
+                        await stream.CopyToAsync(mstream);
+                        await File.WriteAllBytesAsync(filePath, mstream.ToArray());
                     }
                 }
                 fileSaveResult.SavedFileUrl = Path.Combine(relativePath, file.Name).Replace("\\", "/");

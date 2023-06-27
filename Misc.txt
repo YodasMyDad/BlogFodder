@@ -17,6 +17,9 @@ builder.Services.AddRazorPages().ConfigureApplicationPartManager(manager =>
     }
 });
 
+    "DatabaseProvider": "SqlServer",
+    "ConnectionString": "Server=TRINITY;database=BlogFodder;Trusted_Connection=true;TrustServerCertificate=true;Connect Timeout=200;",
+
 // Schema to add to post
 
     @*<script type="application/ld+json">

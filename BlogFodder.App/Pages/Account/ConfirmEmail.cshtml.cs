@@ -27,7 +27,7 @@ namespace BlogFodder.App.Pages.Account
         
         public async Task<IActionResult> OnGetAsync(string? userId, string? code, bool change)
         {
-            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            Settings = await _mediator.Send(new GetSiteSettingsCommand());
             
             if (userId == null || code == null)
             {
@@ -42,7 +42,7 @@ namespace BlogFodder.App.Pages.Account
                     IsEmailUpdate = change
                 };
 
-                Result = await _mediator.Send(confirmEmailCommand).ConfigureAwait(false);
+                Result = await _mediator.Send(confirmEmailCommand);
             }
 
             return Page();

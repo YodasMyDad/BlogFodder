@@ -20,8 +20,8 @@ namespace BlogFodder.App.Pages.Account
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User).ConfigureAwait(false);
-            await _signInManager.RefreshSignInAsync(user).ConfigureAwait(false);
+            var user = await _userManager.GetUserAsync(User);
+            await _signInManager.RefreshSignInAsync(user);
             return Redirect("/account/manage/profile?refresh=true");
         }
     }

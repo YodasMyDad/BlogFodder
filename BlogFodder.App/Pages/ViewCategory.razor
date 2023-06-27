@@ -87,13 +87,13 @@ else
     {
         using var scope = ServiceProvider.CreateScope();
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var category = await mediatr.Send(new GetCategoryCommand {Url = Slug}).ConfigureAwait(false);
+        var category = await mediatr.Send(new GetCategoryCommand {Url = Slug});
         if (category != null)
         {
             CanBeFound = true;
             Category = category;
             PostsPerPage = category.PostsPerPage > 0 ? category.PostsPerPage : 10;
-            Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            Settings = await mediatr.Send(new GetSiteSettingsCommand());
             await GetPosts(mediatr);
         }
     }
@@ -112,7 +112,7 @@ else
             using var scope = ServiceProvider.CreateScope();
             mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         }
-        Posts = await mediatr.Send(postsQuery).ConfigureAwait(false);
+        Posts = await mediatr.Send(postsQuery);
 
         StateHasChanged();
     }

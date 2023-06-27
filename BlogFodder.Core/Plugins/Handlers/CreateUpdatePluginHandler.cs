@@ -42,8 +42,7 @@ public class CreateUpdatePluginHandler : IRequestHandler<CreateUpdatePluginComma
             dbContext.Plugins.Add(plugin);
         }
         
-        result = await dbContext.SaveChangesAndLog(plugin, result, cancellationToken)
-            .ConfigureAwait(false);
+        result = await dbContext.SaveChangesAndLog(plugin, result, cancellationToken);
         
         // Clear the cache
         _cacheService.ClearCachedItemsWithPrefix(nameof(Plugin));

@@ -36,7 +36,7 @@ public class SendEmailConfirmationHandler : IRequestHandler<SendEmailConfirmatio
 
         public async Task Handle(SendEmailConfirmationCommand request, CancellationToken cancellationToken)
         {
-            var userId = await _userManager.GetUserIdAsync(request.User).ConfigureAwait(false);
+            var userId = await _userManager.GetUserIdAsync(request.User);
 
             string code;
             string email;
@@ -45,13 +45,13 @@ public class SendEmailConfirmationHandler : IRequestHandler<SendEmailConfirmatio
             var isChange = "false";
             if (request.NewEmailAddress.IsNullOrWhiteSpace())
             {
-                code = await _userManager.GenerateEmailConfirmationTokenAsync(request.User).ConfigureAwait(false);
+                code = await _userManager.GenerateEmailConfirmationTokenAsync(request.User);
                 email = request.User.Email;
             }
             else
             {
                 isChange = "true";
-                code = await _userManager.GenerateChangeEmailTokenAsync(request.User, request.NewEmailAddress).ConfigureAwait(false);
+                code = await _userManager.GenerateChangeEmailTokenAsync(request.User, request.NewEmailAddress);
                 email = request.NewEmailAddress;
             }
   
@@ -61,6 +61,6 @@ public class SendEmailConfirmationHandler : IRequestHandler<SendEmailConfirmatio
             
             var paragraphs = new List<string> { $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>." };
 
-            await _providerService.EmailProvider!.SendEmailWithTemplateAsync(email!, "Confirm your email", paragraphs).ConfigureAwait(false);
+            await _providerService.EmailProvider!.SendEmailWithTemplateAsync(email!, "Confirm your email", paragraphs);
         }
     }

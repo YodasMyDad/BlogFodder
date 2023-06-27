@@ -124,7 +124,7 @@
         using var scope = ServiceProvider.CreateScope();
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
-        var plugin = await mediatr.Send(new GetPluginByAliasCommand {Alias = nameof(PostSideBarPlugin)}).ConfigureAwait(false);
+        var plugin = await mediatr.Send(new GetPluginByAliasCommand {Alias = nameof(PostSideBarPlugin)});
         if (plugin != null)
         {
             SavePluginSettingsCommand.IsUpdate = true;
@@ -189,7 +189,7 @@
 
             SavePluginSettingsCommand = SavePluginSettingsCommand.ReadyToSave(Settings);
 
-            var result = await mediatr.Send(SavePluginSettingsCommand).ConfigureAwait(false);
+            var result = await mediatr.Send(SavePluginSettingsCommand);
             AboutImage = null;
 
             Errors = SavePluginSettingsCommand.ProcessResult(result, Snackbar);

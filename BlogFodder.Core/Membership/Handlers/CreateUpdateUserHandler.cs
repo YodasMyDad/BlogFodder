@@ -45,13 +45,12 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
         // Get the current user first via the authstate
-        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var handlerResult = new HandlerResult<User>();
 
         var user = await dbContext.Users
             .Include(x => x.ProfileImage)
-            .FirstOrDefaultAsync(x => x.Id == authState.User.GetUserId(), cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(x => x.Id == authState.User.GetUserId(), cancellationToken: cancellationToken);
         if (user == null)
         {
             // new users should only be created by the register page
@@ -83,23 +82,21 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             }
         }
         
-        handlerResult = await dbContext.SaveChangesAndLog(user, handlerResult, cancellationToken)
-            .ConfigureAwait(false);
+        handlerResult = await dbContext.SaveChangesAndLog(user, handlerResult, cancellationToken);
         if (!handlerResult.Success)
         {
             return handlerResult;
         }
 
         // Get user from user manager to update all this
-        var managerUser = await userManager.GetUserAsync(authState.User).ConfigureAwait(false);
+        var managerUser = await userManager.GetUserAsync(authState.User);
 
         if (managerUser != null)
         {
             // Need to use user manager and then refresh signin.
             if (request.User.UserName != managerUser.UserName)
             {
-                var userNameResult = await userManager.SetUserNameAsync(managerUser, request.User.UserName)
-                    .ConfigureAwait(false);
+                var userNameResult = await userManager.SetUserNameAsync(managerUser, request.User.UserName);
                 if (userNameResult.Succeeded)
                 {
                     handlerResult.RefreshSignIn = true;
@@ -127,7 +124,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                     };
 
                     // Send the email
-                    await mediator.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
+                    await mediator.Send(sendConfirmationEmailCommand, cancellationToken);
 
                     // Save the new email in the users extended data
                     managerUser.ExtendedData.Add(Constants.ExtendedDataKeys.NewEmailAddress, request.User.Email!);
@@ -140,11 +137,9 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
                 else
                 {
                     // Just generate the code and change the email
-                    var code = await userManager.GenerateChangeEmailTokenAsync(managerUser, request.User.Email!)
-                        .ConfigureAwait(false);
+                    var code = await userManager.GenerateChangeEmailTokenAsync(managerUser, request.User.Email!);
                     var emailResult =
-                        await userManager.ChangeEmailAsync(managerUser, request.User.Email!, code)
-                            .ConfigureAwait(false);
+                        await userManager.ChangeEmailAsync(managerUser, request.User.Email!, code);
                     if (emailResult.Succeeded)
                     {
                         handlerResult.Success = true;
@@ -165,8 +160,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             if (!request.CurrentPassword.IsNullOrWhiteSpace() && !request.NewPassword.IsNullOrWhiteSpace())
             {
                 var changePasswordResult = await userManager
-                    .ChangePasswordAsync(managerUser, request.CurrentPassword, request.NewPassword)
-                    .ConfigureAwait(false);
+                    .ChangePasswordAsync(managerUser, request.CurrentPassword, request.NewPassword);
                 if (changePasswordResult.Succeeded)
                 {
                     handlerResult.Success = true;
@@ -187,7 +181,7 @@ public class CreateUpdateUserHandler : IRequestHandler<CreateUpdateUserCommand, 
             {
                     managerUser.ExtendedData.RemoveTempUiMessages();
                 managerUser.ExtendedData.SetTempUiMessage(handlerResult.Messages);
-                var tempUiUpdateResult = await userManager.UpdateAsync(managerUser).ConfigureAwait(false);
+                var tempUiUpdateResult = await userManager.UpdateAsync(managerUser);
                 if (!tempUiUpdateResult.Succeeded)
                 {
                     tempUiUpdateResult.LogErrors(_logger);

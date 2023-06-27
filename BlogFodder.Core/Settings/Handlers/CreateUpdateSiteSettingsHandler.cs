@@ -75,8 +75,7 @@ public class CreateUpdateSiteSettingsHandler : IRequestHandler<CreateUpdateSiteS
         }
   
 
-        result = await dbContext.SaveChangesAndLog(siteSettings, result, cancellationToken)
-            .ConfigureAwait(false);
+        result = await dbContext.SaveChangesAndLog(siteSettings, result, cancellationToken);
 
         // Clear the cache
         _cacheService.ClearCachedItem(nameof(SiteSettings));

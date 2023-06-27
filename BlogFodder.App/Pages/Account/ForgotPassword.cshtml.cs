@@ -29,16 +29,16 @@ namespace BlogFodder.App.Pages.Account
 
         public async Task<IActionResult> OnGetAsync(string? returnUrl)
         {
-            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            Settings = await _mediator.Send(new GetSiteSettingsCommand());
             return Page();
         }
         
         public async Task<IActionResult> OnPostAsync()
         {
-            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            Settings = await _mediator.Send(new GetSiteSettingsCommand());
             if (ModelState.IsValid)
             {
-                Result = await _mediator.Send(ForgotPasswordCommand).ConfigureAwait(false);
+                Result = await _mediator.Send(ForgotPasswordCommand);
 
                 if (Result.Success == false)
                 {

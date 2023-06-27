@@ -31,13 +31,13 @@ namespace BlogFodder.App.Pages.Account
         public async Task<IActionResult> OnGetAsync(string? returnUrl)
         {
             LoginUserCommand.ReturnUrl = returnUrl ?? Url.Content("~/");
-            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            Settings = await _mediator.Send(new GetSiteSettingsCommand());
             if (User.Identity?.IsAuthenticated == true)
             {
                 return Redirect("~/");
             }
 
-            await SetExternalLogins().ConfigureAwait(false);
+            await SetExternalLogins();
 
             return Page();
         }
@@ -45,12 +45,12 @@ namespace BlogFodder.App.Pages.Account
         public async Task<IActionResult> OnPostAsync()
         {
             // Reset anything after post
-            await SetExternalLogins().ConfigureAwait(false);
-            Settings = await _mediator.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+            await SetExternalLogins();
+            Settings = await _mediator.Send(new GetSiteSettingsCommand());
             
             if (ModelState.IsValid)
             {
-                var result = await _mediator.Send(LoginUserCommand).ConfigureAwait(false);
+                var result = await _mediator.Send(LoginUserCommand);
 
                 if (result.Success || !result.Messages.ErrorMessages().Any())
                 {
@@ -67,7 +67,7 @@ namespace BlogFodder.App.Pages.Account
 
         private async Task SetExternalLogins()
         {
-            LoginUserCommand.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync().ConfigureAwait(false)).ToList();
+            LoginUserCommand.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
     }
 }

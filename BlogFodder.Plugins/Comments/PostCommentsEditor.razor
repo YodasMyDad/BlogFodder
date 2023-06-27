@@ -76,7 +76,7 @@
             using var scope = ServiceProvider.CreateScope();
             var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
             CreateUpdatePluginCommand = CreateUpdatePluginCommand.ReadyToSave(PostCommentSettings, PostComments);
-            var result = await mediatr.Send(CreateUpdatePluginCommand).ConfigureAwait(false);
+            var result = await mediatr.Send(CreateUpdatePluginCommand);
             if (!result.Success)
             {
                 foreach (var error in result.Messages.ErrorMessages())

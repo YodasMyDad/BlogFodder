@@ -28,8 +28,7 @@ namespace BlogFodder.Core.Extensions;
         public static async Task<BlogFodderFile?> AddFileToDb<T>(this IBrowserFile browserFile, string id, HandlerResult<T> result, 
             ProviderService providerService, BlogFodderDbContext dbContext)
         {
-            var fileSaveResult = await providerService.StorageProvider!.SaveFile(browserFile, id)
-                .ConfigureAwait(false);
+            var fileSaveResult = await providerService.StorageProvider!.SaveFile(browserFile, id);
             if (!fileSaveResult.Success)
             {
                 foreach (var errorMessage in fileSaveResult.ErrorMessages)
@@ -41,8 +40,7 @@ namespace BlogFodder.Core.Extensions;
             }
 
             // Create the file
-            var file = await providerService.StorageProvider.ToBlogFodderFile(fileSaveResult)
-                .ConfigureAwait(false);
+            var file = await providerService.StorageProvider.ToBlogFodderFile(fileSaveResult);
 
             // Save the file first
             dbContext.Files.Add(file);

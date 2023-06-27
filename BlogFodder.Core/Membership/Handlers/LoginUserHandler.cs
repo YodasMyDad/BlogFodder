@@ -34,24 +34,23 @@ namespace BlogFodder.Core.Membership.Handlers
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
             var loginResult = new AuthenticationResult();
-            await signInManager.SignOutAsync().ConfigureAwait(false);
-            var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
+            await signInManager.SignOutAsync();
+            var user = await userManager.FindByEmailAsync(request.Email);
             if (user != null)
             {
-                var signInResult = await signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, false)
-                    .ConfigureAwait(false);
+                var signInResult = await signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, false);
                 loginResult.Success = signInResult.Succeeded;
 
                 if (loginResult.Success)
                 {
-                    var userPrincipal = await signInManager.CreateUserPrincipalAsync(user).ConfigureAwait(false);
+                    var userPrincipal = await signInManager.CreateUserPrincipalAsync(user);
                     loginResult.NavigateToUrl = request.ReturnUrl ?? "~/";
                 }
                 else
                 {
                     if (signInResult.IsNotAllowed)
                     {
-                        if (!await userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false))
+                        if (!await userManager.IsEmailConfirmedAsync(user))
                         {
                             loginResult.AddMessage("Email isn't confirmed. Check your inbox for a confirmation email", ResultMessageType.Warning);
 
@@ -62,10 +61,10 @@ namespace BlogFodder.Core.Membership.Handlers
                                 User = user
                             };
 
-                            await mediatr.Send(sendConfirmationEmailCommand, cancellationToken).ConfigureAwait(false);
+                            await mediatr.Send(sendConfirmationEmailCommand, cancellationToken);
                         }
 
-                        //if (!await _userManager.IsPhoneNumberConfirmedAsync(user).ConfigureAwait(false))
+                        //if (!await _userManager.IsPhoneNumberConfirmedAsync(user))
                         //{
                         //      // Phone Number isn't confirmed.
                         //      // loginResult.FailedReason = "Phone Number isn't confirmed";

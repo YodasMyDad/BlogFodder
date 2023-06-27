@@ -18,14 +18,14 @@ namespace BlogFodder.App.Pages.Account
 
         public async Task<IActionResult> OnGetAsync()
         {
-            await _signInManager.SignOutAsync().ConfigureAwait(false);
+            await _signInManager.SignOutAsync();
 
             return Redirect("~/");
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            await _signInManager.SignOutAsync().ConfigureAwait(false);
+            await _signInManager.SignOutAsync();
 
             //if (returnUrl != null)
             //{

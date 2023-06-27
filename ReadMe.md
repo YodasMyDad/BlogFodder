@@ -2,7 +2,7 @@
 
 A plugin based Blazor blogging platform that is really easy to create plugins for or customise. 
 
-The platform is built with Razor Class Libraries and Razor Components and has a plugin system build around these features which makes it easy to create plugins to extend / customise almost all areas of the Blog using Blazor. Front end is using Bootstrap V5 (But you could use what you want) and the backend/admin is built using MudBlazor.
+The platform is built with Razor Class Libraries and Razor Components and has a plugin system built around these features which makes it easy to create plugins to extend / customise almost all areas of the Blog using Blazor. Front end is using Bootstrap V5 (But you could use what you want) and the backend/admin is built using MudBlazor.
 
 View a brief overview video of the project here
 
@@ -46,9 +46,7 @@ The two implementations of this are **`MarkdownEditorEditorPlugin`** and **`Rich
 
 Some ideas for other editors for the future would be:
 
-- Image Carousel Editor (Standard Carousel that slides but with options)
 - Image Gallery Editor (Which options for layout)
-- YouTube Video Editor (Insert YouTube Videos)
 - Image Generator Editor (Use DALL-E to create AI images from text prompt)
 - Embed Tweet Editor (Allows you to paste a tweet URL and displays it on the front end)
 - Code Editor (Code editor like ACE that allows you to edit the code and highlights it correctly on the front end)
@@ -127,7 +125,7 @@ To update and make changes to the EF Core model, the migrations are in the .Core
 dotnet tool update --global dotnet-ef
 
 cd BlogFodder.Core
-dotnet ef --startup-project ../BlogFodder.App/ migrations add NameOfMigrationHere -o "Data/Migrations"
+dotnet ef --startup-project ../BlogFodder.App/ migrations add Initial -o "Data/Migrations"
 
 // Optional - as migrations are run on startup  
 dotnet ef database update --context BlogFodderDbContext

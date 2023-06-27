@@ -175,7 +175,7 @@
         }
 
         var createUpdateCommand = new CreateUpdatePluginCommand();
-        var plugin = await mediatr.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias}).ConfigureAwait(false);
+        var plugin = await mediatr.Send(new GetPluginByAliasCommand {Alias = PostCommentsConstants.PluginAlias});
         if (plugin == null)
         {
     // This should not happen, but just in case
@@ -188,7 +188,7 @@
         plugin.PluginData = JsonSerializer.Serialize(PostContentModel.PluginModel);
         plugin.PluginSettings = JsonSerializer.Serialize(PostContentModel.PluginSettings);
         createUpdateCommand.Plugin = plugin;
-        var saveResult = await mediatr.Send(createUpdateCommand).ConfigureAwait(false);
+        var saveResult = await mediatr.Send(createUpdateCommand);
         if (saveResult.Success)
         {
             Comment = new PostComment {PostId = PostId!.Value, DateCreated = DateTime.UtcNow};

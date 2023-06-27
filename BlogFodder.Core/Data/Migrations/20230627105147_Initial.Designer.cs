@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogFodder.Core.Data.Migrations
 {
     [DbContext(typeof(BlogFodderDbContext))]
-    [Migration("20230612150558_UserToBlog")]
-    partial class UserToBlog
+    [Migration("20230627105147_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -405,9 +405,6 @@ namespace BlogFodder.Core.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime?>("DateCreated")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -442,6 +439,21 @@ namespace BlogFodder.Core.Data.Migrations
                     b.Property<string>("PageTitle")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("RemoveSideColumn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowAuthorName")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowDefaultHeading")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowFeaturedImageOnPost")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowLastUpdated")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("SocialImageId")
                         .HasColumnType("TEXT");

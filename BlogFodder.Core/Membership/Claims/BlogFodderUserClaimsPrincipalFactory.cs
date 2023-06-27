@@ -27,8 +27,8 @@ namespace BlogFodder.Core.Membership.Claims
             var dbUser = await _context.Users.Include(x => x.ProfileImage).AsNoTracking().FirstOrDefaultAsync(x => x.Id == user.Id);
             user = dbUser!;
             
-            var principal = await base.CreateAsync(user).ConfigureAwait(false);
-            var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+            var principal = await base.CreateAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
 
             var claimsToAdd = new List<Claim> {new(Constants.Claims.Md5Hash, user.Email?.ToMd5() ?? string.Empty)};
 

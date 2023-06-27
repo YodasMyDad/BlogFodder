@@ -39,8 +39,7 @@ public class CreateUpdateGlobalPluginSettingsHandler : IRequestHandler<CreateUpd
             dbContext.PluginSettings.Add(settings);
         }
         
-        result = await dbContext.SaveChangesAndLog(settings, result, cancellationToken)
-            .ConfigureAwait(false);
+        result = await dbContext.SaveChangesAndLog(settings, result, cancellationToken);
         
         // Clear the cache
         _cacheService.ClearCachedItemsWithPrefix(nameof(GlobalPluginSettings));

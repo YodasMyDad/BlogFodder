@@ -32,7 +32,7 @@ namespace BlogFodder.Core.Membership.Handlers
             var authenticationResult = new AuthenticationResult();
 
             // Sign in the user with this external login provider if the user already has a login.
-            var externalLoginResult = await signInManager.ExternalLoginSignInAsync(request.ExternalLoginInfo.LoginProvider, request.ExternalLoginInfo.ProviderKey, isPersistent: true, bypassTwoFactor: true).ConfigureAwait(false);
+            var externalLoginResult = await signInManager.ExternalLoginSignInAsync(request.ExternalLoginInfo.LoginProvider, request.ExternalLoginInfo.ProviderKey, isPersistent: true, bypassTwoFactor: true);
             if (externalLoginResult.Succeeded)
             {
                 authenticationResult.Success = true;
@@ -69,23 +69,23 @@ namespace BlogFodder.Core.Membership.Handlers
             // Set a flag so we know this user has logged in with an external account
             user.ExtendedData.Add(Constants.ExtendedDataKeys.IsExternalLogin, true);
 
-            await userStore.SetUserNameAsync(user, emailAddress, cancellationToken).ConfigureAwait(false);
-            await emailStore.SetEmailAsync(user, emailAddress, cancellationToken).ConfigureAwait(false);
+            await userStore.SetUserNameAsync(user, emailAddress, cancellationToken);
+            await emailStore.SetEmailAsync(user, emailAddress, cancellationToken);
 
-            var result = await userManager.CreateAsync(user).ConfigureAwait(false);
+            var result = await userManager.CreateAsync(user);
             if (result.Succeeded)
             {
                 authenticationResult.Success = true;
-                result = await userManager.AddLoginAsync(user, request.ExternalLoginInfo).ConfigureAwait(false);
+                result = await userManager.AddLoginAsync(user, request.ExternalLoginInfo);
                 if (result.Succeeded)
                 {
                     authenticationResult.Success = true;
-                    var userId = await userManager.GetUserIdAsync(user).ConfigureAwait(false);
-                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user).ConfigureAwait(false);
+                    var userId = await userManager.GetUserIdAsync(user);
+                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
                     // Because the email is coming from an external provider, we are going to assume they have
                     // confirmed the email and done all that stuff. So we are just going to confirm it.
-                    var confirmResult = await userManager.ConfirmEmailAsync(user, code).ConfigureAwait(false);
+                    var confirmResult = await userManager.ConfirmEmailAsync(user, code);
 
                     if (confirmResult.Succeeded == false)
                     {
@@ -98,7 +98,7 @@ namespace BlogFodder.Core.Membership.Handlers
                     }
                     else
                     {
-                        await signInManager.SignInAsync(user, isPersistent: false, request.ExternalLoginInfo.LoginProvider).ConfigureAwait(false);
+                        await signInManager.SignInAsync(user, isPersistent: false, request.ExternalLoginInfo.LoginProvider);
                         authenticationResult.NavigateToUrl = request.ReturnUrl;
                     }
                 }

@@ -89,8 +89,7 @@ public class CreateUpdateCategoryHandler : IRequestHandler<CreateUpdateCategoryC
             }
         }
         
-        return await dbContext.SaveChangesAndLog(category, handlerResult, cancellationToken)
-            .ConfigureAwait(false);
+        return await dbContext.SaveChangesAndLog(category, handlerResult, cancellationToken);
     }
     
 }

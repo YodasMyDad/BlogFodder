@@ -55,7 +55,7 @@
             yesText:"Delete", cancelText:"Cancel");
         if (dialogResult == true)
         {
-            var result = await mediatr.Send(new DeleteCategoryCommand{CategoryId = category.Id}).ConfigureAwait(false);
+            var result = await mediatr.Send(new DeleteCategoryCommand{CategoryId = category.Id});
             if (result is {Success: false})
             {
                 foreach (var errorMessage in result.Messages.ErrorMessagesToList())

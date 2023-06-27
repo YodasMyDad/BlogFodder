@@ -49,14 +49,14 @@ namespace BlogFodder.App.Pages.Account
                 ErrorMessage = $"Error from external provider: {remoteError}";
                 return RedirectToPage(Constants.Urls.Account.Login, new { ReturnUrl = returnUrl });
             }
-            ExternalLoginCommand.ExternalLoginInfo = await _signInManager.GetExternalLoginInfoAsync().ConfigureAwait(false);
+            ExternalLoginCommand.ExternalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
             if (ExternalLoginCommand.ExternalLoginInfo == null)
             {
                 ErrorMessage = "Error loading external login information.";
                 return RedirectToPage(Constants.Urls.Account.Login, new { ReturnUrl = returnUrl });
             }
 
-            Result = await _mediator.Send(ExternalLoginCommand).ConfigureAwait(false);
+            Result = await _mediator.Send(ExternalLoginCommand);
 
             if (Result.Success)
             {

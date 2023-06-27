@@ -13,9 +13,9 @@
 <nav class="navbar navbar-expand-lg bg-secondary-subtle">
     <div class="container">
         <a class="navbar-brand" href="/">
-            @if (Settings.LogoId == null)
+            @if (Settings?.LogoId == null)
             {
-                <img src="@Constants.DefaultLogo" class="text-primary" alt="@Settings.SiteName Logo" width="24" height="24">
+                <img src="@Constants.DefaultLogo" class="text-primary" alt="@Settings?.SiteName Logo" width="24" height="24">
             }
             else
             {
@@ -109,7 +109,7 @@
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
     [Inject] public IServiceProvider ServiceProvider { get; set; } = default!;
 
-    private SiteSettings Settings { get; set; } = default!;
+    private SiteSettings? Settings { get; set; }
     private List<Category> Categories { get; set; } = new();
     private string? SearchTerm { get; set; }
 
@@ -119,7 +119,7 @@
         var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
         Categories = await dbContext.Categories.AsNoTracking().ToListAsync();
-        Settings = await mediatr.Send(new GetSiteSettingsCommand()).ConfigureAwait(false);
+        Settings = await mediatr.Send(new GetSiteSettingsCommand());
     }
 
     private void Search()

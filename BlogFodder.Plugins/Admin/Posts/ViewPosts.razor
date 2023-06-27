@@ -57,7 +57,7 @@
             yesText:"Delete", cancelText:"Cancel");
         if (dialogResult == true)
         {
-            var result = await mediatr.Send(new DeletePostCommand{PostId = post.Id}).ConfigureAwait(false);
+            var result = await mediatr.Send(new DeletePostCommand{PostId = post.Id});
             if (result is {Success: false})
             {
                 foreach (var errorMessage in result.Messages.ErrorMessagesToList())
