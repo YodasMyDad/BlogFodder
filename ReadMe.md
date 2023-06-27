@@ -6,13 +6,11 @@ The platform is built with Razor Class Libraries and Razor Components and has a 
 
 View a brief overview video of the project here
 
-https://twitter.com/YodasMyDad/status/1667848590880907264
+**https://twitter.com/YodasMyDad/status/1667848590880907264**
 
-#### What This Is Not
+This is a work in progress and I'm still trying to get it to a beta stage. I'm posting this publicly as I'm looking for other Blazor enthusiasts to get involved and help shape the project further.
 
-A fully working blogging engine and ready for production. This is a work in progress and I'm still trying to get it to a beta stage. I'm posting this publicly as I'm looking for other Blazor enthusiasts to get involved and help shape the project further.
-
-**I am waiting for .Net 8 and the new Blazor (United) before this will be fully released, as I intend to port it all over to that and make use of their new SSR.**
+**I am waiting for .Net 8 and the new Blazor (United) before there will be a v1 release, as I intend to port it all over to that and make use of their new SSR.**
 
 ### Get It Running
 
@@ -20,9 +18,24 @@ Add your email address (Or a test email address) to the appSettings 'AdminEmailA
 
 Make sure BlogFodder.App is the starting project, and just run it. Then register a new user, with the email address you added to the appSettings and you will now be able to access the Admin section.
 
+**SqlLite or MSSQL are the only two DB's it supports at the moment**
+
+The project is set to use SqlLite by default and all migrations have been generated for that. If you want to use MSSQL then you need to do the following
+
+1. Update the `appSettings.json`. Change `DatabaseProvider` to `SqlServer` and update `ConnectionString` to point to your MSSQL Db.
+
+2. Once you have updated the `appSettings.json`, you need to regenerate the migrations as they were generated for SqlLite. Delete the '**Migrations**' folder in **BlogFodder.Core/Data**. Then run the EF Core migrations code. This will generate the MSSQL migration code.
+
+   ```
+   cd BlogFodder.Core
+   dotnet ef --startup-project ../BlogFodder.App/ migrations add Initial -o "Data/Migrations"
+   ```
+
+3. Now just run the project as normal
+
 ### Current Plugins
 
-The final concept will be users can create Nuget packages that just reference the `BlogFodder.Plugins` project/nuget package (When the nuget package is created). That's it. Oh, also, all plugins Namespaces must start with BlogFodder.Plugins.XX (Again, all this is subject to change)
+The final concept will be where users can create Nuget packages that just reference the `BlogFodder.Plugins` nuget package (When the nuget package is created) and make sure the package starts with BlogFodder.Plugins.XX (Again, all this is subject to change)
 
 The two main plugins are:
 
@@ -30,11 +43,11 @@ The two main plugins are:
 
 This is main plugin system for the blog. This allows you to render components in [specific places,](https://github.com/YodasMyDad/BlogFodder/blob/master/BlogFodder.Core/Plugins/Models/PluginDisplayArea.cs) have a settings page in the admin and also display a component on a post.
 
-I have created (very rough) example Plugin, called **Comments**, a plugin that allows you to add comments on posts, manage them, approve and more. 
+I have created (very rough) example Plugin, called **Comments**, a plugin that allows you to add comments on posts, manage them, approve and more. You can poke around the code here
 
 https://github.com/YodasMyDad/BlogFodder/tree/master/BlogFodder.Plugins/Comments
 
-Plugins have to be enabled first before they appear on the site.
+Plugins have to be enabled first before they appear on the site, again you can see how this is done in the source code.
 
 #### IEditorPlugin
 
@@ -42,20 +55,19 @@ This controls the content editors, which are how the user can edit content and h
 
 The concept for the blog, is instead of having just a single RTE or Markdown Editor. Each block of content can be it's own editor and preview. 
 
-The two implementations of this are **`MarkdownEditorEditorPlugin`** and **`RichTextEditorEditorPlugin`**, so check those out below if you want to know more about how to use them.
+I have a few content editors already (see them on the link below) and will try and add more complex ones when I have time.
+
+https://github.com/YodasMyDad/BlogFodder/tree/master/BlogFodder.Plugins/ContentEditors
 
 Some ideas for other editors for the future would be:
 
 - Image Gallery Editor (Which options for layout)
+- Table Editor (Create and edit tables)
 - Image Generator Editor (Use DALL-E to create AI images from text prompt)
 - Embed Tweet Editor (Allows you to paste a tweet URL and displays it on the front end)
 - Code Editor (Code editor like ACE that allows you to edit the code and highlights it correctly on the front end)
 - ChatGPT Editor (Uses TinyMCE or similar to allow you to create content)
 - Amazon Affiliate Editor (Allows you to select products and create comparison tables with affiliate links)
-
-You can view the current Editor plugins here
-
-https://github.com/YodasMyDad/BlogFodder/tree/master/BlogFodder.Plugins/ContentEditors
 
 **Then we have other ways to extend the platform with the following**
 
@@ -95,15 +107,15 @@ https://github.com/YodasMyDad/BlogFodder/tree/master/BlogFodder.Plugins/Authenti
 
 #### IStartUpPlugin
 
-Allows you to add services during startup, example of using this in the Comments plugin
+Allows you to add services during start up, example of using this in the Comments plugin
 
 https://github.com/YodasMyDad/BlogFodder/blob/master/BlogFodder.Plugins/Comments/PostCommentsStartup.cs
 
-#### IRenderPlugin
+#### IAdminDashboard
 
-***Coming soon*.**... This plugin will be executed in middleware and will allow you to manipulate the final HTML of the page before it gets to the user.
+Allows you to render a component on the Admin dashboard, example of using it here, where I've created a Latest Posts dashboard.
 
-Some ideas for this will be replace keys in the content, for example, you have have something `#Year#` in the content and that is replaced with the current year **2023**
+https://github.com/YodasMyDad/BlogFodder/blob/master/BlogFodder.Plugins/Admin/Posts/LatestPostsDashboard.razor
 
 #### Theme Customisation
 
