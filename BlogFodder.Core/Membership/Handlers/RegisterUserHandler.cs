@@ -1,4 +1,5 @@
-﻿using BlogFodder.Core.Email.Commands;
+﻿using BlogFodder.Core.Data;
+using BlogFodder.Core.Email.Commands;
 using BlogFodder.Core.Extensions;
 using BlogFodder.Core.Membership.Commands;
 using BlogFodder.Core.Membership.Models;
@@ -35,6 +36,7 @@ namespace BlogFodder.Core.Membership.Handlers
         {
             using var scope = _serviceProvider.CreateScope();
             var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<User>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
@@ -49,7 +51,7 @@ namespace BlogFodder.Core.Membership.Handlers
                 _logger.LogInformation("{RequestUsername} created a new account", request.Username);
 
                 var startingRoleName = _blogFodderSettings.NewUserStartingRole ?? Constants.Roles.StandardRoleName;
-                if (_settings.Value.AdminEmailAddresses.Any() && _settings.Value.AdminEmailAddresses.Contains(newUser.Email!))
+                if (dbContext.Users.Count() == 1 || _settings.Value.AdminEmailAddresses.Any() && _settings.Value.AdminEmailAddresses.Contains(newUser.Email!))
                 {
                     startingRoleName = Constants.Roles.AdminRoleName;
                 }
@@ -86,7 +88,10 @@ namespace BlogFodder.Core.Membership.Handlers
                 }
                 else
                 {
-                    await signInManager.SignInAsync(user, request.RememberMe);
+                    if (request.AutoLogin)
+                    {
+                        await signInManager.SignInAsync(user, request.RememberMe);   
+                    }
 
                     loginResult.NavigateToUrl = request.ReturnUrl ?? "~/";
                 }

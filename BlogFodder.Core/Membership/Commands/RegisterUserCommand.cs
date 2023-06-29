@@ -29,4 +29,6 @@ public class RegisterUserCommand : IRequest<AuthenticationResult>
     public List<AuthenticationScheme> ExternalLogins { get; set; } = new();
 
     public string? ReturnUrl { get; set; }
+
+    public bool AutoLogin { get; set; } = true;
 }

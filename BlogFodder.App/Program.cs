@@ -11,6 +11,7 @@ using BlogFodder.Core.Settings.Models;
 using BlogFodder.Core.Shared.Middleware;
 using BlogFodder.Core.Shared.Services;
 using BlogFodder.Plugins;
+using MediatR;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<BlogFodderDbContext>();
+    var mediatr = scope.ServiceProvider.GetRequiredService<IMediator>();
     try
     {
         if (dbContext.Database.GetPendingMigrations().Any())
@@ -60,14 +62,7 @@ using (var scope = app.Services.CreateScope())
             dbContext.Database.Migrate();
         }
         
-        // TODO - need to seed data here
-        var settings = dbContext.SiteSettings.FirstOrDefault();
-        if (settings == null)
-        {
-            // Create one
-            dbContext.SiteSettings.Add(new SiteSettings());
-            dbContext.SaveChanges();
-        }
+        await dbContext.SeedData(mediatr);
     }
     catch (Exception ex)
     {

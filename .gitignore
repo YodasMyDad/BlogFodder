@@ -8,3 +8,4 @@ riderModule.iml
 /.idea/.idea.BlogFodder/.idea/*
 /BlogFodder.App/wwwroot/uploads/*
 /BlogFodder.App/wwwroot/is-cache/*
+/BlogFodder.App/app.db
