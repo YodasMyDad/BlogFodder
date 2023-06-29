@@ -25,7 +25,7 @@ public static class SeedDataExtensions
             {
                 AutoLogin = false,
                 Username = "Admin",
-                    Email = "admin@admin.com",
+                Email = "admin@admin.com",
                 Password = "P@$$word1234"
             };
             var userResult = await mediator.Send(registerUserCommand);

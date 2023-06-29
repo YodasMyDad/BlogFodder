@@ -14,15 +14,22 @@ This is a work in progress and I'm still trying to get it to a beta stage. I'm p
 
 ### Get It Running
 
-Add your email address (Or a test email address) to the appSettings 'AdminEmailAddresses' list. Any email address in this list, when the user registers they are added to the Admin role so you can access the Admin section.
+Make sure BlogFodder.App is the starting project, and just run it. On first run it creates the DB and adds some seed data, you can login using these details.
 
-Make sure BlogFodder.App is the starting project, and just run it. Then register a new user, with the email address you added to the appSettings and you will now be able to access the Admin section.
+**admin@admin.com**  
+**P@$$word1234**
+
+If you want to use the social logins, add the social keys to the appSettings for the provider you want to use.
+
+Then add your email address (Or a test email address) to the appSettings 'AdminEmailAddresses' list. Any email address in this list, when the user registers (Including via social logins) they are added to the Admin role so you can access the Admin section.
+
+https://github.com/YodasMyDad/BlogFodder/blob/master/BlogFodder.App/appsettings.json#L88
 
 **SqlLite or MSSQL are the only two DB's it supports at the moment**
 
 The project is set to use SqlLite by default and all migrations have been generated for that. If you want to use MSSQL then you need to do the following
 
-1. Update the `appSettings.json`. Change `DatabaseProvider` to `SqlServer` and update `ConnectionString` to point to your MSSQL Db.
+1. Update the `appSettings.json`. Change the `DatabaseProvider` to `SqlServer` and update `ConnectionString` to point to your MSSQL Db.
 
 2. Once you have updated the `appSettings.json`, you need to regenerate the migrations as they were generated for SqlLite. Delete the '**Migrations**' folder in **BlogFodder.Core/Data**. Then run the EF Core migrations code. This will generate the MSSQL migration code.
 
