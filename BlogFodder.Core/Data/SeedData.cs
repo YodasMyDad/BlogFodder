@@ -2,6 +2,7 @@ using BlogFodder.Core.Categories.Commands;
 using BlogFodder.Core.Categories.Models;
 using BlogFodder.Core.Media.Models;
 using BlogFodder.Core.Membership.Commands;
+using BlogFodder.Core.Plugins.Models;
 using BlogFodder.Core.Posts.Models;
 using BlogFodder.Core.Settings.Models;
 using MediatR;
@@ -42,7 +43,7 @@ public static class SeedDataExtensions
             var image = new BlogFodderFile
             {
                 Url = "img/monster-1.png",
-                DateCreated = DateTime.Now,
+                DateCreated = DateTime.UtcNow,
                 ItemId = "misc",
                 FileSize = 1505608,
                 FileType = BlogFodderFileType.Image
@@ -59,8 +60,8 @@ public static class SeedDataExtensions
             var post = new Post
             {
                 Url = "example-post",
-                DateCreated = DateTime.Now,
-                DateUpdated = DateTime.Now,
+                DateCreated = DateTime.UtcNow,
+                DateUpdated = DateTime.UtcNow,
                 Name = "Thanks for checking out BlogFodder! I need your help 😊",
                 MetaDescription =
                     "Really do appreciate you testing this app, but I'm looking for help moving this app forward.",
@@ -110,6 +111,15 @@ public static class SeedDataExtensions
             };
             
             dbContext.PostContentItems.Add(postContentItem);
+
+            var plugin = new Plugin
+            {
+                PluginAlias = "PostSideBarPlugin",
+                PluginData = "",
+                Enabled = true,
+                PluginSettings = @"{""Enabled"":true,""AboutBoxEnabled"":true,""AboutBoxTitle"":""Hi, I'm Lee"",""AboutBoxImageId"":null,""AboutBoxImageUrl"":null,""AboutBoxText"":""I've been wanting to build this blog for sometime, and I finally decided to give it a go. I'll keep trying to improve it over the next few months."",""AboutBoxImageHeight"":160,""AboutBoxImageWidth"":400,""LatestPostsAmount"":3}"
+            };
+            dbContext.Plugins.Add(plugin);
             
             await dbContext.SaveChangesAsync();
         }

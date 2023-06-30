@@ -15,11 +15,11 @@ public class PluginContentModel<T, TR>
         if (!model.IsNullOrWhiteSpace())
         {
             PluginModel = JsonSerializer.Deserialize<T>(model);
-
-            if (!settings.IsNullOrWhiteSpace())
-            {
-                PluginSettings = JsonSerializer.Deserialize<TR>(settings);
-            }
+        }
+        
+        if (!settings.IsNullOrWhiteSpace())
+        {
+            PluginSettings = JsonSerializer.Deserialize<TR>(settings);
         }
     }
     
