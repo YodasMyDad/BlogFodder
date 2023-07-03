@@ -4,16 +4,9 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <!--<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
         <Authors>Lee</Authors>
     </PropertyGroup>
     
-<!--
-    <Target Name="NugetPackAutoVersioning" AfterTargets="Build">
-        <Exec Command="dotnet pack -p:PackageVersion=$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmm&quot;)) &#45;&#45;no-build &#45;&#45;configuration $(Configuration) &#45;&#45;output &quot;$(SolutionDir)nuget&quot;" />
-    </Target>
--->
-
     <ItemGroup>
         <SupportedPlatform Include="browser" />
     </ItemGroup>

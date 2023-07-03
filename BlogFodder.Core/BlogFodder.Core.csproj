@@ -10,13 +10,8 @@
         <PackageId>BlogFodder.Core</PackageId>
         <Version>1.0.0</Version>
         <Authors>Lee</Authors>
-        <!--<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
     </PropertyGroup>
-
-<!--    <Target Name="NugetPackAutoVersioning" AfterTargets="Build">
-        <Exec Command="dotnet pack -p:PackageVersion=$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmm&quot;)) &#45;&#45;no-build &#45;&#45;configuration $(Configuration) &#45;&#45;output &quot;$(SolutionDir)nuget&quot;" />
-    </Target>-->
-
+    
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="12.0.1" />
       <PackageReference Include="FluentValidation" Version="11.5.2" />
