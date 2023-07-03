@@ -28,7 +28,7 @@
                         <small>Last Updated: @Post.DateUpdated.Humanize()</small>
                     </p>   
                 }
-                @foreach (var postContentItem in Post.ContentItems)
+                @foreach (var postContentItem in Post.ContentItems.OrderBy(x => x.SortOrder))
                 {
                     <div class="postContentItem">
                         <DynamicComponent Type="@AvailableEditorPlugins[postContentItem.PluginAlias!].Content.Component"
