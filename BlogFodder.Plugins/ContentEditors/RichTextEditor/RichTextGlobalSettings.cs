@@ -4,7 +4,7 @@ namespace BlogFodder.Plugins.ContentEditors.RichTextEditor;
 
 public class RichTextGlobalSettings : IPluginSettings
 {
-    public string? ApiKey { get; set; }
+    //public string? ApiKey { get; set; }
 
     // height
     public int Height { get; set; } = 600;

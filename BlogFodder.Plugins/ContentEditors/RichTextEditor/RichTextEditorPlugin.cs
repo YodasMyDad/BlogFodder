@@ -16,11 +16,15 @@ public class RichTextEditorPlugin : IEditorPlugin
     {
         CssFiles = new List<string>
         {
-            "_content/BlogFodder.Plugins/css/editorstyles.css"
+            "_content/BlogFodder.Plugins/css/editorstyles.css",
+            "https://cdn.quilljs.com/1.3.6/quill.snow.css"
         },
         JsFiles = new List<string>
         {
-            "_content/TinyMCE.Blazor/tinymce-blazor.js"
+            //"_content/TinyMCE.Blazor/tinymce-blazor.js"
+            "https://cdn.quilljs.com/1.3.6/quill.js",
+            "_content/BlogFodder.Plugins/js/quill-blot-formatter.js",
+            "_content/BlogFodder.Plugins/js/quill.js"
         },
         Component = typeof(RichTextEditorComponent),
         PreviewComponent = typeof(RichTextEditorPreview),
@@ -36,7 +40,8 @@ public class RichTextEditorPlugin : IEditorPlugin
         Component = typeof(RichTextContentComponent)
     };
 
-    public SettingsPlugin? Settings { get; set; } = new()
+    public SettingsPlugin? Settings { get; set; }
+        /*= new()
     {
         CssFiles = new List<string>(),
         JsFiles = new List<string>(),
@@ -50,5 +55,5 @@ public class RichTextEditorPlugin : IEditorPlugin
                 Text = "Rich Text Editor"
             }
         }
-    };
+    };*/
 }

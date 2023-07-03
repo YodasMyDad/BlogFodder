@@ -9,9 +9,45 @@
         <MudTabs Rounded="true" ApplyEffectsToContainer="true" PanelClass="py-6" KeepPanelsAlive="true">
 
             <MudTabPanel Text="Editor">
-                <div style="position: relative;">
-                    <TinyMCE.Blazor.Editor Conf="@DefaultEditorSettings" ApiKey="@GlobalSettings.ApiKey" @bind-Value="@EditorData"/>
-                </div>
+                @*<TinyMCE.Blazor.Editor Conf="@DefaultEditorSettings" ApiKey="@GlobalSettings.ApiKey" @bind-Value="@EditorData"/>*@
+                
+                <QuillTextEditor @ref="@QuillHtml">
+                    <ToolbarContent>
+                        <select class="ql-header">
+                            <option selected=""></option>
+                            <option value="1"></option>
+                            <option value="2"></option>
+                            <option value="3"></option>
+                            <option value="4"></option>
+                            <option value="5"></option>
+                        </select>
+                        <span class="ql-formats">
+                            <button class="ql-bold"></button>
+                            <button class="ql-italic"></button>
+                            <button class="ql-underline"></button>
+                            <button class="ql-strike"></button>
+                            <button class="ql-align"></button>
+                            <button class="ql-code-block"></button>
+                            <button class="ql-blockquote"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <select class="ql-color"></select>
+                            <select class="ql-background"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-list" value="ordered"></button>
+                            <button class="ql-list" value="bullet"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-link"></button>
+                            <button class="ql-clean"></button>
+                        </span>
+                    </ToolbarContent>
+                    <EditorContent>
+                        @((MarkupString)EditorData)
+                    </EditorContent>
+                </QuillTextEditor>
+                
             </MudTabPanel>
 
             <MudTabPanel Text="Settings">
@@ -36,6 +72,11 @@
     [Parameter]
     public EventCallback<PostContentItem> SaveAndClose { get; set; }
     
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; }
+    
+    QuillTextEditor QuillHtml;
+    
     // The deserialised data from the db
     private RichTextEditorSettings EditorSettings { get; set; } = new();
     private RichTextGlobalSettings GlobalSettings { get; set; } = new();
@@ -44,11 +85,12 @@
     public Dictionary<string, object> DefaultEditorSettings { get; set; } = new();
 
     // Submits the data and closes the dialog
-    public Task Submit()
+    public async Task Submit()
     {
-        PostContentItem.PluginData = EditorData;
+        //PostContentItem.PluginData = EditorData;
+        PostContentItem.PluginData = await QuillHtml.GetHTML();
         PostContentItem.PluginSettings = JsonSerializer.Serialize(EditorSettings, new JsonSerializerOptions{ WriteIndented = false}); // Is this compact JSON?
-        return SaveAndClose.InvokeAsync(PostContentItem);
+        await SaveAndClose.InvokeAsync(PostContentItem);
     }
 
     // Onload, get the serialised data from the db and deserialise into the correct properties

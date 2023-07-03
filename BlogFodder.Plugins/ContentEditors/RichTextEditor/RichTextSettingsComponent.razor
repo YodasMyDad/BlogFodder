@@ -21,10 +21,10 @@
 
         <MudTabPanel Text="Settings">
             <MudGrid>
-                <MudItem xs="12">
+                @*<MudItem xs="12">
                     <MudTextField Label="API Key" Variant="Variant.Outlined" Margin="Margin.Dense"
                                   HelperText="Get the API key from TinyMCE website" @bind-Value="RichTextGlobalSettings.ApiKey" For="@(() => RichTextGlobalSettings.ApiKey)"/>
-                </MudItem>
+                </MudItem>*@
 
                 <MudItem xs="12">
                     <MudNumericField @bind-Value="RichTextGlobalSettings.Height" Label="Height" Variant="Variant.Outlined" Margin="Margin.Dense" Min="100" For="@(() => RichTextGlobalSettings.Height)"/>
