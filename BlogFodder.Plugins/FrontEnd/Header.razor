@@ -74,7 +74,7 @@
                                 {
                                     <img src="@($"https://www.gravatar.com/avatar/{authState.User.GetMd5()}?d=robohash")" alt="@authState.User.GetUserName() Avatar" width="32" height="32" class="rounded-circle">   
                                 }
-                                <span class="d-lg-none">Username</span>
+                                <span class="d-lg-none">@authState.User.GetUserName()</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 @if (authState.User.IsInRole(Constants.Roles.AdminRoleName))
