@@ -4,9 +4,9 @@ A plugin based Blazor blogging platform that is really easy to create plugins fo
 
 The platform is built with Razor Class Libraries and Razor Components and has a plugin system built around these features which makes it easy to create plugins to extend / customise almost all areas of the Blog using Blazor. Front end is using Bootstrap V5 (But you could use what you want) and the backend/admin is built using MudBlazor.
 
-View a brief overview video of the project here
+**Overview video of the project here**
 
-**https://twitter.com/YodasMyDad/status/1667848590880907264**
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/sB81Tw41d1c/0.jpg)](https://www.youtube.com/watch?v=sB81Tw41d1c)
 
 This is a work in progress and I'm still trying to get it to a beta stage. I'm posting this publicly as I'm looking for other Blazor enthusiasts to get involved and help shape the project further.
 
